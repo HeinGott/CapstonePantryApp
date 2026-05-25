@@ -1,0 +1,33 @@
+﻿@page
+@model ItemRequestsModel
+@using Microsoft.AspNetCore.Authentication
+@attribute [Authorize(Roles = "Admin")]
+
+@{
+    ViewData["Title"] = "Item Requests";
+}
+
+<div class="container py-5">
+    <h1 class="mb-4">Item Requests</h1>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Selected Items</th>
+                <th>Requested Item</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var request in Model.Requests)
+            {
+                <tr>
+                    <td>@request.UserName</td>
+                    <td>@request.SelectedItems</td>
+                    <td>@request.RequestedItem</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,110 @@
+﻿@model IEnumerable<Pantreats.Models.Vendor>
+
+@{
+    ViewData["Title"] = "Vendors";
+}
+
+<div class="vendor-page py-4">
+
+    <div class="vendor-page-header mb-4">
+
+        <div>
+            <h1 class="vendor-page-title mb-1">Vendors</h1>
+            <p class="vendor-page-subtitle mb-0">
+                View vendors and manage donation sources.
+            </p>
+        </div>
+
+        <div class="vendor-actions">
+            <a asp-controller="Vendor" asp-action="Create" class="btn btn-primary">
+                Add Vendor
+            </a>
+        </div>
+
+    </div>
+
+    <div class="student-card">
+
+        <div class="table-responsive">
+            <table class="table student-table align-middle mb-0" id="vendorTable">
+
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('vendorTable', 0, this)">Vendor Name</th>
+                        <th onclick="sortTable('vendorTable', 1, this)">Phone Number</th>
+                        <th onclick="sortTable('vendorTable', 2, this)">Address</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var vendor in Model)
+                    {
+                        <tr class="student-row" onclick="goToVendor(@vendor.VendorID)">
+                            <td>@vendor.Name</td>
+                            <td>@(vendor.PhoneNumber ?? "not added")</td>
+                            <td>@(vendor.Address ?? "not added")</td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        function goToVendor(id) {
+            window.location.href = '/Vendor/Details/' + id;
+        }
+
+        function sortTable(tableId, columnNumber, header) {
+            let table = document.getElementById(tableId);
+            let tbody = table.tBodies[0];
+            let rows = Array.from(tbody.rows);
+            let currentSort = header.getAttribute("data-sort");
+
+            let newSort = "asc";
+
+            if (currentSort === "asc") {
+                newSort = "desc";
+            }
+
+            let headers = table.querySelectorAll("th");
+
+            headers.forEach(function (th) {
+                th.removeAttribute("data-sort");
+            });
+
+            header.setAttribute("data-sort", newSort);
+
+            rows.sort(function (a, b) {
+                let firstValue = a.cells[columnNumber].innerText.trim().toLowerCase();
+                let secondValue = b.cells[columnNumber].innerText.trim().toLowerCase();
+
+                let firstNumber = parseFloat(firstValue);
+                let secondNumber = parseFloat(secondValue);
+
+                if (!isNaN(firstNumber) && !isNaN(secondNumber)) {
+                    return newSort === "asc" ? firstNumber - secondNumber : secondNumber - firstNumber;
+                }
+
+                if (firstValue < secondValue) {
+                    return newSort === "asc" ? -1 : 1;
+                }
+
+                if (firstValue > secondValue) {
+                    return newSort === "asc" ? 1 : -1;
+                }
+
+                return 0;
+            });
+
+            rows.forEach(function (row) {
+                tbody.appendChild(row);
+            });
+        }
+    </script>
+}

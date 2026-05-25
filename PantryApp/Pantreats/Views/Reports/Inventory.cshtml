@@ -1,0 +1,13 @@
+﻿@model List<Pantreats.Models.Inventory>
+
+@{
+    ViewData["Title"] = "Inventory Reports";
+}
+
+<h1>Inventory Reports</h1>
+
+<p>Total inventory records: @Model.Count</p>
+
+<a asp-controller="Reports" asp-action="ExportInventory" class="btn btn-primary">
+    Generate Excel Report
+</a>

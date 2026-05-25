@@ -1,0 +1,241 @@
+﻿@model UserApplicationViewModel
+
+@{
+    ViewData["Title"] = "Apply";
+}
+
+<div class="pantreats-white-section">
+    <div class="container">
+
+        <div class="student-card mx-auto" style="max-width: 1100px;">
+
+            <!-- HEADER -->
+            <div class="mb-4 text-center">
+                <img src="/Images/pantreatsLogo.png" class="mb-3" style="max-width: 220px;">
+                <h1 class="section-title">
+                    User Application
+                </h1>
+                <p class="section-text">Please provide the following information</p>
+            </div>
+
+            <!-- VALIDATION SUMMARY -->
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <form asp-controller="Student" asp-action="UserApplicationForm" method="post">
+
+                <!-- BASIC INFO -->
+                <h5 class="mb-3" style="color: var(--pantreats-blue);">Basic Information</h5>
+
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-4">
+                        <label class="form-label">First Name</label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Middle Name</label>
+                        <input asp-for="MiddleName" class="form-control" />
+                        <span asp-validation-for="MiddleName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Last Name</label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Student ID</label>
+                        <input asp-for="StudentId" class="form-control" type="number" required/>
+                        <span asp-validation-for="StudentId" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">DOB</label>
+                        <input asp-for="DOB"
+                               type="date"
+                               class="form-control"
+                               min="1960-01-01" />
+                        <span asp-validation-for="DOB" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Phone</label>
+                        <input asp-for="PhoneNum" class="form-control" />
+                        <span asp-validation-for="PhoneNum" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- STUDENT INFO -->
+                <h5 class="mb-3" style="color: var(--pantreats-blue);">Student Info</h5>
+
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Student Status</label>
+                        <select asp-for="StudentStatus" class="form-select">
+                            <option value="">-- Select Status --</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Widowed">Widowed</option>
+                            <option value="Divorced">Divorced</option>
+                        </select>
+                        <span asp-validation-for="StudentStatus" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Gender</label>
+                        <select asp-for="Gender" class="form-select">
+                            <option value="">-- Select Gender --</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- ETHNICITY -->
+                <h5 class="mb-3" style="color: var(--pantreats-blue);">Ethnicity</h5>
+
+                <div class="mb-4">
+                    <select asp-for="Ethnicity" class="form-select">
+                        <option value="">-- Select Ethnicity --</option>
+                        <option value="African American">African American</option>
+                        <option value="Asian">Asian</option>
+                        <option value="Caucasian">Caucasian</option>
+                        <option value="Latino">Latino</option>
+                        <option value="Middle Eastern">Middle Eastern</option>
+                        <option value="Native American">Native American</option>
+                        <option value="Pacific Islander">Pacific Islander</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <span asp-validation-for="Ethnicity" class="text-danger"></span>
+                </div>
+
+                <!-- CAMPUS -->
+                <h5 class="mb-3" style="color: var(--pantreats-blue);">Campus</h5>
+
+                <div class="mb-4">
+                    <select asp-for="Campus" class="form-select">
+                        <option value="">-- Select Campus --</option>
+                        <option value="Spartanburg">Spartanburg</option>
+                        <option value="Downtown">Downtown</option>
+                        <option value="Cherokee">Cherokee</option>
+                        <option value="Tyger River">Tyger River</option>
+                        <option value="Union">Union</option>
+                    </select>
+                    <span asp-validation-for="Campus" class="text-danger"></span>
+                </div>
+
+                <!-- HOUSEHOLD -->
+                <h5 class="mb-3" style="color: var(--pantreats-blue);">Household Members Info</h5>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label">Age 0-4</label>
+                        <input asp-for="HouseholdBabiesToddlers" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Age 5-12</label>
+                        <input asp-for="HouseholdBabiesChildren" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Age 13-17</label>
+                        <input asp-for="HouseholdTeens" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Age 18+</label>
+                        <input asp-for="HouseholdAdults" class="form-control" />
+                    </div>
+                </div>
+
+                <!-- EMPLOYMENT -->
+                <h5 class="mb-3" style="color: var(--pantreats-blue);">Employment</h5>
+
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Employment Status</label>
+                        <select asp-for="EmploymentStatus" class="form-select">
+                            <option value="">-- Select Employment Status --</option>
+                            <option value="Full-Time">Full-Time</option>
+                            <option value="Part-Time">Part-Time</option>
+                            <option value="Unemployed">Unemployed</option>
+                            <option value="Student Only">Student Only</option>
+                        </select>
+                        <span asp-validation-for="EmploymentStatus" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Employed Household Members</label>
+                        <input asp-for="EmployedHouseMembers" class="form-control" />
+                    </div>
+                </div>
+
+                <!-- TRANSPORTATION -->
+                <h5 class="mb-3" style="color: var(--pantreats-blue);">Transportation</h5>
+
+                <div class="form-check mb-4">
+                    <input asp-for="HasTransportation" class="form-check-input" />
+                    <label class="form-check-label">Do you have reliable transportation?</label>
+                </div>
+
+                <!-- BENEFITS -->
+                <h5 class="mb-3" style="color: var(--pantreats-blue);">Current Benefits</h5>
+
+                <div class="row mb-4">
+                    <div class="col-md-3 form-check">
+                        <input asp-for="HasSNAP" class="form-check-input" />
+                        <label class="form-check-label">SNAP</label>
+                    </div>
+
+                    <div class="col-md-3 form-check">
+                        <input asp-for="HasWIC" class="form-check-input" />
+                        <label class="form-check-label">WIC</label>
+                    </div>
+
+                    <div class="col-md-3 form-check">
+                        <input asp-for="HasTANF" class="form-check-input" />
+                        <label class="form-check-label">TANF</label>
+                    </div>
+                </div>
+
+                <!-- BENEFITS INTERESTED IN -->
+                <h5 class="mb-3" style="color: var(--pantreats-blue);">Benefits Interested In</h5>
+
+                <div class="row mb-4">
+
+                    <div class="col-md-3 form-check">
+                        <input asp-for="IsInterestedInSNAP" class="form-check-input" />
+                        <label class="form-check-label">SNAP</label>
+                    </div>
+
+                    <div class="col-md-3 form-check">
+                        <input asp-for="IsInterestedInWIC" class="form-check-input" />
+                        <label class="form-check-label">WIC</label>
+                    </div>
+
+                    <div class="col-md-3 form-check">
+                        <input asp-for="IsInterestedInTANF" class="form-check-input" />
+                        <label class="form-check-label">TANF</label>
+                    </div>
+
+                </div>
+
+                <!-- SUBMIT -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn admin-tile-btn-featured px-5 py-2">
+                        Submit
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,85 @@
+﻿@page
+@model ShopModel
+
+@{
+    ViewData["Title"] = "Shop";
+}
+
+<style>
+    .item-img-box {
+        width: 100%;
+        height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+        .item-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+    .card {
+        padding: 10px;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1>Shop the Pantry</h1>
+        <p class="text-muted">
+            Browse and select what your family needs best.
+        </p>
+    </div>
+    <form method="post">
+        <div class="row g-4">
+            @foreach(var item in Model.Items)
+                {
+                var imageName = item.ItemName
+            .Replace(" ", "")
+            .Replace("'", "")
+            .Replace("&", "and")
+            .Replace("/", "")
+            .ToLower();
+
+                <div class="col-md-4 col-lg-3">
+                    <div class="card h-100 p-3 border text-center">
+
+                        <div class="item-img-box">
+                            <img src="/images/items/@(imageName + ".png")"
+                                 alt="@item.ItemName" />
+                        </div>
+
+                        <h5 class="fw-semibold mb-1">@item.ItemName</h5>
+
+                        <h5 class="text-muted mb-2">@item.BrandName</h5>
+
+                        <p class="mb-1 text-muted">@item.UnitSize</p>
+
+                        <p class="mb-3 text-muted">@item.Quantity</p>
+
+                        <div class="form-check mt-auto">
+                            <input class="form-check-input" type="checkbox" name="SelectedItems" value="@item.UPC" id="item-@item.UPC" />
+
+                            <label class="form-check-label" for="item-@item.UPC"> Add this item</label>
+                        </div>
+                    </div>
+                </div>
+                }
+        </div>
+
+        <div class="mt-5">
+            <h5 class="fw-semibold">Need something else?</h5>
+            <p class="text-muted mb-2">If you don't see what you're looking for, you can request it here.</p>
+            <textarea name="RequestItem" class="form-control" rows="4" placeholder="Type any items you'd like us to add..."></textarea>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary px-4">Submit My Request</button>
+        </div>
+
+
+    </form>
+</div>

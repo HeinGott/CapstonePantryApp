@@ -1,0 +1,130 @@
+﻿@model Pantreats.Models.Vendor
+
+@{
+    ViewData["Title"] = "Edit Vendor";
+}
+
+<div class="vendor-edit-page py-4">
+
+    <div class="mb-3">
+        <a asp-controller="Vendor"
+               asp-action="Details"
+               asp-route-id="@Model.VendorID"
+               class="btn student-back-btn">
+            ← Back to Vendor
+        </a>
+    </div>
+
+    <div class="student-card">
+
+        <h1 class="mb-2">Edit Vendor</h1>
+        <p class="student-page-subtitle mb-4">
+            Update vendor information.
+        </p>
+
+        <form asp-action="Edit" method="post">
+
+            <input type="hidden" asp-for="VendorID" />
+
+            <div class="mb-3">
+                <label class="form-label">Vendor Name</label>
+                <input asp-for="Name" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phone Number</label>
+                <input asp-for="PhoneNumber" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Address</label>
+                <input asp-for="Address" class="form-control" />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Notes</label>
+                <textarea asp-for="Notes" class="form-control"></textarea>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                <!-- save -->
+                <button type="submit" class="btn app-btn app-btn-primary">
+                    Save Changes
+                </button>
+
+                <!-- delete trigger -->
+                <button type="button"
+                        class="btn btn-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteVendorModal">
+                    Delete Vendor
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- delete modal -->
+<div class="modal fade"
+     id="deleteVendorModal"
+     tabindex="-1"
+     aria-labelledby="deleteVendorModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteVendorModalLabel">
+                    Delete Vendor
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                Are you sure you want to delete
+                <strong>@Model.Name</strong>?
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn app-btn app-btn-primary"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <form asp-controller="Vendor"
+                      asp-action="Delete"
+                      asp-route-id="@Model.VendorID"
+                      method="post">
+
+                    <button type="submit" class="btn btn-danger">
+                        Yes, Delete
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>

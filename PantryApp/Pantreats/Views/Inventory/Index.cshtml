@@ -1,0 +1,111 @@
+﻿@model List<Pantreats.Models.Inventory>
+
+@{
+    ViewData["Title"] = "Inventory";
+}
+
+<div class="student-page py-4">
+
+    <div class="student-page-header mb-4">
+        <div>
+            <h1 class="student-page-title mb-1">Inventory</h1>
+            <p class="student-page-subtitle mb-0">
+                View and manage all pantry inventory items.
+            </p>
+        </div>
+    </div>
+
+    <div class="student-card">
+
+        <div class="table-responsive">
+            <table class="table student-table align-middle mb-0" id="inventoryTable">
+
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('inventoryTable', 0, this)">UPC</th>
+                        <th onclick="sortTable('inventoryTable', 1, this)">Name</th>
+                        <th onclick="sortTable('inventoryTable', 2, this)">Brand</th>
+                        <th onclick="sortTable('inventoryTable', 3, this)">Category</th>
+                        <th onclick="sortTable('inventoryTable', 4, this)">Subcategory</th>
+                        <th onclick="sortTable('inventoryTable', 5, this)">Use</th>
+                        <th onclick="sortTable('inventoryTable', 6, this)">Unit Size</th>
+                        <th onclick="sortTable('inventoryTable', 7, this)">Quantity</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="student-row">
+                            <td>@item.UPC</td>
+                            <td>@item.ItemName</td>
+                            <td>@item.BrandName</td>
+                            <td>@item.Category</td>
+                            <td>@item.Subcategory</td>
+                            <td>@item.GenderUse</td>
+                            <td>@item.UnitSize</td>
+                            <td>@item.Quantity</td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        function sortTable(tableId, columnNumber, header) {
+            let table = document.getElementById(tableId);
+            let tbody = table.tBodies[0];
+            let rows = Array.from(tbody.rows);
+            let currentSort = header.getAttribute("data-sort");
+
+            let newSort = "asc";
+
+            if (currentSort === "asc") {
+                newSort = "desc";
+            }
+
+            let headers = table.querySelectorAll("th");
+
+            headers.forEach(function (th) {
+                th.removeAttribute("data-sort");
+            });
+
+            header.setAttribute("data-sort", newSort);
+
+            rows.sort(function (a, b) {
+                let firstValue = a.cells[columnNumber].innerText.trim();
+                let secondValue = b.cells[columnNumber].innerText.trim();
+
+                let firstLower = firstValue.toLowerCase();
+                let secondLower = secondValue.toLowerCase();
+
+                let firstNumber = parseFloat(firstLower);
+                let secondNumber = parseFloat(secondLower);
+
+                if (!isNaN(firstNumber) && !isNaN(secondNumber)) {
+                    return newSort === "asc" ? firstNumber - secondNumber : secondNumber - firstNumber;
+                }
+
+                if (firstLower < secondLower) {
+                    return newSort === "asc" ? -1 : 1;
+                }
+
+                if (firstLower > secondLower) {
+                    return newSort === "asc" ? 1 : -1;
+                }
+
+                return 0;
+            });
+
+            rows.forEach(function (row) {
+                tbody.appendChild(row);
+            });
+        }
+    </script>
+}

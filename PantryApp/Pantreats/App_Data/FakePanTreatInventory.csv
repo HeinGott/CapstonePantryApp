@@ -1,0 +1,45 @@
+UPC,Item Name,Brand Name,Category,Subcategory,Gender/Use,Unit Size,Quantity
+900000000101,Green Beans,Harvest Choice,Canned Goods,Vegetables,Family,14.5 oz,48
+900000000102,Sweet Corn,Harvest Choice,Canned Goods,Vegetables,Family,15 oz,42
+900000000103,Diced Tomatoes,Pantry Best,Canned Goods,Vegetables,Family,14.5 oz,36
+900000000104,Tomato Sauce,Pantry Best,Canned Goods,Sauce,Family,15 oz,40
+900000000105,Black Beans,Value Pantry,Canned Goods,Beans,Family,15 oz,30
+900000000106,Pinto Beans,Value Pantry,Canned Goods,Beans,Family,15 oz,34
+900000000107,Kidney Beans,Value Pantry,Canned Goods,Beans,Family,15 oz,28
+900000000108,Chicken Noodle Soup,Comfort Bowl,Canned Goods,Soup,Family,10.5 oz,50
+900000000109,Tomato Soup,Comfort Bowl,Canned Goods,Soup,Family,10.5 oz,46
+900000000110,Tuna in Water,Ocean Table,Canned Goods,Meat/Fish,Family,5 oz,32
+900000000111,Canned Chicken,Home Kitchen,Canned Goods,Meat/Fish,Family,12.5 oz,24
+900000000112,Peach Slices,Orchard Lane,Canned Goods,Fruit,Family,15 oz,26
+900000000113,Pineapple Chunks,Orchard Lane,Canned Goods,Fruit,Family,20 oz,22
+900000000114,Mixed Vegetables,Harvest Choice,Canned Goods,Vegetables,Family,15 oz,38
+900000000115,Carrots,Harvest Choice,Canned Goods,Vegetables,Family,14.5 oz,35
+900000000116,Spaghetti Rings,Pantry Best,Canned Goods,Pasta,Family,15 oz,30
+900000000117,Beef Ravioli,Pantry Best,Canned Goods,Pasta,Family,15 oz,25
+900000000118,Chili Beans,Value Pantry,Canned Goods,Beans,Family,15 oz,29
+900000000201,Macaroni & Cheese,Family Table,Box Goods,Pasta/Rice,Family,7.25 oz,55
+900000000202,Spaghetti Pasta,Family Table,Box Goods,Pasta/Rice,Family,16 oz,40
+900000000203,White Rice,Pantry Best,Box Goods,Pasta/Rice,Family,1 lb,45
+900000000204,Instant Oatmeal Variety Pack,Morning Start,Box Goods,Breakfast,Family,10 packets,32
+900000000205,Corn Flakes Cereal,Morning Start,Box Goods,Breakfast,Family,12 oz,28
+900000000206,Pancake Mix,Kitchen Helper,Box Goods,Baking,Family,32 oz,20
+900000000207,Saltine Crackers,Snack Shelf,Box Goods,Snacks,Family,16 oz,34
+900000000208,Granola Bars,Snack Shelf,Box Goods,Snacks,Family,12 bars,26
+900000000301,Men's Deodorant,FreshWay,Hygiene,Deodorant,Male,2.6 oz,20
+900000000302,Men's Body Wash,FreshWay,Hygiene,Body Wash,Male,18 oz,18
+900000000303,Men's Shampoo,FreshWay,Hygiene,Shampoo,Male,12 oz,16
+900000000304,Men's Toothbrush,SmileCare,Hygiene,Dental,Male,1 count,30
+900000000305,Men's Shaving Cream,SmoothEdge,Hygiene,Shaving,Male,10 oz,15
+900000000306,Men's Disposable Razors,SmoothEdge,Hygiene,Shaving,Male,4 count,14
+900000000307,Men's Bar Soap,CleanBasics,Hygiene,Soap,Male,3 bars,24
+900000000308,Men's Lotion,SkinBasics,Hygiene,Lotion,Male,12 oz,12
+900000000401,Women's Deodorant,FreshWay,Hygiene,Deodorant,Female,2.6 oz,22
+900000000402,Women's Body Wash,FreshWay,Hygiene,Body Wash,Female,18 oz,20
+900000000403,Women's Shampoo,FreshWay,Hygiene,Shampoo,Female,12 oz,18
+900000000404,Women's Conditioner,FreshWay,Hygiene,Conditioner,Female,12 oz,18
+900000000405,Women's Toothbrush,SmileCare,Hygiene,Dental,Female,1 count,30
+900000000406,Women's Lotion,SkinBasics,Hygiene,Lotion,Female,12 oz,14
+900000000407,Women's Bar Soap,CleanBasics,Hygiene,Soap,Female,3 bars,24
+900000000408,Women's Disposable Razors,SmoothEdge,Hygiene,Shaving,Female,4 count,14
+900000000501,Ultra Thin Pads,CareDay,Hygiene,Feminine Care,Female,28 count,24
+900000000502,Regular Tampons,CareDay,Hygiene,Feminine Care,Female,36 count,24

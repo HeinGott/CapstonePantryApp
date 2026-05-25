@@ -1,0 +1,96 @@
+﻿@model Pantreats.Models.Vendor
+
+@{
+    ViewData["Title"] = "Vendor Details";
+}
+
+<div class="vendor-details-page py-4">
+
+    <div class="mb-3">
+        <a asp-controller="Vendor" asp-action="Index" class="btn student-back-btn">
+            ← Back to Vendors
+        </a>
+    </div>
+
+    <div class="student-profile-card mb-4">
+
+        <div class="student-history-header mb-3">
+            <div>
+                <h1 class="student-details-title mb-1">@Model.Name</h1>
+            </div>
+
+            <div>
+                <a asp-controller="Vendor"
+                       asp-action="Edit"
+                       asp-route-id="@Model.VendorID"
+                       class="btn app-btn app-btn-primary">
+                    Edit Vendor
+                </a>
+            </div>
+        </div>
+
+        <div class="student-profile-grid mt-4">
+
+            <div class="student-profile-item">
+                <span>Phone Number</span>
+                <strong>@(Model.PhoneNumber ?? "not added")</strong>
+            </div>
+
+            <div class="student-profile-item">
+                <span>Email</span>
+                <strong>@(Model.Email ?? "not added")</strong>
+            </div>
+
+            <div class="student-profile-item">
+                <span>Address</span>
+                <strong>@(Model.Address ?? "not added")</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="student-card">
+
+        <div class="student-history-header mb-3">
+
+            <div>
+                <h2 class="student-section-title mb-1">Donation History</h2>
+                <p class="student-page-subtitle mb-0">
+                    This will show all donations from this vendor.
+                </p>
+            </div>
+
+            <div>
+                <a href="#" class="btn app-btn app-btn-primary">
+                    Add Donation
+                </a>
+            </div>
+
+        </div>
+
+        <div class="table-responsive">
+            <table class="table student-table align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td colspan="3" class="text-muted text-center py-4">
+                            No donations yet.
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+</div>

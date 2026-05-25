@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "About";
+    ViewData["FullWidth"] = true;
+}
+
+<section class="our-mission-section">
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-9 text-center">
+                <h1 class="our-mission-title mb-4">
+                    Our Mission
+                </h1>
+
+                <div class="mission-lines">
+                    <p class="mission-text mb-2 fade-up">
+                        "Because Hunger Should Never Stand in the Way."
+                    </p>
+
+                    <p class="description-mission-text fade-up">
+                        At PanTreats, we believe that no student should have to worry about where their next meal is coming from.
+                        Our mission is to empower students and households facing food insecurity by providing a simple, private, and user-friendly online platform to access campus pantry support.
+                        We are committed to fostering a supportive community where everyone can find the resources they need.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="volunteer-section">
+
+    <div class="volunteer-content">
+        <h2 class="volunteer-title">Want to Help?</h2>
+        <p class="volunteer-text">
+            Behind every pantry visit is a team of dedicated volunteers who make it possible.<br />
+            Be the change and volunteer today!
+        </p>
+        @if (User.Identity?.IsAuthenticated ?? false)
+        {
+            <div>
+                <a asp-controller="Volunteer" asp-action="ApplyVolunteer"
+                       class="btn btn-outline-light btn-lg hero-secondary-btn px-4">
+                    Volunteer
+                </a>
+            </div>
+        }
+        else
+        {
+            <div>
+                <a asp-area="Identity" asp-page="/Account/Register"
+                       class="btn btn-outline-light btn-lg hero-secondary-btn px-4">
+                    Volunteer
+                </a>
+            </div>
+        }
+
+    </div>
+
+    <img src="~/images/volunteerpic.jpg" alt="Volunteers" class="volunteer-img" />
+
+</section>
+
+<div class="copy-toast" id="copyToast">Phone number copied!</div>
+
+<section class="contact-section">
+    <div class="container">
+        <h2 class="contact-title">Need Help?</h2>
+        <p class="contact-text">Get in contact with us.</p>
+
+        <div class="contact-links">
+            <a class="contact-link contact-click"
+                   href="https://www.google.com/maps/search/?api=1&query=Spartanburg+Community+College+Powers+Building+C111"
+                   target="_blank">
+                📍 Spartanburg (Giles) Campus - Powers Building, C-111
+            </a>
+
+            <a class="contact-link contact-click" href="mailto:pantreats@sccsc.edu">
+                Email: pantreats@sccsc.edu
+            </a>
+
+            <span class="contact-link contact-click" onclick="copyPhone()">
+                Phone: (864) 592-4424
+            </span>
+        </div>
+    </div>
+</section>
+
+<!-- this will fade up elements when the user comes into view -->
+@section Scripts {
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.2 });
+
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+        function copyPhone() {
+            navigator.clipboard.writeText('(864) 592-4424');
+            const toast = document.getElementById('copyToast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+    </script>
+}

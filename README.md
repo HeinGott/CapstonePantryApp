@@ -9,6 +9,6 @@ Contributors:
     Shawn Conboy
     Trevor Ball
     Jake Gentry
-    Eric Maslynchuk
+    Eric Maslyanchuk
     Brian Fritsche
     Jorge Ortiz

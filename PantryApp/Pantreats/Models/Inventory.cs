@@ -1,7 +1,12 @@
-﻿namespace Pantreats.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+
+
+namespace Pantreats.Models
 {
     public class Inventory
     {
+        [Key]
         public string UPC { get; set; }
         public string ItemName { get; set; }
         public string BrandName { get; set; }

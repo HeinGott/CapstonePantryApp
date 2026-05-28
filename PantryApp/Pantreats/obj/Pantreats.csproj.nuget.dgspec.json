@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mstgi\\OneDrive\\Documents\\aCPT275SCWeb\\SeniorProj\\PantryApp\\Pantreats\\Pantreats.csproj": {}
+    "C:\\GitHub\\CapstonePantryApp\\PantryApp\\Pantreats\\Pantreats.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mstgi\\OneDrive\\Documents\\aCPT275SCWeb\\SeniorProj\\PantryApp\\Pantreats\\Pantreats.csproj": {
+    "C:\\GitHub\\CapstonePantryApp\\PantryApp\\Pantreats\\Pantreats.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mstgi\\OneDrive\\Documents\\aCPT275SCWeb\\SeniorProj\\PantryApp\\Pantreats\\Pantreats.csproj",
+        "projectUniqueName": "C:\\GitHub\\CapstonePantryApp\\PantryApp\\Pantreats\\Pantreats.csproj",
         "projectName": "Pantreats",
-        "projectPath": "C:\\Users\\mstgi\\OneDrive\\Documents\\aCPT275SCWeb\\SeniorProj\\PantryApp\\Pantreats\\Pantreats.csproj",
-        "packagesPath": "C:\\Users\\mstgi\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mstgi\\OneDrive\\Documents\\aCPT275SCWeb\\SeniorProj\\PantryApp\\Pantreats\\obj\\",
+        "projectPath": "C:\\GitHub\\CapstonePantryApp\\PantryApp\\Pantreats\\Pantreats.csproj",
+        "packagesPath": "C:\\Users\\pcgen\\.nuget\\packages\\",
+        "outputPath": "C:\\GitHub\\CapstonePantryApp\\PantryApp\\Pantreats\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\mstgi\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\pcgen\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -45,7 +45,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.300"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -117,7 +117,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "c:\\program files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

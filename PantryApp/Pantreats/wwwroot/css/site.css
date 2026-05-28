@@ -1183,3 +1183,68 @@ a:hover {
         gap: 0.65rem;
     }
 }
+
+/*order history page*/
+.order-history {
+    padding: 1rem;
+}
+
+.order-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.order-history-title {
+    color: var(--pantreats-blue);
+    font-weight: 700;
+}
+
+.order-history-subtitle {
+    color: var(--pantreats-green);
+    font-size: 17px;
+    font-weight:bold
+}
+.order-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px var(--pantreats-blue);
+    padding: 1rem;
+}
+.order-table thead th {
+    color: var(--pantreats-blue);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.order-row {
+    cursor: pointer;
+    transition: background-color 0.18s ease;
+}
+
+    .order-row:hover td {
+        background-color: #f3f4f6;
+    }
+.order-detail-row > td {
+    padding: 0;
+    border: 0;
+}
+.order-detail-content {
+    max-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    transition: max-height 0.3s ease;
+    padding: 0 0.75rem 0.75rem;
+}
+
+    .order-detail-content.open {
+        max-height: 500px;
+        visibility: visible;
+    }
+
+.order-detail-table {
+    box-shadow: 0 2px 4px var(--pantreats-blue);
+}

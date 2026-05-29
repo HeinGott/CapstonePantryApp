@@ -1,0 +1,91 @@
+﻿
+@model Pantreats.Models.LookupResult
+
+<h2>Add Item To Pantry</h2>
+
+@if (ViewBag.Error != null)
+{
+    <div style="color:red">
+        @ViewBag.Error
+    </div>
+}
+else
+{
+    <form asp-controller="Inventory"
+          asp-action="AddInventoryItem"
+          method="post">
+
+        <div>
+            <label>Item Name</label>
+            <input type="text"
+                   name="ItemName"
+                   value="@Model.title" />
+        </div>
+
+        <div>
+            <label>Brand</label>
+            <input type="text"
+                   name="BrandName"
+                   value="@Model.brand" />
+        </div>
+
+        <div>
+            <label>Category</label>
+            <input type="text"
+                   name="Category"
+                   value="@Model.category" />
+        </div>
+
+        <div>
+            <label>Subcategory</label>
+            <input type="text"
+                   name="Subcategory" />
+        </div>
+
+        <div>
+            <label>Unit Size</label>
+            <input type="text"
+                   name="UnitSize"
+                   placeholder="@Model.weight" />
+        </div>
+
+        <div>
+            <label>Gender/Use</label>
+            <input type="text"
+                   name="GenderUse"
+                   placeholder="Family" />
+        </div>
+
+        <div>
+            <label>Quantity</label>
+            <input type="number"
+                   name="Quantity"
+                   value="1"
+                   min="1" />
+        </div>
+
+
+        <div>
+            <label>UPC</label>
+            <input type="text"
+                   name="UPC"
+                   value="@ViewBag.UPC"
+                   readonly />
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.images))
+        {
+            <div>
+                <img src="@Model.images"
+                     width="200" />
+            </div>
+        }
+
+        <br />
+
+        <button type="submit">
+            Add To Pantry
+        </button>
+
+    </form>
+}

@@ -89,6 +89,7 @@ var app = builder.Build();
 // create roles when app starts
 using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
     // list of roles for your app
@@ -103,6 +104,8 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
         }
     }
+
+    await DbSeeder.SeedAdminAsync(services);
 }
 
 // configure the http request pipeline
@@ -134,3 +137,7 @@ app.MapRazorPages()
    .WithStaticAssets();
 
 app.Run();
+
+
+
+

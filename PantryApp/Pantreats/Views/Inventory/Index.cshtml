@@ -24,6 +24,22 @@
                        class="form-control"
                        placeholder="Search UPC, name, brand, category..." />
             </div>
+                <h2>UPC Lookup</h2>
+
+                <form asp-controller="Inventory"
+                      asp-action="LookupUPC"
+                      method="post">
+
+                    <input type="text"
+                           name="upc"
+                           placeholder="Scan or enter UPC" />
+
+                    <button type="submit">
+                        Search
+                    </button>
+                </form>
+
+                <hr />
 
             <div class="col-md-3">
                 <select id="categoryFilter" class="form-select">

@@ -53,6 +53,8 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
 // create roles when app starts

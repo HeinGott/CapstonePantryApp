@@ -1,0 +1,39 @@
+﻿
+@model Pantreats.Models.LookupResult
+
+@if (ViewBag.Error != null)
+{
+    <div style="color:red">
+        @ViewBag.Error
+    </div>
+}
+else
+{
+    <h2>@Model.title</h2>
+
+    <p>
+        <strong>Brand:</strong>
+        @Model.brand
+    </p>
+
+    <p>
+        <strong>Description:</strong>
+        @Model.description
+    </p>
+
+    <p>
+        <strong>Weight:</strong>
+        @Model.weight
+    </p>
+
+    <p>
+        <strong>Category:</strong>
+        @Model.category
+    </p>
+
+    @if (!string.IsNullOrEmpty(Model.images))
+    {
+        <img src="@Model.images"
+             width="200" />
+    }
+}

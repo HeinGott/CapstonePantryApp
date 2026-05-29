@@ -289,6 +289,30 @@ a:hover {
         color: #17463a;
     }
 
+.microsoft-login-icon-button {
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+}
+
+.microsoft-login-icon {
+    width: 46px;
+    height: 46px;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.microsoft-login-icon-button:hover .microsoft-login-icon {
+    transform: scale(1.08);
+    opacity: 0.85;
+}
+
+.microsoft-login-icon-button:focus {
+    outline: 2px solid #0d6efd;
+    outline-offset: 6px;
+    border-radius: 8px;
+}
+
 @media (min-width: 768px) {
     .navbar .dropdown:hover .dropdown-menu {
         display: block;

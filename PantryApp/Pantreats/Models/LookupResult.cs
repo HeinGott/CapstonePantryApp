@@ -10,7 +10,7 @@ namespace Pantreats.Models
         public string category { get; set; }
         public string description { get; set; }
         public string weight { get; set; }
-        public string images { get; set; }
+        public string? images { get; set; }
  
 
     }

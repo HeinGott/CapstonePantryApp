@@ -121,5 +121,34 @@ namespace Pantreats.Controllers
         }
 
 
+        [HttpPost]
+        public IActionResult AddInventoryItem(Inventory item)
+        {
+            var filePath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "App_Data",
+                "FakePanTreatInventory.csv"
+            );
+
+            //create CSV row
+            var csvLine =
+                $"{item.UPC}," +
+                $"{item.ItemName}," +
+                $"{item.BrandName}," +
+                $"{item.Category}," +
+                $"{item.Subcategory}," +
+                $"{item.GenderUse}," +
+                $"{item.UnitSize}," +
+                $"{item.Quantity}";
+
+            //append to CSV
+            System.IO.File.AppendAllText(
+                filePath,
+                Environment.NewLine + csvLine
+            );
+
+            return RedirectToAction("Index");
+        }
+
     }
 }

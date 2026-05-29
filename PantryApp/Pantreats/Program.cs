@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Pantreats.Data;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,15 +52,48 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+// add microsoft as an external login option
+builder.Services.AddAuthentication()
+    .AddOpenIdConnect("Microsoft", "Microsoft", options =>
+    {
+        var azureAdSettings = builder.Configuration.GetSection("AzureAd");
+
+        options.Authority = azureAdSettings["Instance"] + azureAdSettings["TenantId"] + "/v2.0";
+        options.ClientId = azureAdSettings["ClientId"];
+        options.ClientSecret = azureAdSettings["ClientSecret"];
+        options.CallbackPath = azureAdSettings["CallbackPath"];
+
+        // use authorization code flow
+        options.ResponseType = "code";
+
+        // important: this makes microsoft work with asp.net identity external login
+        options.SignInScheme = IdentityConstants.ExternalScheme;
+
+        // basic user info from microsoft
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
+        options.Scope.Add("email");
+
+        options.SaveTokens = true;
+    });
+
+// add mvc views
 builder.Services.AddControllersWithViews();
 
+
 builder.Services.AddHttpClient();
+
+// add razor pages for identity pages
+builder.Services.AddRazorPages();
+
 
 var app = builder.Build();
 
 // create roles when app starts
 using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
     // list of roles for your app
@@ -74,6 +108,8 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
         }
     }
+
+    await DbSeeder.SeedAdminAsync(services);
 }
 
 // configure the http request pipeline
@@ -88,12 +124,13 @@ else
 }
 
 app.UseHttpsRedirection();
+
+app.MapStaticAssets();
+
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
@@ -104,3 +141,7 @@ app.MapRazorPages()
    .WithStaticAssets();
 
 app.Run();
+
+
+
+

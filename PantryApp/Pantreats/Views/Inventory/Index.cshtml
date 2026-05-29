@@ -24,22 +24,7 @@
                        class="form-control"
                        placeholder="Search UPC, name, brand, category..." />
             </div>
-                <h2>UPC Lookup</h2>
-
-                <form asp-controller="Inventory"
-                      asp-action="LookupUPC"
-                      method="post">
-
-                    <input type="text"
-                           name="upc"
-                           placeholder="Scan or enter UPC" />
-
-                    <button type="submit">
-                        Search
-                    </button>
-                </form>
-
-                <hr />
+                
 
             <div class="col-md-3">
                 <select id="categoryFilter" class="form-select">
@@ -66,7 +51,7 @@
 
                 </select>
             </div>
-
+                
             <div class="col-md-2">
                 <button type="button"
                         class="btn btn-outline-secondary w-100"
@@ -74,6 +59,9 @@
                     Reset
                 </button>
             </div>
+
+              
+
 
         </div>
 
@@ -88,6 +76,48 @@
             </label>
 
         </div>
+
+            <div class="row mb-3">
+                <div class="col-12 d-flex justify-content-center">
+        
+                    <button id="openScannerBtn"
+                            class="btn btn-success d-flex flex-column align-items-center justify-content-center p-3"
+                            style="width: 180px; height: 130px;">
+
+                        <i class="bi bi-upc-scan" style="font-size: 2.5rem;"></i>
+                        <span class="mt-2">Scan Pantry Item</span>
+
+                    </button>
+
+                    <!-- modal stays here (unchanged) -->
+                    <div id="scannerModal" class="modal">
+                        <div class="modal-content">
+
+                            <span id="closeModal" class="close">&times;</span>
+
+                            <h2>Scan Barcode</h2>
+
+                            <form asp-controller="Inventory"
+                                  asp-action="LookupUPC"
+                                  method="post">
+
+                                <input type="text"
+                                       id="upcInput"
+                                       name="upc"
+                                       autocomplete="off"
+                                       placeholder="Scan barcode..." />
+
+                                <button type="submit">
+                                    Search
+                                </button>
+
+                            </form>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
 
         <div class="table-responsive">
 
@@ -254,6 +284,32 @@
         brandFilter.addEventListener("change", filterInventoryTable);
         inStockOnly.addEventListener("change", filterInventoryTable);
 
+
+        //add item button script -Nick
+        const modal = document.getElementById("scannerModal");
+        const openBtn = document.getElementById("openScannerBtn");
+        const closeBtn = document.getElementById("closeModal");
+        const upcInput = document.getElementById("upcInput");
+
+        openBtn.onclick = () => {
+
+            modal.style.display = "block";
+
+            //small delay so modal is visible first -Nick
+            setTimeout(() => {
+                upcInput.focus();
+            }, 100);
+        };
+
+        closeBtn.onclick = () => {
+            modal.style.display = "none";
+        };
+
+        window.onclick = (event) => {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
     </script>
 
 

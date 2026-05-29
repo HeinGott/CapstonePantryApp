@@ -60,6 +60,7 @@ namespace Pantreats.Controllers
         }
 
 
+
         [HttpPost]
         public async Task<IActionResult> LookupUPC(string upc)
         {
@@ -69,14 +70,14 @@ namespace Pantreats.Controllers
                 return View("UPCResult");
             }
 
-            //string userKey = "YOUR_UPCITEMDB_KEY"; this project will use free api which does not need userkey, only update if switching to paid
+            //string userKey = "YOUR_UPCITEMDB_KEY"; this project will use free api which does not need userkey, only update if switching to paid -Nick
             string apiUrl = $"https://api.upcitemdb.com/prod/trial/lookup?upc={upc}";
 
             try
             {
                 var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
                 /*
-                 * only use this if using paid version of api
+                 * only use this if using paid version of api -Nick
                 request.Headers.Add("user_key", userKey);
                 request.Headers.Add("key_type", "3scale");
                 */
@@ -90,7 +91,7 @@ namespace Pantreats.Controllers
 
                 var json = await response.Content.ReadAsStringAsync();
 
-                //UPCitemDB returns JSON object with items array
+                //UPCitemDB returns JSON object with items array -Nick
                 var obj = JsonConvert.DeserializeObject<dynamic>(json);
 
                 if (obj.items == null || obj.items.Count == 0)
@@ -111,7 +112,9 @@ namespace Pantreats.Controllers
                     images = item.images != null && item.images.Count > 0 ? item.images[0].ToString() : null
                 };
 
-                return View("UPCResult", product);
+                ViewBag.UPC = upc;
+
+                return View("UPCResult", product); 
             }
             catch (Exception ex)
             {
@@ -130,7 +133,7 @@ namespace Pantreats.Controllers
                 "FakePanTreatInventory.csv"
             );
 
-            //create CSV row
+            //create CSV row -Nick
             var csvLine =
                 $"{item.UPC}," +
                 $"{item.ItemName}," +
@@ -141,7 +144,7 @@ namespace Pantreats.Controllers
                 $"{item.UnitSize}," +
                 $"{item.Quantity}";
 
-            //append to CSV
+            //append to CSV -Nick
             System.IO.File.AppendAllText(
                 filePath,
                 Environment.NewLine + csvLine

@@ -1,0 +1,52 @@
+﻿@model Pantreats.Models.OrderFulfilment
+
+@{
+    ViewData["Title"] = "Edit Orders Fulfilment";
+}
+
+<div class="fulfilment-page py-4">
+
+    <h1>Edit Order Fulfilment</h1>
+
+    <form asp-action="Edit" method="post">
+
+        <input asp-for="Id" type="hidden" />
+        <input asp-for="OrderId" type="hidden" />
+
+        <div class="mb-3">
+            <label>Order Status</label>
+
+            <select asp-for="OrderStatus" class="form-control">
+                <option>Waiting Pickup</option>
+                <option>Fulfilled</option>
+                <option>Cancelled</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Fulfilment Date</label>
+
+            <input asp-for="FulfilmentDate"
+                   type="date"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Date Received</label>
+
+            <input asp-for="DateReceived"
+                   type="date"
+                   class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Save
+        </button>
+
+        <a asp-action="Index" class="btn btn-secondary">
+            Cancel
+        </a>
+
+    </form>
+
+</div>

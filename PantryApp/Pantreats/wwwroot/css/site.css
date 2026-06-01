@@ -1272,3 +1272,115 @@ a:hover {
 .order-detail-table {
     box-shadow: 0 2px 4px var(--pantreats-blue);
 }
+
+
+.fulfilment-page{
+    padding: 1rem;
+}
+
+.fulfilment-page-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    flex-wrap: wrap;
+}
+
+.fulfilment-page-title{
+    color: var(--pantreats-blue);
+    font-weight: 700;
+}
+
+.fulfilment-page-subtitle{
+    color: var(--pantreats-green);
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.fulfilment-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px var(--pantreats-blue);
+    padding: 1rem;
+}
+
+.fulfilment-stat-card span {
+    color: var(--pantreats-blue);
+    display: block;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.fulfilment-stat-card strong {
+    color: var(--pantreats-green);
+    font-size: 1.8rem;
+}
+
+.fulfilment-table thead th {
+    color: var(--pantreats-blue);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.fulfilment-row{
+    cursor: pointer;
+    transition: background-color 0.18s ease;
+}
+
+.fulfilment-row:hover td{
+    background-color: #f3f4f6
+}
+
+.fulfilment-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.fulfilment-primary-btn {
+    background-color: var(--pantreats-blue);
+    color: #ffffff;
+    border: 1px solid var(--pantreats-blue);
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.fulfilment-primary-btn:hover {
+    background-color: var(--pantreats-blue-dark) !important;
+    color: #ffffff !important;
+}
+
+.fulfilment-reset-btn {
+    background-color: #ffffff;
+    color: var(--pantreats-blue);
+    border: 1px solid rgba(16, 47, 97, 0.18);
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.fulfilment-excel-btn {
+    background-color: var(--pantreats-green);
+    color: #ffffff;
+    border: 1px solid var(--pantreats-green);
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.fulfilment-pdf-btn {
+    background-color: #334155;
+    color: #ffffff;
+    border: 1px solid #334155;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.fulfilment-status {
+    background-color: #eef3f8;
+    color: var(--pantreats-blue);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}

@@ -1,0 +1,150 @@
+﻿@model Pantreats.Models.OrderFulfilmentViewModel
+
+@{
+    ViewData["Title"] = "Order Fulfilment";
+}
+
+<div class="fulfilment-page py-4">
+
+    <div class="fulfilment-page-header mb-4">
+        <h1 class="fulfilment-page-title">Order Fulfilment</h1>
+
+        <p class="fulfilment-page-subtitle">
+            Track order statuses, fulfilment dates, and completed pantry orders.
+        </p>
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="fulfilment-stat-card">
+                <h5>Total Orders</h5>
+                <h2>@Model.TotalOrders</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="fulfilment-stat-card">
+                <h5>Waiting Pickup</h5>
+                <h2>@Model.WaitingPickupOrders</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="fulfilment-stat-card">
+                <h5>Fulfilled Orders</h5>
+                <h2>@Model.FulfilledOrders</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="fulfilment-card">
+
+        <form method="get" class="mb-4">
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <input class="form-control"
+                           type="text"
+                           name="searchText"
+                           value="@Model.SearchText"
+                           placeholder="Search by order ID or email" />
+                </div>
+
+                <div class="col-md-4">
+                    <select class="form-select" name="statusFilter">
+                        <option value="">All Statuses</option>
+
+                        @if (Model.StatusFilter == "Waiting Pickup")
+                        {
+                            <option value="Waiting Pickup" selected>Waiting Pickup</option>
+                        }
+                        else
+                        {
+                            <option value="Waiting Pickup">Waiting Pickup</option>
+                        }
+
+                        @if (Model.StatusFilter == "Fulfilled")
+                        {
+                            <option value="Fulfilled" selected>Fulfilled</option>
+                        }
+                        else
+                        {
+                            <option value="Fulfilled">Fulfilled</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" type="submit">
+                        Search
+                    </button>
+                </div>
+
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table fulfilment-table align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Order Date</th>
+                        <th>Fulfilment Date</th>
+                        <th>Date Received</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model.OrderFulfilments.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                No fulfilment records found.
+                            </td>
+                        </tr>
+                    }
+
+                    @foreach (var item in Model.OrderFulfilments)
+                    {
+                        <tr class="fulfilment-row">
+                            <td>@item.OrderId</td>
+                            <td>@item.Order?.Email</td>
+                            <td>@item.OrderStatus</td>
+                            <td>@item.Order?.OrderDate.ToShortDateString()</td>
+                            <td>@item.FulfilmentDate.ToShortDateString()</td>
+
+                            <td>
+                                @if (item.DateReceived.HasValue)
+                                {
+                                    @item.DateReceived.Value.ToShortDateString()
+                                }
+                                else
+                                {
+                                    <span>Not Received</span>
+                                }
+                            </td>
+
+                            <td>
+                                <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-primary">
+                                    Edit
+                                </a>
+                            </td>
+
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+</div>

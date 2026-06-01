@@ -11,5 +11,7 @@
 
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>(); //nav property that links to OrderItems,
         //easier to access the items in an order when we have the order object
+
+        public OrderFulfilment? OrderFulfilment { get; set; }//nav property that links to OrderFulfilment
     }
 }

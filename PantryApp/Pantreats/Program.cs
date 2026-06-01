@@ -28,7 +28,7 @@ if (File.Exists(mdfPath))
     connectionString = localMdfConnection
         ?? throw new InvalidOperationException("connection string 'LocalMdf' not found.");
 
-    Console.WriteLine("using app_data mdf database");
+    Console.WriteLine("using the MDF database in app_data");
 }
 else
 {

@@ -81,8 +81,12 @@ builder.Services.AddAuthentication()
 // add mvc views
 builder.Services.AddControllersWithViews();
 
+
+builder.Services.AddHttpClient();
+
 // add razor pages for identity pages
 builder.Services.AddRazorPages();
+
 
 var app = builder.Build();
 

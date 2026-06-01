@@ -4,136 +4,133 @@
 }
 
 <style>
-    .page-top-spacing{
-        padding-top: 80px;
-    }
-    section
-    {
-        margin-bottom: 70px;
-    }
-    .privacy-title
-    {
-        font-size: 3rem;
-        font-weight: 700;
-         margin-bottom: 25px;
-    }
-    .policy-text
-    {
-        font-size: 1.5rem;
+    .privacy-page {
+        background: #f4f6f9;
+        padding-top: 70px;
+        padding-bottom: 70px;
     }
 
-    h2
-    {
+    .privacy-header {
+        margin-bottom: 40px;
+    }
+
+    .privacy-section {
+        margin-bottom: 35px;
+    }
+
+    .privacy-card {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e5e5;
+    }
+
+    .privacy-header-card {
+        text-align: center;
+        padding: 55px 45px;
+    }
+
+    .privacy-title {
+        font-size: 3.3rem;
+        font-weight: 800;
+        color: #0d2c54;
+        margin-bottom: 25px;
+    }
+
+    .privacy-text,
+    .privacy-section-text,
+    .privacy-list li {
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: #444444;
+    }
+
+    .privacy-section-title {
         font-size: 1.8rem;
         font-weight: 700;
-        margin-bottom: 18px;
+        color: #0d2c54;
+        margin-bottom: 20px;
+        border-left: 5px solid #4CAF50;
+        padding-left: 15px;
     }
 
-    p
-    {
-        font-size: 1.15rem;
-        line-height: 1.8;
-        margin-bottom: 15px;
-    }
-
-    ul
-    {
+    .privacy-list {
         padding-left: 25px;
-        margin-bottom: 15px;
+        margin-top: 15px;
+        margin-bottom: 0;
     }
 
-    ul li
-    {
-        font-size: 1.15rem;
-        line-height: 1.7;
-        margin-bottom: 10px;
+        .privacy-list li {
+            margin-bottom: 10px;
+        }
+
+    .fade-up {
+        opacity: 0;
+        transform: translateY(25px);
+        transition: all 0.6s ease;
     }
 
-    .col-lg-9{
-        background-color: #ffffff;
-        padding: 35px;
-        border-radius: 18px;
-        border: 1px solid #ddd;
-    }
-    .broad-statment .col-leg-9{
-        background-color: transparent;
-        border: none;
-        padding: 0;
-    }
-    .policy-text
-    {
-        font-size:1.3rem;
-        line-height: 1.8;
-    }
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
 </style>
 
-<section class="broad-statement page-top-spacing">
-    <div class="container">
+<div class="privacy-page">
 
-        <div class="row justify-content-center">
+    <section class="privacy-header">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 privacy-card privacy-header-card">
 
-            <div class="col-lg-9 text-center">
+                    <h1 class="privacy-title">
+                        Privacy Policy
+                    </h1>
 
-                <h1 class="privacy-title mb-4">
-                    Privacy Policy
-                </h1>
-
-                <div class="policy-statement">
-
-                    <p class="policy-text fade-up">
+                    <p class="privacy-text fade-up">
                         This Privacy Statement governs the manner in which Spartanburg Community College collects, uses, maintains,
                         and discloses information collected from users (each, a "User") of the sccsc.edu website ("Site").
-                        
+
                         This privacy statement applies to the Site and all products and services offered by Spartanburg Community College.
                     </p>
 
                 </div>
-
             </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="personal-identification-statement">
-    <div class="container">
+    <section class="privacy-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 privacy-card">
 
-        <div class="row justify-content-center">
+                    <h2 class="privacy-section-title">
+                        Personal Identification Information
+                    </h2>
 
-            <div class="col-lg-9 ">
-
-                <h2 class="personal-identification-title mb-4">
-                    Personal Identification Information
-                </h2>
-
-                <div class="personal-identification-statement">
-
-                    <p class="personal-text fade-up">
-
+                    <p class="privacy-section-text fade-up">
+                        Personal identification information may be collected from Users in a variety of ways,
+                        including when Users visit the Site, register on the Site, complete forms, and participate
+                        in other activities, services, features, or resources available through the Site.
                     </p>
 
                 </div>
-
             </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="non-personal-identification-statement">
-    <div class="container">
+    <section class="privacy-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 privacy-card">
 
-        <div class="row justify-content-center">
+                    <h2 class="privacy-section-title">
+                        Non-Personal Identification Information
+                    </h2>
 
-            <div class="col-lg-9 ">
-
-                <h2 class="non-personal-identification-title mb-4">
-                    Non-Personal Identification Information
-                </h2>
-
-                <div class="non-personal-identification-statement">
-
-                    <p class="non-personal-text fade-up">
+                    <p class="privacy-section-text fade-up">
                         We may collect non-personal identification information about Users whenever they interact with the Site.
                         Non-personal identification information may include the browser name, the type of computer,
                         and technical information about users' means of connection to the Site,
@@ -141,281 +138,244 @@
                     </p>
 
                 </div>
-
             </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="web-browser-cookies-statement">
-    <div class="container">
+    <section class="privacy-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 privacy-card">
 
-        <div class="row justify-content-center">
+                    <h2 class="privacy-section-title">
+                        Web Browser Cookies
+                    </h2>
 
-            <div class="col-lg-9 ">
-
-                <h2 class="web-browser-cookies-title mb-4">
-                    Web Browser Cookies
-                </h2>
-
-                <div class="web-browser-cookies-statement">
-
-                    <p class="cookies-text fade-up">
+                    <p class="privacy-section-text fade-up">
                         The College uses persistent cookies to maintain session continuity as the reader moves from page to page in a single session.
-                        Third-party services associated with or linked from SCC sites may or may not use "persistent cookies" to identify users.
+                        Third-party services associated with or linked from SCC sites may or may not use persistent cookies to identify users.
                         Users may set their browser to refuse cookies or alert them when cookies are being sent.
                         If they do so, note that some parts of the Site may not function properly.
                     </p>
 
                 </div>
-
             </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="use-of-collected-information-statement">
-    <div class="container">
+    <section class="privacy-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 privacy-card">
 
-        <div class="row justify-content-center">
+                    <h2 class="privacy-section-title">
+                        Use of Collected Information
+                    </h2>
 
-            <div class="col-lg-9 ">
-
-                <h2 class="use-of-collected-information-title mb-4">
-                    Use of Collected Information
-                </h2>
-
-                <div class="use-of-collected-information-statement">
-
-                    <p class="use-of-collected-information-text fade-up">
-                        Spartanburg Community College may collect and use Users personal information for the following purposes:
+                    <p class="privacy-section-text fade-up">
+                        Spartanburg Community College may collect and use Users' personal information for the following purposes:
                     </p>
 
-                    <ul class="collected-information-text fade-up">
-                        <li>To provide services to the Spartanburg Community College community and to serve other College needs</li>
-                        <li>To improve constituent service</li>
-                        <li>Information provided helps Spartanburg Community College respond to constituent service requests and support needs more efficiently.</li>
+                    <ul class="privacy-list fade-up">
+                        <li>To provide services to the Spartanburg Community College community and to serve other College needs.</li>
+                        <li>To improve constituent service.</li>
+                        <li>To respond to constituent service requests and support needs more efficiently.</li>
                     </ul>
 
                 </div>
-
             </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="personalized-user-experience-statement">
-    <div class="container">
+    <section class="privacy-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 privacy-card">
 
-        <div class="row justify-content-center">
+                    <h2 class="privacy-section-title">
+                        Personalized User Experience
+                    </h2>
 
-            <div class="col-lg-9 ">
-
-                <h2 class="personalized-user-experience-title mb-4">
-                    Personalized User Experience
-                </h2>
-
-                <div class="personalized-user-experience-statement">
-
-                    <p class="personalized-user-text fade-up">
-                        Spartanburg Community College may use information in the aggregate to understand how Users as a group use the services and resources provided on the Site.
+                    <p class="privacy-section-text fade-up">
+                        Spartanburg Community College may use information in the aggregate to understand how Users as a group
+                        use the services and resources provided on the Site.
                     </p>
 
                 </div>
-
             </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="site-improvement-statement">
-    <div class="container">
+    <section class="privacy-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 privacy-card">
 
-        <div class="row justify-content-center">
+                    <h2 class="privacy-section-title">
+                        Site Improvement
+                    </h2>
 
-            <div class="col-lg-9 ">
-
-                <h2 class="site-improvement-title mb-4">
-                    Site Improvement
-                </h2>
-
-                <div class="site-improvement-statement">
-
-                    <p class="improvement-text fade-up">
-                        Spartanburg Community College may use the feedback provided to improve products and services
+                    <p class="privacy-section-text fade-up">
+                        Spartanburg Community College may use the feedback provided to improve products and services.
                     </p>
 
-                    <ul>
-                        <li>To run a promotion, contest, survey, or other website feature</li>
+                    <ul class="privacy-list fade-up">
+                        <li>To run a promotion, contest, survey, or other website feature.</li>
                         <li>To send Users information they agreed to receive about topics that may be interesting.</li>
-                        <li>To send periodic emails</li>
-                        <li>Spartanburg Community College may use the personal email address to respond to inquiries, questions, and/or other requests. If a User decides to opt-in to a mailing list, they will receive emails that may include company news, updates, related product or service information, etc. If at any time the User would like to unsubscribe from receiving future emails to their personal account, detailed unsubscribe instructions are included at the bottom of each email.</li>
+                        <li>To send periodic emails.</li>
+                        <li>
+                            Spartanburg Community College may use the personal email address to respond to inquiries,
+                            questions, and other requests.
+                        </li>
                     </ul>
+
                 </div>
-
             </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="information-protection-statement">
-    <div class="container">
+    <section class="privacy-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 privacy-card">
 
-        <div class="row justify-content-center">
+                    <h2 class="privacy-section-title">
+                        Information Protection
+                    </h2>
 
-            <div class="col-lg-9 ">
-
-                <h2 class="information-protection-title mb-4">
-                    Information Protection
-                </h2>
-
-                <div class="information-protection-statement">
-
-                    <p class="protection-text fade-up">
+                    <p class="privacy-section-text fade-up">
                         Spartanburg Community College adopts appropriate data collection, storage,
-                        and processing practices and security measures to protect against unauthorized access, alteration, disclosure,
-                        or destruction of personal information, username, password, transaction information, and data stored on the Site.
+                        and processing practices and security measures to protect against unauthorized access,
+                        alteration, disclosure, or destruction of personal information, username, password,
+                        transaction information, and data stored on the Site.
                     </p>
 
                 </div>
-
             </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="sharing-of-personal-infomation-statement">
-    <div class="container">
+    <section class="privacy-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 privacy-card">
 
-        <div class="row justify-content-center">
+                    <h2 class="privacy-section-title">
+                        Sharing of Personal Information
+                    </h2>
 
-            <div class="col-lg-9 ">
-
-                <h2 class="sharing-of-personal-infomation-title mb-4">
-                    Sharing of Personal Information
-                </h2>
-
-                <div class="sharing-of-personal-infomation-statement">
-
-                    <p class="sharing-of-infomation-text fade-up">
+                    <p class="privacy-section-text fade-up">
                         Spartanburg Community College does not sell, trade, or rent user's personal identification information to others.
-                        Spartanburg Community College may share generic aggregated demographic information not linked to any personal identification information
-                        regarding visitors and users with business partners, trusted affiliates, and advertisers for the purposes outlined above.
-                        Spartanburg Community College may use third-party service providers to help operate the business and the Site or administer activities on the college's behalf, such as sending out newsletters or surveys.
-                        Spartanburg Community College may share information with third parties for limited purposes where the User has granted permission to do so.
+                        Spartanburg Community College may share generic aggregated demographic information not linked to any personal
+                        identification information regarding visitors and users with business partners, trusted affiliates, and advertisers
+                        for the purposes outlined above.
+                    </p>
 
+                    <p class="privacy-section-text fade-up">
+                        Spartanburg Community College may use third-party service providers to help operate the business and the Site
+                        or administer activities on the college's behalf, such as sending out newsletters or surveys.
+                        Spartanburg Community College may share information with third parties for limited purposes where the User
+                        has granted permission to do so.
+                    </p>
+
+                    <p class="privacy-section-text fade-up">
                         All the above categories exclude text messaging originator opt-in data and consent;
                         this information will not be shared with any third parties, excluding aggregators and providers of the Text Messaging services.
+                    </p>
 
-                        Laws exist in South Carolina to ensure that the government is open and that the public can access appropriate records and information possessed by a government agency.
-                        At the same time, however, there are exceptions to the public's right to access certain records in order to protect against the unreasonable invasion of individuals' personal privacy.
-                        Both State and Federal law authorizes such exceptions.
-                        Information collected from users of this Site, similarly to information collected during in-person visits to a government office, may be subject to inspection and copying by the public unless an exemption exists in law.
-                        If there is a conflict between this Privacy Statement and a State or Federal law governing the disclosure of public records, the applicable law shall control.
-                        The Family Privacy Protection Act of 2002 prohibits persons or private entities from using personal information obtained from State agencies for commercial solicitation purposes.
-                        A person knowingly violating this prohibition is guilty of a misdemeanor and subject to the penalties specified in S.C. Code Ann. Section 30-2-50(D).
+                    <p class="privacy-section-text fade-up">
+                        Laws exist in South Carolina to ensure that the government is open and that the public can access appropriate
+                        records and information possessed by a government agency. At the same time, however, there are exceptions to
+                        the public's right to access certain records in order to protect against the unreasonable invasion of individuals'
+                        personal privacy.
+                    </p>
+
+                    <p class="privacy-section-text fade-up">
+                        If there is a conflict between this Privacy Statement and a State or Federal law governing the disclosure of public records,
+                        the applicable law shall control. The Family Privacy Protection Act of 2002 prohibits persons or private entities
+                        from using personal information obtained from State agencies for commercial solicitation purposes.
                     </p>
 
                 </div>
-
             </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="third-party-statement">
-    <div class="container">
+    <section class="privacy-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 privacy-card">
 
-        <div class="row justify-content-center">
+                    <h2 class="privacy-section-title">
+                        Third-Party Websites
+                    </h2>
 
-            <div class="col-lg-9 ">
+                    <p class="privacy-section-text fade-up">
+                        Users may find advertising or other content on the website that links to the sites and services of partners,
+                        suppliers, advertisers, sponsors, licensors, and other third parties.
+                        Spartanburg Community College does not control the content or links that appear on these sites and is not
+                        responsible for the practices employed by websites linked to or from the Site.
+                    </p>
 
-                <h2 class="third-party-title mb-4">
-                    Third-Party Websites
-                </h2>
-
-                <div class="third-party-statement">
-
-                    <p class="third-party-text fade-up">
-                        Users may find advertising or other content on the website that links to the sites and services of partners, suppliers, advertisers, sponsors, licensors, and other third parties.
-                        Spartanburg Community College does not control the content or links that appear on these sites and is not responsible for the practices employed by websites linked to or from the Site.
-                        In addition, these sites or services, including their content and links, may constantly change.
+                    <p class="privacy-section-text fade-up">
                         These sites and services may have their own privacy policies and constituent service policies.
-                        Browsing and interaction on any other website, including websites with links to the Spartanburg Community College Site, is subject to that website's terms and policies.
+                        Browsing and interaction on any other website, including websites with links to the Spartanburg Community College Site,
+                        is subject to that website's terms and policies.
                     </p>
 
                 </div>
-
             </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="changes-to-privacy-statement-statement">
-    <div class="container">
+    <section class="privacy-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 privacy-card">
 
-        <div class="row justify-content-center">
+                    <h2 class="privacy-section-title">
+                        Changes to Privacy Statement
+                    </h2>
 
-            <div class="col-lg-9 ">
-
-                <h2 class="changes-to-privacy-statement-title mb-4">
-                    Changes to Privacy Statement
-                </h2>
-
-                <div class="changes-to-privacy-statement-statement">
-
-                    <p class="changes-to-privacy-statement-text fade-up">
+                    <p class="privacy-section-text fade-up">
                         Spartanburg Community College can update this privacy statement at any time.
                         Revisions will be noted at the bottom of this Privacy Statement.
-                        Spartanburg Community College encourages Users to frequently check this page for any changes to stay informed about protecting the personal information collected.
+                        Spartanburg Community College encourages Users to frequently check this page for any changes
+                        to stay informed about protecting the personal information collected.
+                    </p>
 
-                        You acknowledge and agree that it is your responsibility to review this privacy statement periodically and become aware of modifications.
+                    <p class="privacy-section-text fade-up">
+                        You acknowledge and agree that it is your responsibility to review this privacy statement periodically
+                        and become aware of modifications.
                     </p>
 
                 </div>
-
             </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="acceptance-of-terms-statement">
-    <div class="container">
+    <section class="privacy-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 privacy-card">
 
-        <div class="row justify-content-center">
+                    <h2 class="privacy-section-title">
+                        Acceptance of Terms
+                    </h2>
 
-            <div class="col-lg-9 ">
-
-                <h2 class="acceptance-of-terms-title mb-4">
-                    Acceptance of Terms
-                </h2>
-
-                <div class="acceptance-of-terms-statement">
-
-                    <p class="acceptance-of-terms-text fade-up">
+                    <p class="privacy-section-text fade-up">
                         Users use the website to signify acceptance of this Privacy Statement and terms of service.
                         If users disagree with this, please do not use the website.
                         Continued use of the website following the posting of changes to this statement will be deemed acceptance of those changes.
                     </p>
 
                 </div>
-
             </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- this will fade up elements when the user comes into view -->
+</div>
+
 @section Scripts {
     <script>
         const observer = new IntersectionObserver((entries) => {

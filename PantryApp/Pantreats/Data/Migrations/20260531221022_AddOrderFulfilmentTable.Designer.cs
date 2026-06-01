@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pantreats.Data;
 
@@ -11,9 +12,11 @@ using Pantreats.Data;
 namespace Pantreats.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260531221022_AddOrderFulfilmentTable")]
+    partial class AddOrderFulfilmentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -258,7 +261,7 @@ namespace Pantreats.Data.Migrations
 
                     b.HasKey("UPC");
 
-                    b.ToTable("Inventory", (string)null);
+                    b.ToTable("Inventory");
                 });
 
             modelBuilder.Entity("Pantreats.Models.ItemRequest", b =>
@@ -281,7 +284,7 @@ namespace Pantreats.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ItemRequest", (string)null);
+                    b.ToTable("ItemRequest");
                 });
 
             modelBuilder.Entity("Pantreats.Models.Order", b =>
@@ -312,7 +315,7 @@ namespace Pantreats.Data.Migrations
 
                     b.HasKey("OrderId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Pantreats.Models.OrderFulfilment", b =>
@@ -341,7 +344,7 @@ namespace Pantreats.Data.Migrations
                     b.HasIndex("OrderId")
                         .IsUnique();
 
-                    b.ToTable("OrderFulfilments", (string)null);
+                    b.ToTable("OrderFulfilments");
                 });
 
             modelBuilder.Entity("Pantreats.Models.OrderItem", b =>
@@ -378,7 +381,7 @@ namespace Pantreats.Data.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("Pantreats.Models.UserApplication", b =>
@@ -475,7 +478,7 @@ namespace Pantreats.Data.Migrations
 
                     b.HasKey("ApplicationId");
 
-                    b.ToTable("UserApplications", (string)null);
+                    b.ToTable("UserApplications");
                 });
 
             modelBuilder.Entity("Pantreats.Models.Vendor", b =>
@@ -504,7 +507,7 @@ namespace Pantreats.Data.Migrations
 
                     b.HasKey("VendorID");
 
-                    b.ToTable("Vendors", (string)null);
+                    b.ToTable("Vendors");
                 });
 
             modelBuilder.Entity("Pantreats.Models.VolunteerApplication", b =>
@@ -603,7 +606,7 @@ namespace Pantreats.Data.Migrations
 
                     b.HasKey("VolunteerApplicationId");
 
-                    b.ToTable("VolunteerApplications", (string)null);
+                    b.ToTable("VolunteerApplications");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -13,6 +13,7 @@ namespace Pantreats.Data
         public DbSet<UserApplication> UserApplications { get; set; }
         public DbSet<VolunteerApplication> VolunteerApplications { get; set; }
         public DbSet<ItemRequest> ItemRequest { get; set; }
+        public DbSet<OrderFulfilment> OrderFulfilments { get; set; }
 
         /*this method configures the relationships between OrderItem and Inventory,
         this will ensure if the inventory item is deleted, that the upc will be set to null and
@@ -21,11 +22,20 @@ namespace Pantreats.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Vendor>().ToTable("Vendors");
+
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Inventory)
                 .WithMany()
                 .HasForeignKey(oi => oi.InventoryUPC)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            //configures the relationships between Orders and OrderFulfilment
+            modelBuilder.Entity<OrderFulfilment>()
+                .HasOne(of => of.Order)
+                .WithOne(of => of.OrderFulfilment)
+                .HasForeignKey<OrderFulfilment>(of => of.OrderId);
+
         }
     }
 }

@@ -50,6 +50,12 @@
                     Log in
                 </button>
 
+                <a asp-controller="Vendor"
+                   asp-action="Login"
+                   class="w-100 btn btn-lg btn-primary mt-3">
+                    Login as Vendor
+                </a>
+
             </form>
 
             @if (Model.ExternalLogins != null && Model.ExternalLogins.Count > 0)
@@ -93,6 +99,11 @@
                 <p class="mb-2">
                     <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">
                         Register as a new user
+                    </a>
+                </p>
+                <p class="mb-2">
+                    <a asp-controller="Vendor" asp-action="Register">
+                        Register as a new vendor
                     </a>
                 </p>
                 <p class="mb-0">

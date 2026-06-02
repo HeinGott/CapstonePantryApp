@@ -2,16 +2,21 @@
 using Microsoft.EntityFrameworkCore;
 using Pantreats.Data;
 using Pantreats.Models;
+using static Pantreats.Areas.Identity.Pages.Account.RegisterModel;
+using Microsoft.AspNetCore.Identity;
 
 namespace Pantreats.Controllers
 {
     public class VendorController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public VendorController(ApplicationDbContext context)
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
+        public VendorController(ApplicationDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signManager)
         {
             _context = context;
+            _userManager = userManager;
+            _signInManager = signManager;
         }
 
         // show all vendors
@@ -108,6 +113,40 @@ namespace Pantreats.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(InputModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    //Assign vendor role here
+                    await _userManager.AddToRoleAsync(user, "Vendors");
+                    return RedirectToAction("Login", "Vendor");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            return View(model);
+        }
+
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        public IActionResult Login()
+        {
+            return View();
         }
     }
 }

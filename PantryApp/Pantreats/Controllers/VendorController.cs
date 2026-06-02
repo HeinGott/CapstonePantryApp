@@ -158,12 +158,12 @@ namespace Pantreats.Controllers
             return View(model);
         }
 
-        public IActionResult Register()
+        public IActionResult Register() //add this to show the registration page
         {
             return View();
         }
 
-        public IActionResult Login()
+        public IActionResult Login() //add this to show the login page
         {
             return View();
         }

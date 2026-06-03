@@ -42,10 +42,21 @@
                     <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
                 </div>
 
-                <button id="registerSubmit" type="submit"
-                        class="w-100 btn btn-lg btn-primary">
-                    Register
-                </button>
+
+                <div class="flex-container">
+                    <button id="registerSubmit" type="submit"
+                            class="w-100 btn btn-lg btn-primary">
+                        Register
+                    </button>
+
+                    <a asp-controller="Vendor"
+                       asp-action="Register"
+                       class="w-100 btn btn-lg btn-primary mt-3">
+                        Register as Vendor
+                    </a>
+                </div>
+
+
             </form>
         </div>
     </div>

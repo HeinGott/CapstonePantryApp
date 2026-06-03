@@ -154,7 +154,7 @@ namespace Pantreats.Areas.Identity.Pages.Account
 
                         if (await _userManager.IsInRoleAsync(user, "Vendors"))
                         {
-                            return RedirectToAction("Index", "Vendor");
+                            return RedirectToAction("Index", "Vendor"); // Redirect to Vendor dashboard
                         }
                     }
 

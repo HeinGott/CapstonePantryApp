@@ -108,8 +108,11 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
         }
     }
-
+    //seed logins for demo accounts
     await DbSeeder.SeedAdminAsync(services);
+    await DbSeeder.SeedDonorAsync(services);
+    await DbSeeder.SeedStudentAsync(services);
+    await DbSeeder.SeedVolunteerAsync(services);
 }
 
 // configure the http request pipeline

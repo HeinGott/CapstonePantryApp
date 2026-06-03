@@ -32,9 +32,21 @@
 
                 <div class="mb-3">
                     <label asp-for="Input.Password" class="form-label">Password</label>
-                    <input asp-for="Input.Password" class="form-control"
-                           placeholder="Enter your password"
-                           autocomplete="current-password" />
+
+                    <div class="input-group">
+                        <input asp-for="Input.Password"
+                               class="form-control"
+                               id="passwordInput"
+                               placeholder="Enter your password"
+                               autocomplete="current-password" />
+
+                        <button class="btn btn-outline-secondary"
+                                type="button"
+                                id="togglePasswordButton">
+                            Show
+                        </button>
+                    </div>
+
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
 
@@ -48,13 +60,7 @@
                 <button id="login-submit" type="submit"
                         class="w-100 btn btn-lg btn-primary">
                     Log in
-                </button>
-
-                <a asp-controller="Vendor"
-                   asp-action="Login"
-                   class="w-100 btn btn-lg btn-primary mt-3">
-                    Login as Vendor
-                </a>
+                </button>                
 
             </form>
 
@@ -118,4 +124,20 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const passwordInput = document.getElementById("passwordInput");
+        const togglePasswordButton = document.getElementById("togglePasswordButton");
+
+        togglePasswordButton.addEventListener("click", function () {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                togglePasswordButton.textContent = "Hide";
+            }
+            else {
+                passwordInput.type = "password";
+                togglePasswordButton.textContent = "Show";
+            }
+        });
+    </script>
 }

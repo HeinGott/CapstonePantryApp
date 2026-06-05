@@ -108,18 +108,5 @@ namespace Pantreats.Controllers
         }
 
 
-        [HttpPost]
-        public IActionResult Delete(string upc)
-        {
-            var item = _context.Inventory.FirstOrDefault(i => i.UPC == upc); //find item in inventory table
-
-            if (item != null)
-            {
-                _context.Inventory.Remove(item);
-                _context.SaveChanges();
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
     }
 }

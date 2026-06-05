@@ -1250,30 +1250,83 @@ a:hover {
 }
 
     .order-row:hover td {
-        background-color: #f3f4f6;
+        background-color: var(--pantreats-blue-soft);
     }
-.order-detail-row > td {
-    padding: 0;
-    border: 0;
-}
-.order-detail-content {
-    max-height: 0;
-    overflow: hidden;
-    visibility: hidden;
-    transition: max-height 0.3s ease;
-    padding: 0 0.75rem 0.75rem;
+/*order details page*/
+.back-button {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: #fff;
+    color: var(--pantreats-blue);
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
 }
 
-    .order-detail-content.open {
-        max-height: 500px;
-        visibility: visible;
+    .back-button:hover {
+        background: #f3f4f6;
+        color: var(--pantreats-blue);
     }
 
-.order-detail-table {
+.order-details-header-card {
+    background: #ffffff;
+    border-radius: 20px;
     box-shadow: 0 2px 4px var(--pantreats-blue);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
+.order-details-title {
+    color: var(--pantreats-blue);
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
 
+.order-details-subtitle {
+    color: #6b7280;
+    margin-bottom: 1.25rem;
+}
+
+.order-details-info-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.info-card {
+    flex: 1 1 200px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.info-card-label {
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.info-card-value {
+    color: #111827;
+    font-weight: 600;
+}
+
+.order-items-title {
+    color: var(--pantreats-blue);
+    font-weight: 700;
+}
+
+.order-items-subtitle {
+    color: var(--pantreats-green);
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+/* fulfilment page */
 .fulfilment-page{
     padding: 1rem;
 }

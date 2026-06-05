@@ -1,0 +1,76 @@
+﻿@model Pantreats.Models.Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="order-details py-4">
+
+    <a asp-action="History" class="back-button">← Back to Order History</a>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="order-details-header-card">
+            <h1 class="order-details-title">Order #@Model.OrderId</h1>
+            <p class="order-details-subtitle">Placed on @Model.OrderDate.ToString("MM/dd/yyyy")</p>
+
+            <div class="order-details-info-grid">
+                <div class="info-card">
+                    <div class="info-card-label">User ID</div>
+                    <div class="info-card-value">@Model.UserId</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-label">Email</div>
+                    <div class="info-card-value">@Model.Email</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-label">Phone</div>
+                    <div class="info-card-value">@Model.PhoneNum</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-label">Total Points</div>
+                    <div class="info-card-value">@Model.Total</div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="order-details-header-card">
+            <h1 class="order-details-title">Order #@Model.OrderId</h1>
+            <p class="order-details-subtitle">Placed on @Model.OrderDate.ToString("MM/dd/yyyy")</p>
+        </div>
+    }
+
+    <div class="order-card">
+        <h2 class="order-items-title">Items</h2>
+        <p class="order-items-subtitle">Items included in this order.</p>
+
+        <div class="table-responsive">
+            <table class="table order-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>UPC</th>
+                        <th>Item Name</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <tr>
+                            <td>@item.InventoryUPC</td>
+                            <td>@item.ItemName</td>
+                            <td>@item.Category</td>
+                            <td>@item.OrderQuantity</td>
+                            <td>@item.Points</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

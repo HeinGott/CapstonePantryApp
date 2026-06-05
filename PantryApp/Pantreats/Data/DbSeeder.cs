@@ -138,11 +138,35 @@ namespace Pantreats.Data
 
             var lines = File.ReadAllLines(filePath);
 
+            var items = new List<Inventory>();
+
+            foreach (var line in lines)
+            {
+
+                var columns = line.Split(',');
+                var name = columns[0].Trim();
+                var upc = columns[0].Trim();
+
+                items.Add(new Inventory
+                {
+                    UPC = upc,
+                    ItemName = name,
+                    BrandName = GetBrand(name),
+                    Category = GetCategory(name),
+                    Subcategory = GetSubcategory(name),
+                    GenderUse = "All",
+                    UnitSize = GetUnitSize(name),
+                    Quantity = 25
+                });
+            }
+
+            context.Inventory.AddRange(items);
+            context.SaveChanges();
 
         }
 
         //helper methods that search for keywords in the names -nick
-        private string GetCategory(string name)
+        private static string GetCategory(string name)
         {
             if (name.Contains("Toothpaste")) return "Personal Care";
             if (name.Contains("Deodorant")) return "Personal Care";
@@ -166,7 +190,7 @@ namespace Pantreats.Data
         }
 
 
-        private string GetSubcategory(string name)
+        private static string GetSubcategory(string name)
         {
             name = name.ToLower();
 
@@ -235,7 +259,7 @@ namespace Pantreats.Data
         }
 
 
-        private string GetUnitSize(string name) //looks for oz in name. defaults to standard if no oz in name -nick
+        private static string GetUnitSize(string name) //looks for a number and oz in item name. defaults to standard if no oz in name -nick
         {
             var match = Regex.Match(name, @"\d+(\.\d+)?\s?oz"); 
             return match.Success ? match.Value : "Standard";

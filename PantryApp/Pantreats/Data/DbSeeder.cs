@@ -155,7 +155,6 @@ namespace Pantreats.Data
                 var upc = columns[1].Trim();
 
 
-
                 items.Add(new Inventory
                 {
                     UPC = upc,
@@ -174,7 +173,7 @@ namespace Pantreats.Data
 
         }
 
-        //helper methods that search for keywords in the names -nick
+        //helper methods that search for keywords in the names of each item-nick
         private static string GetCategory(string name)
         {
             if (name.Contains("Toothpaste")) return "Personal Care";

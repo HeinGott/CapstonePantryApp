@@ -149,6 +149,20 @@
                             <td>@item.GenderUse</td>
                             <td>@item.UnitSize</td>
                             <td>@item.Quantity</td>
+                            <td>
+                            <form asp-controller="Inventory"
+                                    asp-action="Delete"
+                                    method="post"
+                                    onsubmit="return confirm('Delete this item?');">
+
+                                <input type="hidden" name="upc" value="@item.UPC" />
+
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    Delete
+                                </button>
+
+                            </form>
+                            </td>
                         </tr>
                     }
 

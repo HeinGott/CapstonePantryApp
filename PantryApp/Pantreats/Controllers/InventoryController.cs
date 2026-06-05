@@ -7,50 +7,19 @@ namespace Pantreats.Controllers
     {
 
         private readonly HttpClient _httpClient;
+        private readonly ApplicationDbContext _context;
 
-        public InventoryController(HttpClient httpClient)
+
+        public InventoryController(HttpClient httpClient, ApplicationDbContext context)
         {
             _httpClient = httpClient;
+            _context = context;
         }
 
         public IActionResult Index()
         {
-            // Create a list to store inventory items
-            var inventory = new List<Inventory>();
-
-            // Get path to the CSV file
-            var filePath = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "App_Data",
-                "FakePanTreatInventory.csv"
-            );
-
-            // Check if file exists
-            if (System.IO.File.Exists(filePath))
-            {
-                // Read all lines and skip the header (first row)
-                var lines = System.IO.File.ReadAllLines(filePath).Skip(1);
-
-                // Loop through each line in the file
-                foreach (var line in lines)
-                {
-                    // Split line by commas
-                    var parts = line.Split(',');
-
-                    // Add item to list
-                    inventory.Add(new Inventory
-                    {
-                        UPC = parts[0],
-                        ItemName = parts[1],
-                        BrandName = parts[2],
-                        Category = parts[3],
-                        Subcategory = parts[4],     // Column D
-                        GenderUse = parts[5],    // Column E
-                        UnitSize = parts[6],     // Column F
-                        Quantity = int.Parse(parts[7].Trim()), // Column G
-                    });
-                }
-            }
+            //query list of inventory items from db
+            var inventory = _context.Inventory.OrderBy(i => i.ItemName).ToList();
 
             // Store total count in ViewBag
             ViewBag.Count = inventory.Count;
@@ -127,30 +96,15 @@ namespace Pantreats.Controllers
         [HttpPost]
         public IActionResult AddInventoryItem(Inventory item)
         {
-            var filePath = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "App_Data",
-                "FakePanTreatInventory.csv"
-            );
+            if (!ModelState.IsValid)
+            {
+                return View(item);
+            }
 
-            //create CSV row -Nick
-            var csvLine =
-                $"{item.UPC}," +
-                $"{item.ItemName}," +
-                $"{item.BrandName}," +
-                $"{item.Category}," +
-                $"{item.Subcategory}," +
-                $"{item.GenderUse}," +
-                $"{item.UnitSize}," +
-                $"{item.Quantity}";
+            _context.Inventory.Add(item);
+            _context.SaveChanges();
 
-            //append to CSV -Nick
-            System.IO.File.AppendAllText(
-                filePath,
-                Environment.NewLine + csvLine
-            );
-
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
     }

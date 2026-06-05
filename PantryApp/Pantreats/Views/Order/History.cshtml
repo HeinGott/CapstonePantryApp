@@ -1,47 +1,8 @@
-﻿
+﻿@model List<Pantreats.Models.Order>
+
+
 @{
     ViewData["Title"] = "Order History";
-}
-
-@{
-
-    var orders = new List<dynamic>
-    {
-        new {
-            OrderId = 1001,
-            User = "022001",
-            OrderDate = "2026/05/01",
-            Total = 12,
-            Items = new List<dynamic>
-            {
-                new { InventoryUPC = 101010100, ItemName = "Canned Black Beans", Category = "Canned Goods", Quantity = 2, Points = 4 },
-                new { InventoryUPC = 101010101, ItemName = "White Rice (2 lb)",   Category = "Grains",       Quantity = 1, Points = 3 },
-                new { InventoryUPC = 101010102, ItemName = "Peanut Butter",        Category = "Pantry",       Quantity = 1, Points = 5 }
-            }
-        },
-        new {
-            OrderId = 1002,
-            User = "003032",
-            OrderDate = "2026/05/03",
-            Total = 7,
-            Items = new List<dynamic>
-            {
-                new { InventoryUPC = 101010103, ItemName = "Pasta (1 lb)",     Category = "Grains",       Quantity = 2, Points = 4 },
-                new { InventoryUPC = 101010104, ItemName = "Marinara Sauce",   Category = "Canned Goods", Quantity = 1, Points = 3 }
-            }
-        },
-        new {
-            OrderId = 1003,
-            User = "004045",
-            OrderDate = "2026/05/04",
-            Total = 9,
-            Items = new List<dynamic>
-            {
-                new { InventoryUPC = 101010105, ItemName = "Cereal",        Category = "Breakfast", Quantity = 1, Points = 4 },
-                new { InventoryUPC = 101010106, ItemName = "Milk (1 gal)",  Category = "Dairy",     Quantity = 1, Points = 5 }
-            }
-        }
-    };
 }
 
 
@@ -61,53 +22,37 @@
 
     <div class="order-card">
         <div class="table-responsive">
-            <table class="table order-table align-middle mb-0">
+            <table id="orderTable" class="table order-table align-middle mb-0">
                 <thead>
                     <tr>
                         <th>Order Id</th>
                         <th>User Id</th>
                         <th>Date</th>
                         <th>Total Points</th>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <th></th>
+                        }
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var order in orders)
+                    @foreach (var order in Model)
                     {
-                        <tr class="order-row" onclick="toggleOrder(@order.OrderId)">
+                        <tr class="order-row" onclick="goToOrder(@order.OrderId)">
                             <td>@order.OrderId</td>
-                            <td>@order.User</td>
-                            <td>@order.OrderDate</td>
+                            <td>@order.UserId</td>
+                            <td>@order.OrderDate.ToString("yyyy/MM/dd")</td>
                             <td>@order.Total</td>
-                        </tr>
-
-                        <tr class="order-detail-row">
-                            <td colspan="4">
-                                <div class="order-detail-content" id="order-detail-@order.OrderId">
-                                    <table class="table order-detail-table mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>UPC</th>
-                                                <th>Item Name</th>
-                                                <th>Category</th>
-                                                <th>Quantity</th>
-                                                <th>Points</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var item in order.Items)
-                                            {
-                                                <tr>
-                                                    <td>@item.InventoryUPC</td>
-                                                    <td>@item.ItemName</td>
-                                                    <td>@item.Category</td>
-                                                    <td>@item.Quantity</td>
-                                                    <td>@item.Points</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </td>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <td onclick="event.stopPropagation()">
+                                    <form asp-action="Delete" asp-route-id="@order.OrderId" method="post"
+                                          onsubmit="return confirm('Delete this order?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger">🗑</button>
+                                    </form>
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>
@@ -116,3 +61,27 @@
     </div>
 
 </div>
+
+@section Scripts {
+    <script>
+            function searchOrders() {
+            let input = document.getElementById("orderSearch");
+            let filter = input.value.toLowerCase();
+            let rows = document.getElementById("orderTable").tBodies[0].rows;
+
+            for (let i = 0; i < rows.length; i++) {
+                let orderId = rows[i].cells[0].innerText.toLowerCase();
+
+                if (orderId.includes(filter)) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+
+        function goToOrder(orderId) {
+            window.location.href = '/Order/Details/' + orderId;
+        }
+    </script>
+}

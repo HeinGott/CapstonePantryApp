@@ -128,7 +128,7 @@ namespace Pantreats.Data
         
         public static void SeedInventory(ApplicationDbContext context, IWebHostEnvironment env)
         {
-            if (context.Inventory.Any()) //check if inventory table is empty -nick
+            if (context.Inventory.AsNoTracking().Any()) //check if inventory table is empty -nick
                 return;
 
             var filePath = Path.Combine(env.ContentRootPath, "App_Data", "InventorySeed.csv");
@@ -142,10 +142,19 @@ namespace Pantreats.Data
 
             foreach (var line in lines)
             {
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
+
 
                 var columns = line.Split(',');
+                if (columns.Length < 2)
+                    continue;
+
                 var name = columns[0].Trim();
-                var upc = columns[0].Trim();
+                var upc = columns[1].Trim();
+
+
 
                 items.Add(new Inventory
                 {
@@ -181,9 +190,14 @@ namespace Pantreats.Data
             "Campbell", "Lidl", "Laura Lynn", "Swanson",
             "Bush's", "Kirkland", "Crest", "Colgate", "Founders", 
             "Lakeside", "Happy Harvest", "Cheeze-It", "Nature Valley",
-            "Clover Valley", "Armor", "Green Giant", "Pregresso", "Swanson", 
+            "Clover Valley", "Armor", "Green Giant", "Progresso", "Swanson", 
             "Crider", "Maruchan", "Marie Callender's", "American Beauty",
-            "Goya", "Dakota's Pride", "Barilla"
+            "Goya", "Dakota's Pride", "Barilla", "Northern Catch",
+            "IGA", "Mothers Maid", "Nutter Butter", "Teddy Grahams",
+            "Chicken of the Sea", "Stokely's", "Nissin", "Lance",
+            "Iberia", "Mission Pride", "Early Garden","Garden", "Quaker", "Cheetos",
+            "Lay's", "Velveeta", "Garolalo", "Pirate's Booty", "Member's Mark",
+            "Mueller's", "La Moderna", "Chef's Cupboard", "Combino"
             };
 
             return brands.FirstOrDefault(b => name.StartsWith(b)) ?? "Unknown";
@@ -218,6 +232,7 @@ namespace Pantreats.Data
             if (name.Contains("stewed tomato")) return "Tomatoes";
 
             //soups
+            if (name.Contains("soup")) return "Soups";
             if (name.Contains("chicken noodle")) return "Soups";
             if (name.Contains("vegetable soup")) return "Soups";
             if (name.Contains("beef soup")) return "Soups";
@@ -230,6 +245,7 @@ namespace Pantreats.Data
             //meat
             if (name.Contains("tuna")) return "Meat";
             if (name.Contains("salmon")) return "Meat";
+            if (name.Contains("chicken")) return "Meat";
             if (name.Contains("chicken breast")) return "Meat";
             if (name.Contains("vienna sausage")) return "Meat";
 
@@ -243,7 +259,7 @@ namespace Pantreats.Data
             if (name.Contains("cheetos")) return "Snacks";
             if (name.Contains("chips")) return "Snacks";
             if (name.Contains("veggie straws")) return "Snacks";
-            if (name.Contains("cheez-it")) return "Snacks";
+            if (name.Contains("cheeze-it")) return "Snacks";
             if (name.Contains("cracker")) return "Snacks";
             if (name.Contains("teddy grahams") || name.Contains("nutter butter"))
                 return "Snacks";
@@ -263,6 +279,18 @@ namespace Pantreats.Data
         {
             var match = Regex.Match(name, @"\d+(\.\d+)?\s?oz"); 
             return match.Success ? match.Value : "Standard";
+        }
+
+
+        public static void ClearInventory(ApplicationDbContext context) //method to delete all inventory in db table, used for testing
+        {
+            var allItems = context.Inventory.ToList();
+
+            if (!allItems.Any())
+                return;
+
+            context.Inventory.RemoveRange(allItems);
+            context.SaveChanges();
         }
 
     }

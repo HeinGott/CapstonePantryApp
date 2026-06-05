@@ -1,7 +1,8 @@
+using DocumentFormat.OpenXml.InkML;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Pantreats.Data;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,6 +97,8 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
+    var env = services.GetRequiredService<IWebHostEnvironment>();
+
     // list of roles for your app
     string[] roles = { "Admin", "Vendors", "Volunteers", "Students" };
 
@@ -108,11 +111,20 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
         }
     }
-    //seed logins for demo accounts
+
+    //seed logins for demo accounts -nick
     await DbSeeder.SeedAdminAsync(services);
     await DbSeeder.SeedDonorAsync(services);
     await DbSeeder.SeedStudentAsync(services);
     await DbSeeder.SeedVolunteerAsync(services);
+
+    using (var dbScope = app.Services.CreateScope())
+    {
+        var dbContext = dbScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        //DbSeeder.ClearInventory(dbContext); this clears the inventory table if not commented out 
+        DbSeeder.SeedInventory(dbContext, env);
+    }
+
 }
 
 // configure the http request pipeline

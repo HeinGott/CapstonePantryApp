@@ -1,17 +1,17 @@
-﻿@model Pantreats.Models.Vendor
+﻿@model Pantreats.Models.Donor
 
 @{
-    ViewData["Title"] = "Edit Vendor";
+    ViewData["Title"] = "Edit Donor";
 }
 
 <div class="vendor-edit-page py-4">
 
     <div class="mb-3">
-        <a asp-controller="Vendor"
+        <a asp-controller="Donor"
                asp-action="Details"
-               asp-route-id="@Model.VendorID"
+               asp-route-id="@Model.DonorID"
                class="btn student-back-btn">
-            ← Back to Vendor
+            ← Back to Donor
         </a>
     </div>
 
@@ -24,10 +24,10 @@
 
         <form asp-action="Edit" method="post">
 
-            <input type="hidden" asp-for="VendorID" />
+            <input type="hidden" asp-for="DonorID" />
 
             <div class="mb-3">
-                <label class="form-label">Vendor Name</label>
+                <label class="form-label">Donor Name</label>
                 <input asp-for="Name" class="form-control" />
             </div>
 
@@ -64,8 +64,8 @@
                 <button type="button"
                         class="btn btn-danger"
                         data-bs-toggle="modal"
-                        data-bs-target="#deleteVendorModal">
-                    Delete Vendor
+                        data-bs-target="#deleteDonorModal">
+                    Delete Donor
                 </button>
 
             </div>
@@ -78,17 +78,17 @@
 
 <!-- delete modal -->
 <div class="modal fade"
-     id="deleteVendorModal"
+     id="deleteDonorModal"
      tabindex="-1"
-     aria-labelledby="deleteVendorModalLabel"
+     aria-labelledby="deleteDonorModalLabel"
      aria-hidden="true">
 
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteVendorModalLabel">
-                    Delete Vendor
+                <h5 class="modal-title" id="deleteDonorModalLabel">
+                    Delete Donor
                 </h5>
 
                 <button type="button"
@@ -111,9 +111,9 @@
                     Cancel
                 </button>
 
-                <form asp-controller="Vendor"
+                <form asp-controller="Donor"
                       asp-action="Delete"
-                      asp-route-id="@Model.VendorID"
+                      asp-route-id="@Model.DonorID"
                       method="post">
 
                     <button type="submit" class="btn btn-danger">

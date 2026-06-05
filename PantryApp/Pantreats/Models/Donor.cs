@@ -2,9 +2,9 @@
 
 namespace Pantreats.Models
 {
-    public class Vendor
+    public class Donor
     {
-        public int VendorID { get; set; }
+        public int DonorID { get; set; }
         public string? UserId { get; set; }
 
         [Required]

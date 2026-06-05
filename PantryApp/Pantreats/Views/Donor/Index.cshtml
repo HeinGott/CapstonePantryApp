@@ -1,23 +1,23 @@
-﻿@model IEnumerable<Pantreats.Models.Vendor>
+﻿@model IEnumerable<Pantreats.Models.Donor>
 
 @{
-    ViewData["Title"] = "Vendors";
+    ViewData["Title"] = "Donors";
 }
 
-<div class="vendor-page py-4">
+<div class="donor-page py-4">
 
-    <div class="vendor-page-header mb-4">
+    <div class="donor-page-header mb-4">
 
         <div>
-            <h1 class="vendor-page-title mb-1">Vendors</h1>
-            <p class="vendor-page-subtitle mb-0">
-                View vendors and manage donation sources.
+            <h1 class="donor-page-title mb-1">Donor</h1>
+            <p class="donor-page-subtitle mb-0">
+                View donors and manage donation sources.
             </p>
         </div>
 
-        <div class="vendor-actions">
-            <a asp-controller="Vendor" asp-action="Create" class="btn btn-primary">
-                Add Vendor
+        <div class="donor-actions">
+            <a asp-controller="Donor" asp-action="Create" class="btn btn-primary">
+                Add Donor
             </a>
         </div>
 
@@ -26,23 +26,23 @@
     <div class="student-card">
 
         <div class="table-responsive">
-            <table class="table student-table align-middle mb-0" id="vendorTable">
+            <table class="table student-table align-middle mb-0" id="donorTable">
 
                 <thead>
                     <tr>
-                        <th onclick="sortTable('vendorTable', 0, this)">Vendor Name</th>
-                        <th onclick="sortTable('vendorTable', 1, this)">Phone Number</th>
-                        <th onclick="sortTable('vendorTable', 2, this)">Address</th>
+                        <th onclick="sortTable('donorTable', 0, this)">Donor Name</th>
+                        <th onclick="sortTable('donorTable', 1, this)">Phone Number</th>
+                        <th onclick="sortTable('donorTable', 2, this)">Address</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    @foreach (var vendor in Model)
+                    @foreach (var donor in Model)
                     {
-                        <tr class="student-row" onclick="goToVendor(@vendor.VendorID)">
-                            <td>@vendor.Name</td>
-                            <td>@(vendor.PhoneNumber ?? "not added")</td>
-                            <td>@(vendor.Address ?? "not added")</td>
+                        <tr class="student-row" onclick="goToDonor(@donor.DonorID)">
+                            <td>@donor.Name</td>
+                            <td>@(donor.PhoneNumber ?? "not added")</td>
+                            <td>@(donor.Address ?? "not added")</td>
                         </tr>
                     }
                 </tbody>
@@ -56,8 +56,8 @@
 
 @section Scripts {
     <script>
-        function goToVendor(id) {
-            window.location.href = '/Vendor/Details/' + id;
+        function goToDonor(id) {
+            window.location.href = '/Donor/Details/' + id;
         }
 
         function sortTable(tableId, columnNumber, header) {

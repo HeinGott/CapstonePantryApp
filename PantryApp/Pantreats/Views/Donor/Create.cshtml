@@ -1,26 +1,26 @@
-﻿@model Pantreats.Models.Vendor
+﻿@model Pantreats.Models.Donor
 
 @{
-    ViewData["Title"] = "Add Vendor";
+    ViewData["Title"] = "Add Donor";
 }
 
 <section class="vendor-create-page">
     <div class="mb-4">
-        <a asp-controller="Vendor" asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-controller="Donor" asp-action="Index" class="btn btn-outline-secondary">
             ← Back to Vendors
         </a>
     </div>
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <h1 class="mb-2">Add Vendor</h1>
+            <h1 class="mb-2">Add Donor</h1>
             <p class="text-muted mb-4">
                 Add a person or company that donates items to the pantry.
             </p>
 
             <form asp-action="Create" method="post">
                 <div class="mb-3">
-                    <label asp-for="Name" class="form-label">Vendor Name</label>
+                    <label asp-for="Name" class="form-label">Donor Name</label>
                     <input asp-for="Name" class="form-control" />
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
@@ -50,7 +50,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary">
-                    Save Vendor
+                    Save Donor
                 </button>
             </form>
         </div>

@@ -106,7 +106,7 @@ namespace Pantreats.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> AddInventoryItem(Inventory item, string imageUrl)
+        public async Task<IActionResult> AddInventoryItem(Inventory item, IFormFile imageFile, string imageUrl)
         {
             if (!ModelState.IsValid)
             {
@@ -114,8 +114,41 @@ namespace Pantreats.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            
+
             _context.Inventory.Add(item);
             _context.SaveChanges();
+
+
+            //user file upload
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                using var ms = new MemoryStream();
+
+                byte[] imageBytes = null;
+                string contentType = null;
+
+
+                await imageFile.CopyToAsync(ms);
+
+                imageBytes = ms.ToArray();
+                contentType = imageFile.ContentType;
+
+
+
+                _context.InventoryImages.Add(new InventoryImage
+                {
+                    UPC = item.UPC,
+                    ImageData = imageBytes,
+                    ContentType = contentType
+                });
+
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+
+
 
             //if imageurl exists save to db for item upc
             if (!string.IsNullOrEmpty(imageUrl))
@@ -143,6 +176,7 @@ namespace Pantreats.Controllers
                     Console.WriteLine("Image save failed: " + ex.Message);
                 }
             }
+
 
 
             return RedirectToAction(nameof(Index));

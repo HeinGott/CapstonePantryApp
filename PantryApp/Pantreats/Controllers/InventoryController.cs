@@ -108,5 +108,45 @@ namespace Pantreats.Controllers
         }
 
 
+        public IActionResult Edit(string upc)
+        {
+            var item = _context.Inventory.FirstOrDefault(i => i.UPC == upc);
+
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            return View(item);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(Inventory item)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Inventory.Update(item);
+                _context.SaveChanges();
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(item);
+        }
+
+        [HttpPost]
+        public IActionResult DeleteConfirmed(string upc)
+        {
+            var item = _context.Inventory.FirstOrDefault(i => i.UPC == upc);
+
+            if (item != null)
+            {
+                _context.Inventory.Remove(item);
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

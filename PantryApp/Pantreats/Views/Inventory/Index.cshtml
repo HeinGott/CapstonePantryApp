@@ -133,6 +133,7 @@
                         <th onclick="sortTable('inventoryTable', 5, this)">Use</th>
                         <th onclick="sortTable('inventoryTable', 6, this)">Unit Size</th>
                         <th onclick="sortTable('inventoryTable', 7, this)">Quantity</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
 
@@ -149,6 +150,29 @@
                             <td>@item.GenderUse</td>
                             <td>@item.UnitSize</td>
                             <td>@item.Quantity</td>
+
+                            <td class="d-flex gap-2">
+                                <a asp-controller="Inventory"
+                                    asp-action="Edit"
+                                    asp-route-upc="@item.UPC"
+                                    class="inventory-edit-btn">
+                                    Edit
+                                </a>
+
+                                <form asp-controller="Inventory"
+                                        asp-action="DeleteConfirmed"
+                                        asp-route-upc="@item.UPC"
+                                        method="post"
+                                        style="display:inline;"
+                                        onsubmit="return confirm('Are you sure you want to delete this inventory item?');">
+
+                                    <button type="submit" class="inventory-delete-btn">
+                                        Delete
+                                    </button>
+
+                                </form>
+                            </td>
+
                         </tr>
                     }
 

@@ -1,0 +1,46 @@
+﻿@model List<Pantreats.Models.UserManagerViewModel>
+
+@{
+    ViewData["Title"] = "User Manager";
+}
+
+<div class="student-page py-4">
+
+    <div class="student-page-header mb-4">
+        <h1 class="student-page-title">User Manager</h1>
+        <p class="student-page-subtitle">
+            Manage user accounts and roles.
+        </p>
+    </div>
+
+    <div class="student-card">
+
+        <table class="table student-table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.Email</td>
+                        <td>@user.Role</td>
+                        <td>
+                            <a class="inventory-edit-btn">
+                                Change Role
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

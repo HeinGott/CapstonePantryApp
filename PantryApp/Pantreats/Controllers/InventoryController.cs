@@ -81,6 +81,44 @@ namespace Pantreats.Controllers
                     images = item.images != null && item.images.Count > 0 ? item.images[0].ToString() : null
                 };
 
+                //if imageurl exists save to db for item upc
+                if (!string.IsNullOrEmpty(product.images))
+                {
+                    try
+                    {
+                        var imageResponse = await _httpClient.GetAsync(product.images);
+
+                        if (imageResponse.IsSuccessStatusCode)
+                        {
+                            byte[] imageBytes = await imageResponse.Content.ReadAsByteArrayAsync(); //turn image into byte array so it can be stored as varbinary(max) in db
+
+                            string contentType = imageResponse.Content.Headers.ContentType?.MediaType;
+
+                            var existingImage = await _context.InventoryImages.FindAsync(upc);
+
+                            //if image exists for upc then we do nothing, but if none we save to table
+
+                            if(existingImage == null)
+                            {
+                                _context.InventoryImages.Add(new InventoryImage
+                                {
+                                    UPC = upc,
+                                    ImageData = imageBytes,
+                                    ContentType = contentType
+                                });
+
+                            }
+
+                            await _context.SaveChangesAsync(); 
+                        }
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
+
                 ViewBag.UPC = upc;
 
                 return View("UPCResult", product); 
@@ -146,6 +184,19 @@ namespace Pantreats.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+
+        public async Task<IActionResult> GetImage(string upc)
+        {
+            var image = await _context.InventoryImages.FindAsync(upc);
+
+            if(image == null)
+            {
+                return NotFound();
+            }
+
+            return File(image.ImageData, image.ContentType);
         }
 
     }

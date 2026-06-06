@@ -1469,3 +1469,37 @@ a:hover {
     padding: 10px;
     font-size: 20px;
 }
+
+/* Inventory Action Buttons */
+
+.inventory-edit-btn {
+    background-color: var(--pantreats-green);
+    border: 1px solid var(--pantreats-green);
+    color: white !important;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 6px 12px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.inventory-edit-btn:hover {
+    background-color: var(--pantreats-green-dark) !important;
+    border-color: var(--pantreats-green-dark) !important;
+    color: white !important;
+}
+
+.inventory-delete-btn {
+    background-color: var(--pantreats-blue);
+    border: 1px solid var(--pantreats-blue);
+    color: white !important;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 6px 12px;
+}
+
+.inventory-delete-btn:hover {
+    background-color: var(--pantreats-blue-dark) !important;
+    border-color: var(--pantreats-blue-dark) !important;
+    color: white !important;
+}

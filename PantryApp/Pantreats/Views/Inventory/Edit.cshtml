@@ -1,0 +1,70 @@
+﻿@model Pantreats.Models.Inventory
+
+@{
+    ViewData["Title"] = "Edit Inventory Item";
+}
+
+<div class="student-page py-4">
+    <div class="student-page-header mb-4">
+        <div>
+            <h1 class="student-page-title mb-1">Edit Inventory Item</h1>
+            <p class="student-page-subtitle mb-0">Update pantry item details.</p>
+        </div>
+    </div>
+
+    <div class="student-card">
+        <form asp-controller="Inventory" asp-action="Edit" method="post">
+            <input type="hidden" asp-for="UPC" />
+
+            <div class="mb-3">
+                <label class="form-label">UPC</label>
+                <input asp-for="UPC" class="form-control" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ItemName" class="form-label">Item Name</label>
+                <input asp-for="ItemName" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="BrandName" class="form-label">Brand</label>
+                <input asp-for="BrandName" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Category" class="form-label">Category</label>
+                <input asp-for="Category" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Subcategory" class="form-label">Subcategory</label>
+                <input asp-for="Subcategory" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="GenderUse" class="form-label">Use</label>
+                <input asp-for="GenderUse" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="UnitSize" class="form-label">Unit Size</label>
+                <input asp-for="UnitSize" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Quantity" class="form-label">Quantity</label>
+                <input asp-for="Quantity" class="form-control" type="number" />
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn inventory-edit-btn">
+                    Save Changes
+                </button>
+
+                <a asp-controller="Inventory" asp-action="Index" class="btn btn-secondary">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

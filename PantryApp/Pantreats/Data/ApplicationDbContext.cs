@@ -14,6 +14,7 @@ namespace Pantreats.Data
         public DbSet<VolunteerApplication> VolunteerApplications { get; set; }
         public DbSet<ItemRequest> ItemRequest { get; set; }
         public DbSet<OrderFulfilment> OrderFulfilments { get; set; }
+        public DbSet<InventoryImage> InventoryImages { get; set; }
 
         /*this method configures the relationships between OrderItem and Inventory,
         this will ensure if the inventory item is deleted, that the upc will be set to null and
@@ -36,6 +37,19 @@ namespace Pantreats.Data
                 .WithOne(of => of.OrderFulfilment)
                 .HasForeignKey<OrderFulfilment>(of => of.OrderId);
 
+
+            modelBuilder.Entity<InventoryImage>(entity =>
+            {
+                entity.HasKey(e => e.UPC);
+
+                entity.Property(e => e.ImageData)
+                      .HasColumnType("varbinary(max)");
+                //configures the relationships between InventoryImage and Inventory
+                entity.HasOne(e => e.Inventory)
+                    .WithOne(i => i.InventoryImage)
+                    .HasForeignKey<InventoryImage>(e => e.UPC);
+
+            });
         }
     }
 }

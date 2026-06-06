@@ -106,8 +106,9 @@ namespace Pantreats.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> AddInventoryItem(Inventory item, IFormFile imageFile, string imageUrl)
+        public async Task<IActionResult> AddInventoryItem(Inventory item, IFormFile? imageFile, string imageUrl)
         {
+
             if (!ModelState.IsValid)
             {
                 ViewBag.Error = "Invalid Model";

@@ -73,6 +73,14 @@ else
                    readonly />
         </div>
 
+        <div>
+            <label>Image Url</label>
+            <input type="text"
+                   name="imageUrl"
+                   value="@Model.images"
+                   readonly />
+        </div>
+
         @if (!string.IsNullOrEmpty(Model.images))
         {
             <div>

@@ -100,7 +100,7 @@ using (var scope = app.Services.CreateScope())
     var env = services.GetRequiredService<IWebHostEnvironment>();
 
     // list of roles for your app
-    string[] roles = { "Admin", "Vendors", "Volunteers", "Students" };
+    string[] roles = { "Admin", "Donors", "Volunteers", "Students" };
 
     foreach (var role in roles)
     {

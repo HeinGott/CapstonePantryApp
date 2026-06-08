@@ -1,7 +1,7 @@
-﻿@model Pantreats.Models.Vendor
+﻿@model Pantreats.Models.Donor
 
 @{
-    ViewData["Title"] = "Vendor Details";
+    ViewData["Title"] = "Donor Details";
 }
 
 <div class="vendor-details-page py-4">
@@ -20,11 +20,11 @@
             </div>
 
             <div>
-                <a asp-controller="Vendor"
+                <a asp-controller="Donor"
                        asp-action="Edit"
-                       asp-route-id="@Model.VendorID"
+                       asp-route-id="@Model.DonorID"
                        class="btn app-btn app-btn-primary">
-                    Edit Vendor
+                    Edit Donor
                 </a>
             </div>
         </div>

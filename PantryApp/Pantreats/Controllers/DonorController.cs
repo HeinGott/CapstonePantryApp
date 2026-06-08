@@ -8,31 +8,31 @@ using static Pantreats.Areas.Identity.Pages.Account.RegisterModel;
 
 namespace Pantreats.Controllers
 {
-    public class VendorController : Controller
+    public class DonorController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-        public VendorController(ApplicationDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signManager)
+        public DonorController(ApplicationDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signManager)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signManager;
         }
 
-        // show all vendors
+        // show all Donors
         public async Task<IActionResult> Index()
         {
-            var vendors = await _context.Vendors.ToListAsync();
+            var vendors = await _context.Donors.ToListAsync();
 
             return View(vendors);
         }
 
-        // show one vendor
+        // show one donor
         public async Task<IActionResult> Details(int id)
         {
-            var vendor = await _context.Vendors
-                .FirstOrDefaultAsync(v => v.VendorID == id);
+            var vendor = await _context.Donors
+                .FirstOrDefaultAsync(v => v.DonorID == id);
 
             if (vendor == null)
             {
@@ -42,7 +42,7 @@ namespace Pantreats.Controllers
             return View(vendor);
         }
 
-        // show add vendor page
+        // show add donor page
         public IActionResult Create()
         {
             return View();
@@ -51,66 +51,66 @@ namespace Pantreats.Controllers
         // save new vendor
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Vendor vendor)
+        public async Task<IActionResult> Create(Donor donor)
         {
             if (ModelState.IsValid)
             {
-                _context.Vendors.Add(vendor);
+                _context.Donors.Add(donor);
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(vendor);
+            return View(donor);
         }
 
         // show edit page
         public async Task<IActionResult> Edit(int id)
         {
-            var vendor = await _context.Vendors.FindAsync(id);
+            var donor = await _context.Donors.FindAsync(id);
 
-            if (vendor == null)
+            if (donor == null)
             {
                 return NotFound();
             }
 
-            return View(vendor);
+            return View(donor);
         }
 
         // save edits
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Vendor vendor)
+        public async Task<IActionResult> Edit(int id, Donor donor)
         {
-            if (id != vendor.VendorID)
+            if (id != donor.DonorID)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
-                _context.Update(vendor);
+                _context.Update(donor);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction(nameof(Details), new { id = vendor.VendorID });
+                return RedirectToAction(nameof(Details), new { id = donor.DonorID });
             }
 
-            return View(vendor);
+            return View(donor);
         }
 
-        // delete vendor
+        // delete donor 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var vendor = await _context.Vendors.FindAsync(id);
+            var donor = await _context.Donors.FindAsync(id);
 
-            if (vendor == null)
+            if (donor == null)
             {
                 return NotFound();
             }
 
-            _context.Vendors.Remove(vendor);
+            _context.Donors.Remove(donor);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
@@ -118,9 +118,9 @@ namespace Pantreats.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(Vendor model, string Password)
+        public async Task<IActionResult> Register(Donor model, string Password)
         {
-            //Registers user for vendor
+            //Registers user for donor
             if (ModelState.IsValid)
             {
                 var user = new IdentityUser { UserName = model.Email, Email = model.Email };
@@ -128,10 +128,10 @@ namespace Pantreats.Controllers
 
                 if (result.Succeeded)
                 {
-                    //Assign vendor role here
-                    await _userManager.AddToRoleAsync(user, "Vendors");
-                    // Save Vendor to vendor table
-                    var vendor = new Vendor
+                    //Assign donor role here
+                    await _userManager.AddToRoleAsync(user, "Donors");
+                    // Save Donor to donor table
+                    var donor = new Donor
                     {
                         Name = model.Name,
                         Email = model.Email,
@@ -140,8 +140,8 @@ namespace Pantreats.Controllers
                         Notes = model.Notes,
                         UserId = user.Id 
                     };
-                    //Adds user to vendor Table
-                    _context.Vendors.Add(vendor);
+                    //Adds user to donor Table
+                    _context.Donors.Add(donor);
                     await _context.SaveChangesAsync();
 
                     //return RedirectToAction("Login", "Vendor");

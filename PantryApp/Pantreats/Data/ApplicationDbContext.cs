@@ -9,7 +9,7 @@ namespace Pantreats.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
-        public DbSet<Vendor> Vendors { get; set; } = default!;
+        public DbSet<Donor> Donors { get; set; } = default!;
         public DbSet<UserApplication> UserApplications { get; set; }
         public DbSet<VolunteerApplication> VolunteerApplications { get; set; }
         public DbSet<ItemRequest> ItemRequest { get; set; }
@@ -22,7 +22,7 @@ namespace Pantreats.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Vendor>().ToTable("Vendors");
+            modelBuilder.Entity<Donor>().ToTable("Vendors");
 
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Inventory)

@@ -13,7 +13,8 @@ else
 {
     <form asp-controller="Inventory"
           asp-action="AddInventoryItem"
-          method="post">
+          method="post"
+          enctype="multipart/form-data">
 
         <div>
             <label>Item Name</label>
@@ -72,6 +73,23 @@ else
                    value="@ViewBag.UPC"
                    readonly />
         </div>
+
+
+
+            <div class="mb-3">
+                <label class="form-label">Update Image (Optional)</label>
+
+      
+            <label>Image Url</label>
+            <input type="text"
+                   name="imageUrl"
+                   value="@Model.images"
+                   readonly />
+
+                <input type="file"
+                       name="imageFile"
+                       class="form-control" />
+            </div>
 
         @if (!string.IsNullOrEmpty(Model.images))
         {

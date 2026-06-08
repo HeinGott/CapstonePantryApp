@@ -1,85 +1,37 @@
 ﻿@model List<Pantreats.Models.Order>
 
-
 @{
     ViewData["Title"] = "Order History";
 }
 
-
 <div class="order-history py-4">
-    <div class="order-history-header mb-4">
-        <div>
-            <h1 class="order-history-title">Order History</h1>
-            <p class="order-history-subtitle mb-0">
-                History of all past orders.
-            </p>
-        </div>
 
-        <div class="order-search-box">
-            <input type="text" id="orderSearch" class="form-control" placeholder="Search order..." onkeyup="searchOrders()" />
-        </div>
-    </div>
+    <h1>Order History</h1>
 
-    <div class="order-card">
-        <div class="table-responsive">
-            <table id="orderTable" class="table order-table align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th>Order Id</th>
-                        <th>User Id</th>
-                        <th>Date</th>
-                        <th>Total Points</th>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <th></th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var order in Model)
-                    {
-                        <tr class="order-row" onclick="goToOrder(@order.OrderId)">
-                            <td>@order.OrderId</td>
-                            <td>@order.UserId</td>
-                            <td>@order.OrderDate.ToString("yyyy/MM/dd")</td>
-                            <td>@order.Total</td>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <td onclick="event.stopPropagation()">
-                                    <form asp-action="Delete" asp-route-id="@order.OrderId" method="post"
-                                          onsubmit="return confirm('Delete this order?');">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm btn-danger">🗑</button>
-                                    </form>
-                                </td>
-                            }
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Order Id</th>
+                <th>Date</th>
+                <th>Total Points</th>
+            </tr>
+        </thead>
 
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr style="cursor:pointer" onclick="goToOrder(@order.OrderId)">
+                    <td>@order.OrderId</td>
+                    <td>@order.OrderDate.ToString("yyyy/MM/dd")</td>
+                    <td>@order.Total</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
 
 @section Scripts {
     <script>
-            function searchOrders() {
-            let input = document.getElementById("orderSearch");
-            let filter = input.value.toLowerCase();
-            let rows = document.getElementById("orderTable").tBodies[0].rows;
-
-            for (let i = 0; i < rows.length; i++) {
-                let orderId = rows[i].cells[0].innerText.toLowerCase();
-
-                if (orderId.includes(filter)) {
-                    rows[i].style.display = "";
-                } else {
-                    rows[i].style.display = "none";
-                }
-            }
-        }
-
         function goToOrder(orderId) {
             window.location.href = '/Order/Details/' + orderId;
         }

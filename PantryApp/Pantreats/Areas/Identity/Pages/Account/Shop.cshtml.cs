@@ -22,62 +22,18 @@ namespace Pantreats.Areas.Identity.Pages.Account
         }
         public void OnGet()
         {
-            Items.Clear();
-
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "App_Data", "FakePanTreatInventory.csv");
-
-            var lines = System.IO.File.ReadAllLines(filePath);
-
-            foreach(var line in lines.Skip(1))
-            {
-                var data = line.Split(',');
-
-                Items.Add(new Inventory
-                {
-                    UPC = data[0],
-                    ItemName = data[1],
-                    BrandName = data[2],
-                    Category = data[3],
-                    Subcategory = data[4],
-                    GenderUse = data[5],
-                    UnitSize = data[6],
-                    Quantity = int.Parse(data[7]),
-                });
-            }
-
+            Items = _context.Inventory.ToList();
         }
+
         public IActionResult OnPost()
         {
-            Items.Clear();
+            // Reload inventory from database (optional, mostly for UI consistency)
+            Items = _context.Inventory.ToList();
 
-            var filePath = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "App_Data",
-                "FakePanTreatInventory.csv"
-            );
-
-            var lines = System.IO.File.ReadAllLines(filePath);
-
-            foreach (var line in lines.Skip(1))
-            {
-                var data = line.Split(',');
-
-                Items.Add(new Inventory
-                {
-                    UPC = data[0],
-                    ItemName = data[1],
-                    BrandName = data[2],
-                    Category = data[3],
-                    Subcategory = data[4],
-                    GenderUse = data[5],
-                    UnitSize = data[6],
-                    Quantity = int.Parse(data[7]),
-                });
-            }
-
-            // If the user selected pantry items, create a real order
+            // If user selected items, create order
             if (SelectedItems != null && SelectedItems.Any())
             {
+                // 1. Create Order
                 var order = new Order
                 {
                     UserId = User.Identity?.Name ?? "Anonymous",
@@ -88,28 +44,33 @@ namespace Pantreats.Areas.Identity.Pages.Account
                 };
 
                 _context.Orders.Add(order);
-                _context.SaveChanges();
+                _context.SaveChanges(); // generates OrderId
 
+                // 2. Create OrderItems
                 foreach (var selectedUPC in SelectedItems)
                 {
-                    var selectedItem = Items.FirstOrDefault(item => item.UPC == selectedUPC);
+                    var inventoryItem = _context.Inventory
+                        .FirstOrDefault(i => i.UPC == selectedUPC);
 
-                    if (selectedItem != null)
+                    if (inventoryItem == null)
+                        continue; // skip invalid UPCs safely
+
+                    var orderItem = new OrderItem
                     {
-                        var orderItem = new OrderItem
-                        {
-                            OrderId = order.OrderId,
-                            InventoryUPC = selectedItem.UPC,
-                            ItemName = selectedItem.ItemName,
-                            Category = selectedItem.Category,
-                            OrderQuantity = 1,
-                            Points = 1
-                        };
+                        OrderId = order.OrderId,
+                        InventoryUPC = inventoryItem.UPC,
+                        ItemName = inventoryItem.ItemName,
+                        Category = inventoryItem.Category,
+                        OrderQuantity = 1,
+                        Points = 1
+                    };
 
-                        _context.OrderItems.Add(orderItem);
-                    }
+                    _context.OrderItems.Add(orderItem);
                 }
 
+                _context.SaveChanges(); // save OrderItems FIRST
+
+                // 3. Create Fulfilment
                 var fulfilment = new OrderFulfilment
                 {
                     OrderId = order.OrderId,
@@ -121,7 +82,7 @@ namespace Pantreats.Areas.Identity.Pages.Account
                 _context.SaveChanges();
             }
 
-            // If the user typed a requested item, save that too
+            // 4. Save item request (unchanged)
             if (!string.IsNullOrWhiteSpace(RequestItem))
             {
                 var request = new ItemRequest
@@ -137,6 +98,5 @@ namespace Pantreats.Areas.Identity.Pages.Account
 
             return RedirectToPage("/Account/Shop");
         }
-
     }
 }

@@ -58,7 +58,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.OrderItems)
+                    @foreach (var item in Model.OrderItems ?? new List<OrderItem>())
                     {
                         <tr>
                             <td>@item.InventoryUPC</td>

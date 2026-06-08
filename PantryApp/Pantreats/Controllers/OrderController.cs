@@ -15,37 +15,39 @@ namespace Pantreats.Controllers
 
         public IActionResult History()
         {
-            // base query — Include pulls the line items along with each order
-            IQueryable<Order> query = _context.Orders.Include(o => o.OrderItems);
+            IQueryable<Order> query = _context.Orders
+                .Include(o => o.OrderItems);
 
-            // if you're NOT an admin, narrow the query to just your own orders
             if (!User.IsInRole("Admin"))
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-                query = query.Where(o => o.UserId == userId);
+                var userName = User.Identity!.Name; 
+
+                query = query.Where(o => o.UserId == userName);
             }
-            //only take the 20 most recent orders, and pass them to the view
-            var orders = query.OrderByDescending(o => o.OrderDate)
-                              .Take(20)
-                              .ToList();
+
+            var orders = query
+                .OrderByDescending(o => o.OrderDate)
+                .Take(20)
+                .ToList();
+
             return View(orders);
         }
 
         public IActionResult Details(int id)
         {
             var order = _context.Orders
-                                .Include(o => o.OrderItems)
-                                .FirstOrDefault(o => o.OrderId == id);
+                .Include(o => o.OrderItems)
+                .FirstOrDefault(o => o.OrderId == id);
 
             if (order == null)
             {
                 return NotFound();
             }
 
-            // Students can only view their OWN orders. Admin can view any.
             if (!User.IsInRole("Admin"))
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                var userId = User.Identity!.Name;
+
                 if (order.UserId != userId)
                 {
                     return NotFound();
@@ -54,6 +56,7 @@ namespace Pantreats.Controllers
 
             return View(order);
         }
+
         //this will delete an order, but only if you're an admin
         [HttpPost]
         [Authorize(Roles = "Admin")]

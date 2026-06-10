@@ -152,9 +152,9 @@ namespace Pantreats.Areas.Identity.Pages.Account
                             return RedirectToAction("Index", "Home");
                         }
 
-                        if (await _userManager.IsInRoleAsync(user, "Vendors"))
+                        if (await _userManager.IsInRoleAsync(user, "Donor"))
                         {
-                            return RedirectToAction("Index", "Vendor"); // Redirect to Vendor dashboard
+                            return RedirectToAction("Index", "Donor"); // Redirect to Donor dashboard
                         }
                     }
 

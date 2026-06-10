@@ -23,23 +23,23 @@ namespace Pantreats.Controllers
         // show all Donors
         public async Task<IActionResult> Index()
         {
-            var vendors = await _context.Donors.ToListAsync();
+            var Donor = await _context.Donors.ToListAsync();
 
-            return View(vendors);
+            return View(Donor);
         }
 
         // show one donor
         public async Task<IActionResult> Details(int id)
         {
-            var vendor = await _context.Donors
+            var donor = await _context.Donors
                 .FirstOrDefaultAsync(v => v.DonorID == id);
 
-            if (vendor == null)
+            if (donor == null)
             {
                 return NotFound();
             }
 
-            return View(vendor);
+            return View(donor);
         }
 
         // show add donor page
@@ -48,7 +48,7 @@ namespace Pantreats.Controllers
             return View();
         }
 
-        // save new vendor
+        // save new donor to database
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Donor donor)
@@ -144,7 +144,7 @@ namespace Pantreats.Controllers
                     _context.Donors.Add(donor);
                     await _context.SaveChangesAsync();
 
-                    //return RedirectToAction("Login", "Vendor");
+                    //return RedirectToAction("Login", "Donor");
                     //This redirects you to the default button press to confirm your account
                     //Need to add real emailing feature to register your account
                     return RedirectToPage("/Account/RegisterConfirmation", new { area = "Identity", email = model.Email });
@@ -163,9 +163,86 @@ namespace Pantreats.Controllers
             return View();
         }
 
-        public IActionResult Login() //add this to show the login page
+        public IActionResult Login()
         {
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string Email, string Password, bool RememberMe)
+        {
+            var result = await _signInManager.PasswordSignInAsync(
+                Email,
+                Password,
+                RememberMe,
+                lockoutOnFailure: false
+            );
+
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Dashboard", "Donor");
+            }
+
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            return View();
+        }
+
+        //created a dashboard for donors to see their donation history and stats
+        public IActionResult Dashboard()
+        {
+            var model = new DonorDashboardViewModel
+            {
+                DonorName = "Eric Maslyanchuk",
+                TotalDonations = 2,
+                TotalItemsDonated = 15,
+                LastDonationDate = DateTime.Now,
+                Donations = new List<Donation>
+        {
+            new Donation
+            {
+                DonationId = 1,
+                DonorId = 1,
+                DonationDate = DateTime.Now.AddDays(-10),
+                Status = "Approved",
+                DonationItems = new List<DonationItem>
+                {
+                    new DonationItem { ItemName = "Rice", Quantity = 10 }
+                }
+            },
+            new Donation
+            {
+                DonationId = 2,
+                DonorId = 1,
+                DonationDate = DateTime.Now,
+                Status = "Pending",
+                DonationItems = new List<DonationItem>
+                {
+                    new DonationItem { ItemName = "Beans", Quantity = 5 }
+                }
+            }
+        }
+            };
+
+            return View(model);
+        }
+
+        public IActionResult CreateDonation()
+        {
+            return View();
+        }
+
+        //THESE METHODS ARE ONLY FOR TESTING PURPOSES 
+        public IActionResult DonationSubmitted()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateDonation(string test)
+        {
+            return RedirectToAction("DonationSubmitted");
         }
     }
 }

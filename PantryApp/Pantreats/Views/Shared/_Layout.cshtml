@@ -79,14 +79,14 @@
 
                                     <li class="nav-item dropdown">
                                         <a class="nav-link dropdown-toggle pantreats-nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Vendor
+                                            Donor
                                         </a>
                                         <ul class="dropdown-menu pantreats-dropdown-menu">
                                             <li>
-                                                <a class="dropdown-item pantreats-dropdown-item" asp-controller="Vendor" asp-action="Index">View Vendors</a>
+                                                <a class="dropdown-item pantreats-dropdown-item" asp-controller="Donor" asp-action="Index">View Donors</a>
                                             </li>
                                             <li>
-                                                <a class="dropdown-item pantreats-dropdown-item" asp-controller="Vendor" asp-action="Donations">Vendor Donations</a>
+                                                <a class="dropdown-item pantreats-dropdown-item" asp-controller="Donor" asp-action="Donations">Donor Donations</a>
                                             </li>
                                         </ul>
                                     </li>
@@ -141,6 +141,16 @@
                                         <a class="nav-link pantreats-nav-link" asp-controller="Volunteer" asp-action="ApplyVolunteer">Apply</a>
                                     </li>
                                 }
+                                @if (User.IsInRole("Donors"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link pantreats-nav-link"
+                                           asp-controller="Donor"
+                                           asp-action="Dashboard">
+                                            Dashboard
+                                        </a>
+                                    </li>
+                                }
 
                                 <li class="nav-item">
                                     <a class="nav-link pantreats-nav-link" asp-controller="Home" asp-action="About">About</a>
@@ -149,6 +159,8 @@
                                     <a class="nav-link pantreats-nav-link" asp-controller="Home" asp-action="Privacy">Privacy</a>
                                 </li>
                             </ul>
+
+
 
                             <partial name="_LoginPartial" />
                         </div>

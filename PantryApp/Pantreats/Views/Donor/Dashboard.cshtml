@@ -1,0 +1,75 @@
+﻿@model Pantreats.Models.DonorDashboardViewModel
+
+@*
+    This is the donor dashboard view. 
+    It displays the donor's name, 
+    total donations, 
+    total items donated, 
+    last donation date, 
+    and a list of their donations.
+*@
+
+@{
+    ViewData["Title"] = "Donor Dashboard";
+}
+
+<h1>Donor Dashboard</h1>
+<h4>Welcome, @Model.DonorName</h4>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card p-3 shadow-sm">
+            <h5>Total Donations</h5>
+            <h2>@Model.TotalDonations</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 shadow-sm">
+            <h5>Total Items Donated</h5>
+            <h2>@Model.TotalItemsDonated</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 shadow-sm">
+            <h5>Last Donation</h5>
+            <h2>@Model.LastDonationDate?.ToShortDateString()</h2>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a asp-controller="Donor"
+       asp-action="CreateDonation"
+       class="btn btn-primary">
+        Make a Donation
+    </a>
+</div>
+
+<h3 class="mt-5">Donation History</h3>
+
+<table class="table table-bordered table-striped mt-3">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var donation in Model.Donations)
+        {
+            foreach (var item in donation.DonationItems)
+            {
+                <tr>
+                    <td>@donation.DonationDate.ToShortDateString()</td>
+                    <td>@item.ItemName</td>
+                    <td>@item.Quantity</td>
+                    <td>@donation.Status</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

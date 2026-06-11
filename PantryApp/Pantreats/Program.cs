@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Pantreats.Data;
+using Pantreats.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,6 +83,8 @@ builder.Services.AddAuthentication()
 // add mvc views
 builder.Services.AddControllersWithViews();
 
+//the email service
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddHttpClient();
 

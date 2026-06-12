@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Pantreats.Services;
 using System.Security.Claims;
 
 namespace Pantreats.Controllers
@@ -7,10 +8,12 @@ namespace Pantreats.Controllers
     public class OrderController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public OrderController(ApplicationDbContext context)
+        public OrderController(ApplicationDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         public IActionResult History()
@@ -73,6 +76,16 @@ namespace Pantreats.Controllers
             _context.SaveChanges();
 
             return RedirectToAction("History");
+        }
+
+
+        [AllowAnonymous]
+        public async Task<IActionResult> TestEmail()
+        {
+            var sent = await _emailService.SendOrderConfirmationAsync(
+                "jakegmain@gmail.com", 999, "https://localhost/Order/Details/999"); //we use this for the checkout page, user email, order id, the order detail url
+
+            return Content(sent ? "Sent — check your email." : "Send failed — check the Output window.");
         }
     }
 

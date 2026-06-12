@@ -1,0 +1,99 @@
+﻿@*
+    This is the view for creating a new donation.
+*@
+@{
+    ViewData["Title"] = "Create Donation";
+}
+
+<h1>Make a Donation</h1>
+
+<form asp-controller="Donor" asp-action="CreateDonation" method="post">
+    @Html.AntiForgeryToken()
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Donate</th>
+                <th>Category</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>Canned Goods</td>
+                <td><input type="number" min="1" value="1" class="form-control" /></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>Produce</td>
+                <td><input type="number" min="1" value="1" class="form-control" /></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>Meat</td>
+                <td><input type="number" min="1" value="1" class="form-control" /></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>Bread & Bakery</td>
+                <td><input type="number" min="1" value="1" class="form-control" /></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>Rice & Pasta</td>
+                <td><input type="number" min="1" value="1" class="form-control" /></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>Dairy Products</td>
+                <td><input type="number" min="1" value="1" class="form-control" /></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>Frozen Foods</td>
+                <td><input type="number" min="1" value="1" class="form-control" /></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>Snacks</td>
+                <td><input type="number" min="1" value="1" class="form-control" /></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>Beverages</td>
+                <td><input type="number" min="1" value="1" class="form-control" /></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>Hygiene Products</td>
+                <td><input type="number" min="1" value="1" class="form-control" /></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>Baby Supplies</td>
+                <td><input type="number" min="1" value="1" class="form-control" /></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>Pet Food</td>
+                <td><input type="number" min="1" value="1" class="form-control" /></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-primary">
+        Submit Donation
+    </button>
+</form>

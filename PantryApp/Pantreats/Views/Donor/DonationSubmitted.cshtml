@@ -1,0 +1,26 @@
+﻿@*
+   This page is shown after a donor submits a donation request. 
+   It confirms that the request was submitted successfully and provides a link back to the donor dashboard.
+   and will eventually send an email notification to the pantry administrator.
+*@
+@{
+    ViewData["Title"] = "Donation Submitted";
+}
+
+<div class="text-center mt-5">
+    <h1>Thank You!</h1>
+
+    <p>
+        Your donation request has been submitted successfully.
+    </p>
+
+    <p>
+        The pantry administrator will review your donation.
+    </p>
+
+    <a asp-controller="Donor"
+       asp-action="Dashboard"
+       class="btn btn-primary">
+        Return to Dashboard
+    </a>
+</div>

@@ -1,8 +1,4 @@
-﻿@*
-    this is the login page for the vendor, which is currently not implemented.
-    made by eric and jorge
-*@
-@{
+﻿@{
     ViewData["Title"] = "Donor Login";
 }
 
@@ -12,19 +8,23 @@
         <h2 class="text-center mb-3">Donor Login</h2>
         <hr />
 
-        <form>
+        <form asp-controller="Donor" asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="All" class="text-danger"></div>
+
             <div class="mb-3">
                 <label class="form-label">Email</label>
-                <input type="email" class="form-control" placeholder="example@gmail.com" />
+                <input type="email" name="Email" class="form-control" placeholder="example@gmail.com" />
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Password</label>
-                <input type="password" class="form-control" placeholder="Enter your password" />
+                <input type="password" name="Password" class="form-control" placeholder="Enter your password" />
             </div>
 
             <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" />
+                <input type="checkbox" name="RememberMe" value="true" class="form-check-input" />
                 <label class="form-check-label">Remember me?</label>
             </div>
 
@@ -39,4 +39,3 @@
 
     </div>
 </div>
-

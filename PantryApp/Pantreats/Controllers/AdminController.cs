@@ -47,5 +47,37 @@ namespace Pantreats.Controllers
         }
 
 
+        
+        //Edits the users role -Jorge
+        [HttpPost]
+        public async Task<IActionResult> EditUser(string userID, string newRole)
+        {
+            //If you save the Template one it redirects and does give you none
+            if (string.IsNullOrEmpty(newRole))
+            {
+                return RedirectToAction("Users");
+            } 
+
+            var user = await _userManager.FindByIdAsync(userID);
+
+            if (user != null)
+            {
+                //Gets previous role
+                var prevRole = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+
+                //Makes sure role is not null
+                if (prevRole != null)
+                {
+                    //Remove role
+                    await _userManager.RemoveFromRoleAsync(user, prevRole);
+                }
+                
+                //Add New role
+                await _userManager.AddToRoleAsync(user, newRole);
+            }
+            //Sends Back to Main page after
+            return RedirectToAction("Users");
+        }
+        
     }
 }

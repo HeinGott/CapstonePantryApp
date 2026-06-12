@@ -31,9 +31,17 @@
                         <td>@user.Email</td>
                         <td>@user.Role</td>
                         <td>
-                            <a class="inventory-edit-btn">
-                                Change Role
-                            </a>
+                            <form asp-action="EditUser" asp-controller="Admin" method="post" style="display:flex; gap:8px;">
+                                <input type="hidden" name="userID" value="@user.UserId"/>
+                                <select name="newRole" class="form-select form-select-sm">
+                                   <option value="" disabled selected>Select a role...</option>
+                                   <option value="Admin">Admin</option>
+                                   <option value="Donors">Donor</option>
+                                   <option value="Volunteers">Volunteers</option>
+                                   <option value="Students">Students</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                            </form>
                         </td>
                     </tr>
                 }

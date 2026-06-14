@@ -41,7 +41,7 @@
             <div class="col-md-6 col-xl-3">
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <a asp-area="Identity" asp-page="/Account/Shop" class="text-decoration-none">
+                    <a asp-controller="Shop" asp-action="Index" class="text-decoration-none">
                         <div class="info-card h-100 text-center p-4">
                             <h5 class="fw-bold">Shop the Pantry</h5>
                             <p class="text-muted mb-0">

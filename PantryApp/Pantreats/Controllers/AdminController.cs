@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Pantreats.Models;
 
 namespace Pantreats.Controllers
@@ -8,22 +9,27 @@ namespace Pantreats.Controllers
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
+        private static readonly Dictionary<string, string> AllowedRoles = new()
+        {
+            ["Admin"] = "Admin",
+            ["Students"] = "Student",
+            ["Volunteers"] = "Volunteer",
+            ["Donors"] = "Donor"
+        };
+
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-
-        public AdminController(UserManager<IdentityUser> userManager,RoleManager<IdentityRole> roleManager)
+        public AdminController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _roleManager = roleManager;
         }
 
-
         public IActionResult Index()
         {
             return View();
         }
-
 
         public async Task<IActionResult> Users()
         {
@@ -34,50 +40,180 @@ namespace Pantreats.Controllers
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
+                var roleValue = NormalizeRole(roles.FirstOrDefault());
 
                 model.Add(new UserManagerViewModel
                 {
                     UserId = user.Id,
-                    Email = user.Email,
-                    Role = roles.FirstOrDefault() ?? "No Role"
+                    Email = user.Email ?? string.Empty,
+                    Role = GetRoleLabel(roleValue),
+                    RoleValue = roleValue
                 });
             }
 
             return View(model);
         }
 
+        public async Task<IActionResult> UserEdit(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return NotFound();
+            }
 
-        
-        //Edits the users role -Jorge
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var model = new UserEditViewModel
+            {
+                UserId = user.Id,
+                Email = user.Email ?? string.Empty,
+                UserName = user.UserName ?? string.Empty,
+                PhoneNumber = user.PhoneNumber,
+                Role = NormalizeRole(roles.FirstOrDefault())
+            };
+
+            PopulateRoleOptions(model);
+            return View(model);
+        }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UserEdit(UserEditViewModel model)
+        {
+            if (!AllowedRoles.ContainsKey(model.Role))
+            {
+                ModelState.AddModelError(nameof(model.Role), "Select admin, student, volunteer, or donor.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                PopulateRoleOptions(model);
+                return View(model);
+            }
+
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.Email = model.Email;
+            user.UserName = model.UserName;
+            user.PhoneNumber = model.PhoneNumber;
+
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                AddErrors(updateResult);
+                PopulateRoleOptions(model);
+                return View(model);
+            }
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            if (currentRoles.Any())
+            {
+                var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                if (!removeResult.Succeeded)
+                {
+                    AddErrors(removeResult);
+                    PopulateRoleOptions(model);
+                    return View(model);
+                }
+            }
+
+            await EnsureRoleExists(model.Role);
+            var addResult = await _userManager.AddToRoleAsync(user, model.Role);
+            if (!addResult.Succeeded)
+            {
+                AddErrors(addResult);
+                PopulateRoleOptions(model);
+                return View(model);
+            }
+
+            TempData["StatusMessage"] = "User updated successfully.";
+            return RedirectToAction("Users");
+        }
+
+        // Edits the user's role from the user list.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditUser(string userID, string newRole)
         {
-            //If you save the Template one it redirects and does give you none
-            if (string.IsNullOrEmpty(newRole))
+            if (string.IsNullOrEmpty(newRole) || !AllowedRoles.ContainsKey(newRole))
             {
                 return RedirectToAction("Users");
-            } 
+            }
 
             var user = await _userManager.FindByIdAsync(userID);
 
             if (user != null)
             {
-                //Gets previous role
-                var prevRole = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+                var prevRoles = await _userManager.GetRolesAsync(user);
 
-                //Makes sure role is not null
-                if (prevRole != null)
+                if (prevRoles.Any())
                 {
-                    //Remove role
-                    await _userManager.RemoveFromRoleAsync(user, prevRole);
+                    await _userManager.RemoveFromRolesAsync(user, prevRoles);
                 }
-                
-                //Add New role
+
+                await EnsureRoleExists(newRole);
                 await _userManager.AddToRoleAsync(user, newRole);
             }
-            //Sends Back to Main page after
+
             return RedirectToAction("Users");
         }
-        
+
+        private static string NormalizeRole(string? role)
+        {
+            return role switch
+            {
+                "Admin" => "Admin",
+                "Student" or "Students" => "Students",
+                "Volunteer" or "Volunteers" => "Volunteers",
+                "Donor" or "Donors" or "Vendor" or "Vendors" => "Donors",
+                _ => string.Empty
+            };
+        }
+
+        private static string GetRoleLabel(string? role)
+        {
+            var normalizedRole = NormalizeRole(role);
+
+            return string.IsNullOrEmpty(normalizedRole)
+                ? "No Role"
+                : AllowedRoles[normalizedRole];
+        }
+
+        private static void PopulateRoleOptions(UserEditViewModel model)
+        {
+            model.AvailableRoles = AllowedRoles
+                .Select(role => new SelectListItem
+                {
+                    Value = role.Key,
+                    Text = role.Value,
+                    Selected = role.Key == model.Role
+                })
+                .ToList();
+        }
+
+        private void AddErrors(IdentityResult result)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+        }
+
+        private async Task EnsureRoleExists(string role)
+        {
+            if (!await _roleManager.RoleExistsAsync(role))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
     }
 }

@@ -6,7 +6,7 @@
 
 <div class="student-page py-4">
 
-    <div class="student-page-header mb-4 d-flex justify-content-between align-items-center">
+    <div class="student-page-header inventory-page-header mb-4">
         <div>
             <h1 class="student-page-title mb-1">Inventory</h1>
             <p class="student-page-subtitle mb-0">
@@ -14,171 +14,124 @@
             </p>
         </div>
 
-    <div class="student-card">
+        <div class="student-card inventory-card">
 
-        <div class="row g-3 mb-4">
+            <div class="row g-3 mb-4">
 
-            <div class="col-md-4">
-                <input type="text"
-                       id="searchText"
-                       class="form-control"
-                       placeholder="Search UPC, name, brand, category..." />
-            </div>
+                <div class="col-md-4">
+                    <div class="inventory-search-scan">
+                        <span class="inventory-scan-trigger" aria-hidden="true">
+                            <i class="bi bi-upc-scan"></i>
+                        </span>
+
+                        <input type="text" id="searchText" class="form-control inventory-search-input" autofocus autocomplete="off"
+                               placeholder="Scan UPC or Search name, brand, category..." />
+                    </div>
+                </div>
+
                 
+                <div class="col-md-3">
+                    <select id="categoryFilter" class="form-select">
 
-            <div class="col-md-3">
-                <select id="categoryFilter" class="form-select">
+                        <option value="">Category: Any</option>
 
-                    <option value="">Category: Any</option>
+                        @foreach (var category in Model.Select(x => x.Category).Distinct().OrderBy(x => x))
+                        {
+                            <option value="@category">@category</option>
+                        }
 
-                    @foreach (var category in Model.Select(x => x.Category).Distinct().OrderBy(x => x))
-                    {
-                        <option value="@category">@category</option>
-                    }
+                    </select>
+                </div>
 
-                </select>
-            </div>
+                <div class="col-md-3">
+                    <select id="brandFilter" class="form-select">
 
-            <div class="col-md-3">
-                <select id="brandFilter" class="form-select">
+                        <option value="">Brand: Any</option>
 
-                    <option value="">Brand: Any</option>
+                        @foreach (var brand in Model.Select(x => x.BrandName).Distinct().OrderBy(x => x))
+                        {
+                            <option value="@brand">@brand</option>
+                        }
 
-                    @foreach (var brand in Model.Select(x => x.BrandName).Distinct().OrderBy(x => x))
-                    {
-                        <option value="@brand">@brand</option>
-                    }
+                    </select>
+                </div>
 
-                </select>
-            </div>
-                
-            <div class="col-md-2">
-                <button type="button"
-                        class="btn btn-outline-secondary w-100"
-                        onclick="resetInventorySearch()">
-                    Reset
-                </button>
-            </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-secondary w-100" onclick="resetInventorySearch()">
+                        Reset
+                    </button>
+                </div>
 
               
 
 
-        </div>
-
-        <div class="form-check mb-3">
-
-            <input class="form-check-input"
-                   type="checkbox"
-                   id="inStockOnly">
-
-            <label class="form-check-label" for="inStockOnly">
-                Show in-stock only
-            </label>
-
-        </div>
-
-            <div class="row mb-3">
-                <div class="col-12 d-flex justify-content-center">
-        
-                    <button id="openScannerBtn"
-                            class="btn btn-success d-flex flex-column align-items-center justify-content-center p-3"
-                            style="width: 180px; height: 130px;">
-
-                        <i class="bi bi-upc-scan" style="font-size: 2.5rem;"></i>
-                        <span class="mt-2">Scan Pantry Item</span>
-
-                    </button>
-
-                    <!-- modal stays here (unchanged) -->
-                    <div id="scannerModal" class="modal">
-                        <div class="modal-content">
-
-                            <span id="closeModal" class="close">&times;</span>
-
-                            <h2>Scan Barcode</h2>
-
-                            <form asp-controller="Inventory"
-                                  asp-action="LookupUPC"
-                                  method="post">
-
-                                <input type="text"
-                                       id="upcInput"
-                                       name="upc"
-                                       autocomplete="off"
-                                       placeholder="Scan barcode..." />
-
-                                <button type="submit">
-                                    Search
-                                </button>
-
-                            </form>
-
-                        </div>
-                    </div>
-
-                </div>
             </div>
 
-        <div class="table-responsive">
+            <div class="form-check mb-3">
 
-            <table class="table student-table align-middle mb-0" id="inventoryTable">
+                <input class="form-check-input" type="checkbox" id="inStockOnly">
 
-                <thead>
-                    <tr>
-                        <th onclick="sortTable('inventoryTable', 0, this)">UPC</th>
-                        <th onclick="sortTable('inventoryTable', 1, this)">Name</th>
-                        <th onclick="sortTable('inventoryTable', 2, this)">Brand</th>
-                        <th onclick="sortTable('inventoryTable', 3, this)">Category</th>
-                        <th onclick="sortTable('inventoryTable', 4, this)">Subcategory</th>
-                        <th onclick="sortTable('inventoryTable', 5, this)">Use</th>
-                        <th onclick="sortTable('inventoryTable', 6, this)">Unit Size</th>
-                        <th onclick="sortTable('inventoryTable', 7, this)">Quantity</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+                <label class="form-check-label" for="inStockOnly">
+                    Show in-stock only
+                </label>
 
-                <tbody>
+            </div>
 
-                    @foreach (var item in Model)
-                    {
-                        <tr class="student-row">
-                            <td>@item.UPC</td>
-                            <td>@item.ItemName</td>
-                            <td>@item.BrandName</td>
-                            <td>@item.Category</td>
-                            <td>@item.Subcategory</td>
-                            <td>@item.GenderUse</td>
-                            <td>@item.UnitSize</td>
-                            <td>@item.Quantity</td>
+            <div class="table-responsive">
 
-                            <td class="d-flex gap-2">
-                                <a asp-controller="Inventory"
-                                    asp-action="Edit"
-                                    asp-route-upc="@item.UPC"
-                                    class="inventory-edit-btn">
-                                    Edit
-                                </a>
+                <table class="table student-table inventory-table align-middle mb-0" id="inventoryTable">
 
-                                <form asp-controller="Inventory"
-                                        asp-action="DeleteConfirmed"
-                                        asp-route-upc="@item.UPC"
-                                        method="post"
-                                        style="display:inline;"
-                                        onsubmit="return confirm('Are you sure you want to delete this inventory item?');">
-
-                                    <button type="submit" class="inventory-delete-btn">
-                                        Delete
-                                    </button>
-
-                                </form>
-                            </td>
-
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('inventoryTable', 0, this)">UPC</th>
+                            <th onclick="sortTable('inventoryTable', 1, this)">Name</th>
+                            <th onclick="sortTable('inventoryTable', 2, this)">Brand</th>
+                            <th onclick="sortTable('inventoryTable', 3, this)">Category</th>
+                            <th onclick="sortTable('inventoryTable', 4, this)">Unit Size</th>
+                            <th onclick="sortTable('inventoryTable', 5, this)">Quantity</th>
+                            <th>Actions</th>
                         </tr>
-                    }
+                    </thead>
 
-                </tbody>
+                    <tbody>
 
-            </table>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="student-row inventory-row" data-edit-url="@Url.Action("Edit", "Inventory", new { upc = item.UPC })">
+                                <td><span class="inventory-cell-text inventory-cell-text-single">@item.UPC</span></td>
+                                <td><span class="inventory-cell-text inventory-name-cell-text">@item.ItemName</span></td>
+                                <td><span class="inventory-cell-text">@item.BrandName</span></td>
+                                <td><span class="inventory-cell-text inventory-cell-text-single">@item.Category</span></td>
+                                <td><span class="inventory-cell-text inventory-cell-text-single">@item.UnitSize</span></td>
+                                <td><span class="inventory-cell-text inventory-cell-text-single">@item.Quantity</span></td>
+
+                                <td class="inventory-actions-cell">
+                                    <div class="inventory-actions-group">
+                                        <a asp-controller="Inventory" asp-action="Edit" asp-route-upc="@item.UPC"
+                                           class="inventory-edit-btn">
+                                            Edit
+                                        </a>
+
+                                        <form asp-controller="Inventory" asp-action="DeleteConfirmed" asp-route-upc="@item.UPC"
+                                              method="post" style="display:inline;"
+                                              onsubmit="return confirm('Are you sure you want to delete this inventory item?');">
+
+                                            <button type="submit" class="inventory-delete-btn">
+                                                Delete
+                                            </button>
+
+                                        </form>
+                                    </div>
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
 
         </div>
 
@@ -188,152 +141,133 @@
 
 @section Scripts {
     <script>
-        function sortTable(tableId, columnNumber, header) {
-            let table = document.getElementById(tableId);
-            let tbody = table.tBodies[0];
-            let rows = Array.from(tbody.rows);
-            let currentSort = header.getAttribute("data-sort");
+                function sortTable(tableId, columnNumber, header) {
+                    let table = document.getElementById(tableId);
+                    let tbody = table.tBodies[0];
+                    let rows = Array.from(tbody.rows);
+                    let currentSort = header.getAttribute("data-sort");
 
-            let newSort = "asc";
+                    let newSort = "asc";
 
-            if (currentSort === "asc") {
-                newSort = "desc";
-            }
+                    if (currentSort === "asc") {
+                        newSort = "desc";
+                    }
 
-            let headers = table.querySelectorAll("th");
+                    let headers = table.querySelectorAll("th");
 
-            headers.forEach(function (th) {
-                th.removeAttribute("data-sort");
-            });
+                    headers.forEach(function (th) {
+                        th.removeAttribute("data-sort");
+                    });
 
-            header.setAttribute("data-sort", newSort);
+                    header.setAttribute("data-sort", newSort);
 
-            rows.sort(function (a, b) {
-                let firstValue = a.cells[columnNumber].innerText.trim();
-                let secondValue = b.cells[columnNumber].innerText.trim();
+                    rows.sort(function (a, b) {
+                        let firstValue = a.cells[columnNumber].innerText.trim();
+                        let secondValue = b.cells[columnNumber].innerText.trim();
 
-                let firstLower = firstValue.toLowerCase();
-                let secondLower = secondValue.toLowerCase();
+                        let firstLower = firstValue.toLowerCase();
+                        let secondLower = secondValue.toLowerCase();
 
-                let firstNumber = parseFloat(firstLower);
-                let secondNumber = parseFloat(secondLower);
+                        let firstNumber = parseFloat(firstLower);
+                        let secondNumber = parseFloat(secondLower);
 
-                if (!isNaN(firstNumber) && !isNaN(secondNumber)) 
-                {
-                    return newSort === "asc" ? firstNumber - secondNumber : secondNumber - firstNumber;
+                        if (!isNaN(firstNumber) && !isNaN(secondNumber)) {
+                            return newSort === "asc" ? firstNumber - secondNumber : secondNumber - firstNumber;
+                        }
+
+                        if (firstLower < secondLower) {
+                            return newSort === "asc" ? -1 : 1;
+                        }
+
+                        if (firstLower > secondLower) {
+                            return newSort === "asc" ? 1 : -1;
+                        }
+
+                        return 0;
+                    });
+
+                    rows.forEach(function (row) {
+                        tbody.appendChild(row);
+                    });
                 }
 
-                if (firstLower < secondLower) 
-                {
-                    return newSort === "asc" ? -1 : 1;
+
+                //Inventory search/filter scripts -- Trevor
+                const searchText = document.getElementById("searchText");
+                const categoryFilter = document.getElementById("categoryFilter");
+                const brandFilter = document.getElementById("brandFilter");
+                const inStockOnly = document.getElementById("inStockOnly");
+
+                function filterInventoryTable() {
+                    let searchValue = searchText.value.toLowerCase();
+                    let categoryValue = categoryFilter.value.toLowerCase();
+                    let brandValue = brandFilter.value.toLowerCase();
+                    let showStockOnly = inStockOnly.checked;
+
+                    let rows = document.querySelectorAll("#inventoryTable tbody tr");
+
+                    rows.forEach(function (row) {
+                        let upc = row.cells[0].innerText.toLowerCase();
+                        let name = row.cells[1].innerText.toLowerCase();
+                        let brand = row.cells[2].innerText.toLowerCase();
+                        let category = row.cells[3].innerText.toLowerCase();
+                        let quantity = parseInt(row.cells[5].innerText);
+
+                        let matchesSearch =
+                            upc.includes(searchValue) ||
+                            name.includes(searchValue) ||
+                            brand.includes(searchValue) ||
+                            category.includes(searchValue);
+
+                        let matchesCategory =
+                            categoryValue === "" ||
+                            category === categoryValue;
+
+                        let matchesBrand =
+                            brandValue === "" ||
+                            brand === brandValue;
+
+                        let matchesStock =
+                            !showStockOnly ||
+                            quantity > 0;
+
+                        row.style.display =
+                            matchesSearch &&
+                                matchesCategory &&
+                                matchesBrand &&
+                                matchesStock
+                                ? ""
+                                : "none";
+                    });
                 }
 
-                if (firstLower > secondLower) 
-                {
-                    return newSort === "asc" ? 1 : -1;
+                function resetInventorySearch() {
+                    searchText.value = "";
+                    categoryFilter.value = "";
+                    brandFilter.value = "";
+                    inStockOnly.checked = false;
+
+                    filterInventoryTable();
                 }
 
-                return 0;
-            });
+                searchText.addEventListener("input", filterInventoryTable);
+                categoryFilter.addEventListener("change", filterInventoryTable);
+                brandFilter.addEventListener("change", filterInventoryTable);
+                inStockOnly.addEventListener("change", filterInventoryTable);
 
-            rows.forEach(function (row) {
-                tbody.appendChild(row);
-            });
-        }
+                document.querySelectorAll(".inventory-row").forEach(function (row) {
+                    row.addEventListener("click", function (event) {
+                        if (event.target.closest("a, button, form")) {
+                            return;
+                        }
 
+                        const editUrl = row.dataset.editUrl;
 
-        //Inventory search/filter scripts -- Trevor
-        const searchText = document.getElementById("searchText");
-        const categoryFilter = document.getElementById("categoryFilter");
-        const brandFilter = document.getElementById("brandFilter");
-        const inStockOnly = document.getElementById("inStockOnly");
-
-        function filterInventoryTable()
-        {
-            let searchValue = searchText.value.toLowerCase();
-            let categoryValue = categoryFilter.value.toLowerCase();
-            let brandValue = brandFilter.value.toLowerCase();
-            let showStockOnly = inStockOnly.checked;
-
-            let rows = document.querySelectorAll("#inventoryTable tbody tr");
-
-            rows.forEach(function (row)
-            {
-                let upc = row.cells[0].innerText.toLowerCase();
-                let name = row.cells[1].innerText.toLowerCase();
-                let brand = row.cells[2].innerText.toLowerCase();
-                let category = row.cells[3].innerText.toLowerCase();
-                let quantity = parseInt(row.cells[7].innerText);
-
-                let matchesSearch =
-                    upc.includes(searchValue) ||
-                    name.includes(searchValue) ||
-                    brand.includes(searchValue) ||
-                    category.includes(searchValue);
-
-                let matchesCategory =
-                    categoryValue === "" ||
-                    category === categoryValue;
-
-                let matchesBrand =
-                    brandValue === "" ||
-                    brand === brandValue;
-
-                let matchesStock =
-                    !showStockOnly ||
-                    quantity > 0;
-
-                row.style.display =
-                    matchesSearch &&
-                    matchesCategory &&
-                    matchesBrand &&
-                    matchesStock
-                        ? ""
-                        : "none";
-            });
-        }
-
-        function resetInventorySearch()
-        {
-            searchText.value = "";
-            categoryFilter.value = "";
-            brandFilter.value = "";
-            inStockOnly.checked = false;
-
-            filterInventoryTable();
-        }
-
-        searchText.addEventListener("input", filterInventoryTable);
-        categoryFilter.addEventListener("change", filterInventoryTable);
-        brandFilter.addEventListener("change", filterInventoryTable);
-        inStockOnly.addEventListener("change", filterInventoryTable);
-
-
-        //add item button script -Nick
-        const modal = document.getElementById("scannerModal");
-        const openBtn = document.getElementById("openScannerBtn");
-        const closeBtn = document.getElementById("closeModal");
-        const upcInput = document.getElementById("upcInput");
-
-        openBtn.onclick = () => {
-
-            modal.style.display = "block";
-
-            //small delay so modal is visible first -Nick
-            setTimeout(() => {
-                upcInput.focus();
-            }, 100);
-        };
-
-        closeBtn.onclick = () => {
-            modal.style.display = "none";
-        };
-
-        window.onclick = (event) => {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        };
+                        if (editUrl) {
+                            window.location.href = editUrl;
+                        }
+                    });
+                });
     </script>
 
 

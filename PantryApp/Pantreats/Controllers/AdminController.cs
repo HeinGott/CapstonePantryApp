@@ -90,6 +90,7 @@ namespace Pantreats.Controllers
             // Retrieves all donations from the database, including the associated donation items, then orders them by donation date in descending order
             var donations = _context.Donations
                 .Include(d => d.DonationItems)
+                .Include(d => d.Donor)
                 .OrderByDescending(d => d.DonationDate)
                 .ToList();
 

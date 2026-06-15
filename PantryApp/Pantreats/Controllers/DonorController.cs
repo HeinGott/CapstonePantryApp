@@ -191,9 +191,16 @@ namespace Pantreats.Controllers
         //created a dashboard for donors to see their donation history and stats
         public IActionResult Dashboard()
         {
+            var userId = _userManager.GetUserId(User);
+
+            var donor = _context.Donors
+                .FirstOrDefault(d => d.UserId == userId);
+
+            var donorName = donor != null ? donor.Name : User.Identity?.Name ?? "Donor";
+
             var model = new DonorDashboardViewModel
             {
-                DonorName = "Eric Maslyanchuk",
+                DonorName = donorName,
                 TotalDonations = 2,
                 TotalItemsDonated = 15,
                 LastDonationDate = DateTime.Now,
@@ -202,7 +209,7 @@ namespace Pantreats.Controllers
             new Donation
             {
                 DonationId = 1,
-                DonorId = 1,
+                DonorId = donor?.DonorID ?? 0,
                 DonationDate = DateTime.Now.AddDays(-10),
                 Status = "Approved",
                 DonationItems = new List<DonationItem>
@@ -213,7 +220,7 @@ namespace Pantreats.Controllers
             new Donation
             {
                 DonationId = 2,
-                DonorId = 1,
+                DonorId = donor?.DonorID ?? 0,
                 DonationDate = DateTime.Now,
                 Status = "Pending",
                 DonationItems = new List<DonationItem>
@@ -240,8 +247,41 @@ namespace Pantreats.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateDonation(string test)
+        public IActionResult CreateDonation(string[] selectedItems, Dictionary<string, int> quantities)
         {
+            var userId = _userManager.GetUserId(User);
+
+            var donor = _context.Donors.FirstOrDefault(d => d.UserId == userId);
+
+            if (donor == null)
+            {
+                return RedirectToAction("Dashboard");
+            }
+
+            var donation = new Donation
+            {
+                DonorId = donor.DonorID,
+                DonationDate = DateTime.Now,
+                Status = "Pending",
+                DonationItems = new List<DonationItem>()
+            };
+
+            foreach (var itemName in selectedItems)
+            {
+                var quantity = quantities.ContainsKey(itemName)
+                    ? quantities[itemName]
+                    : 1;
+
+                donation.DonationItems.Add(new DonationItem
+                {
+                    ItemName = itemName,
+                    Quantity = quantity
+                });
+            }
+
+            _context.Donations.Add(donation);
+            _context.SaveChanges();
+
             return RedirectToAction("DonationSubmitted");
         }
     }

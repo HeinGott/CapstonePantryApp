@@ -1,8 +1,11 @@
+using DocumentFormat.OpenXml.InkML;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Pantreats.Models;
+using Microsoft.EntityFrameworkCore;
+using Pantreats.Data;
 
 namespace Pantreats.Controllers
 {
@@ -17,11 +20,13 @@ namespace Pantreats.Controllers
             ["Donors"] = "Donor"
         };
 
+        private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AdminController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        public AdminController(ApplicationDbContext context, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
+            _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
         }
@@ -165,6 +170,62 @@ namespace Pantreats.Controllers
             }
 
             return RedirectToAction("Users");
+        }
+
+        // View Donations - Trevor
+        public IActionResult Donations()
+        {
+            // Retrieves all donations from the database, including the associated donation items, then orders them by donation date in descending order
+            var donations = _context.Donations
+                .Include(d => d.DonationItems)
+                .Include(d => d.Donor)
+                .OrderByDescending(d => d.DonationDate)
+                .ToList();
+
+            // Passes the list of donations to the view for display
+            return View(donations);
+        }
+
+        // Approve Donations - Trevor
+        [HttpPost]
+        public IActionResult ApproveDonation(int id)
+        {
+            // Find the donation by ID
+            var donation = _context.Donations.FirstOrDefault(d => d.DonationId == id);
+
+            // If the donation is not found, return a 404 error
+            if (donation == null)
+            {
+                return NotFound();
+            }
+
+            // Update the donation status to "Approved"
+            donation.Status = "Approved";
+            _context.SaveChanges();
+
+            // Redirect back to the Donations view
+            return RedirectToAction("Donations");
+        }
+
+        // Deny Donations - Trevor
+        [HttpPost]
+        public IActionResult DenyDonation(int id)
+        {
+            // Find the donation by ID
+            var donation = _context.Donations.FirstOrDefault(d => d.DonationId == id);
+
+            // If the donation is not found, return a 404 error
+            if (donation == null)
+            {
+                return NotFound();
+            }
+
+            // Update the donation status to "Denied"
+            donation.Status = "Denied";
+            _context.SaveChanges();
+
+            // Redirects back to the Donations view
+            return RedirectToAction("Donations");
         }
 
         private static string NormalizeRole(string? role)

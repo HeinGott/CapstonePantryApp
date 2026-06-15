@@ -1,0 +1,79 @@
+﻿@model List<Pantreats.Models.Donation>
+
+@{
+    ViewData["Title"] = "Donation Approval";
+}
+
+<div class="student-page py-4">
+
+    <div class="student-page-header mb-4">
+        <div>
+            <h1 class="student-page-title mb-1">Donation Approval</h1>
+            <p class="student-page-subtitle mb-0">
+                Review and approve donor-submitted donations.
+            </p>
+        </div>
+    </div>
+
+    <div class="student-card">
+        <table class="table student-table align-middle">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Donor</th>
+                    <th>Items</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var donation in Model)
+                {
+                    <tr>
+                        <td>@donation.DonationDate.ToShortDateString()</td>
+
+                        <td>
+                            @donation.Donor?.Name
+                        </td>
+
+                        <td>
+                            @foreach (var item in donation.DonationItems)
+                            {
+                                <div>@item.ItemName - Qty: @item.Quantity</div>
+                            }
+                        </td>
+
+                        <td>@donation.Status</td>
+
+                        <td class="d-flex gap-2">
+
+                            @if (donation.Status == "Pending")
+                            {
+                                <form asp-controller="Admin"
+                                      asp-action="ApproveDonation"
+                                      asp-route-id="@donation.DonationId"
+                                      method="post">
+                                    <button type="submit" class="inventory-edit-btn">
+                                        Approve
+                                    </button>
+                                </form>
+
+                                <form asp-controller="Admin"
+                                      asp-action="DenyDonation"
+                                      asp-route-id="@donation.DonationId"
+                                      method="post">
+                                    <button type="submit" class="inventory-delete-btn">
+                                        Deny
+                                    </button>
+                                </form>
+                            }
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>

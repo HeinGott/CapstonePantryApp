@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pantreats.Data;
 
@@ -11,9 +12,11 @@ using Pantreats.Data;
 namespace Pantreats.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260614071754_AddDonationTables")]
+    partial class AddDonationTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -243,8 +246,6 @@ namespace Pantreats.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("DonationId");
-
-                    b.HasIndex("DonorId");
 
                     b.ToTable("Donations");
                 });
@@ -726,17 +727,6 @@ namespace Pantreats.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Pantreats.Models.Donation", b =>
-                {
-                    b.HasOne("Pantreats.Models.Donor", "Donor")
-                        .WithMany()
-                        .HasForeignKey("DonorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Donor");
                 });
 
             modelBuilder.Entity("Pantreats.Models.DonationItem", b =>

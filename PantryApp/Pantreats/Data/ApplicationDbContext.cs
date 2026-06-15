@@ -6,6 +6,8 @@ namespace Pantreats.Data
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext(options)
     {
+        public DbSet<Donation> Donations { get; set; }
+        public DbSet<DonationItem> DonationItems { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
@@ -23,7 +25,7 @@ namespace Pantreats.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Donor>().ToTable("Vendors");
+            modelBuilder.Entity<Donor>().ToTable("Donors");
 
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Inventory)

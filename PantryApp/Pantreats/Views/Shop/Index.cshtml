@@ -1,0 +1,660 @@
+@model Pantreats.Models.ShopViewModel
+
+@{
+    ViewData["Title"] = "Shop";
+    var categories = Model.Items
+        .Select(item => item.Category)
+        .Where(category => !string.IsNullOrWhiteSpace(category))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .OrderBy(category => category)
+        .ToList();
+}
+
+<div class="shop-page py-4"
+     data-page-size="@Model.PageSize"
+     data-total-items="@Model.TotalItems">
+    <form id="shopAntiForgeryForm" class="d-none">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <div class="shop-header mb-4">
+        <div>
+            <span class="shop-kicker">Student Pantry</span>
+            <h1 class="student-page-title mb-1">Shop the Pantry</h1>
+            <p class="student-page-subtitle mb-0">
+                Choose what you need today. Add items to your cart, then place one pickup order.
+            </p>
+        </div>
+    </div>
+
+    <section class="shop-cart-panel d-none" id="shopCartPanel" aria-labelledby="shopCartPanelLabel">
+        <div class="shop-cart-panel-header">
+            <div>
+                <span class="shop-kicker">Pickup Order</span>
+                <h2 class="h5 mb-0" id="shopCartPanelLabel">Your Cart</h2>
+            </div>
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    id="cartCloseButton"
+                    aria-label="Close cart">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div id="cartStatus" class="shop-cart-status d-none" aria-live="polite"></div>
+        <div id="cartItems" class="shop-cart-items"></div>
+        <div id="emptyCartMessage" class="shop-empty-cart">
+            Your cart is empty. Add pantry items and they will show up here.
+        </div>
+
+        <div class="shop-cart-panel-footer">
+            <div class="shop-cart-total-row">
+                <span>Total</span>
+                <strong><span id="cartTotal">0</span> points</strong>
+            </div>
+            <a class="btn btn-outline-secondary d-none" id="viewOrdersLink" asp-controller="Order" asp-action="History">View orders</a>
+            <button type="button" class="btn shop-checkout-button" id="checkoutButton">Place order</button>
+        </div>
+    </section>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="student-card text-center py-5">
+            <h2 class="h5 mb-2">No pantry items are available yet.</h2>
+            <p class="text-muted mb-0">Check back soon or contact the pantry team.</p>
+        </div>
+    }
+    else
+    {
+        <section class="shop-filter-bar mb-4" id="shopFilterBar">
+            <div class="shop-filter-search">
+                <label class="form-label mb-2" for="shopSearchInput">Find an item</label>
+                <div class="shop-search-input-wrap">
+                    <i class="bi bi-search"></i>
+                    <input type="search"
+                           class="form-control"
+                           id="shopSearchInput"
+                           placeholder="Search by item name, brand, or size" />
+                </div>
+            </div>
+
+            <div class="shop-filter-pills-wrap">
+                <span class="shop-filter-label">Category</span>
+                <div class="shop-filter-pills" id="shopCategoryPills">
+                    <button type="button" class="btn shop-category-pill active" data-category-filter="all">All</button>
+                    @foreach (var category in categories)
+                    {
+                        <button type="button"
+                                class="btn shop-category-pill"
+                                data-category-filter="@category">
+                            @category
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="shop-filter-cart">
+                <button type="button"
+                        class="btn shop-cart-button"
+                        id="cartToggleButton"
+                        aria-controls="shopCartPanel"
+                        aria-expanded="false">
+                    <i class="bi bi-basket2"></i>
+                    Cart
+                    <span id="cartCountBadge" class="badge rounded-pill">0</span>
+                </button>
+            </div>
+        </section>
+
+        <div class="shop-grid mb-4" id="shopGrid">
+            @foreach (var item in Model.Items)
+            {
+                var isOutOfStock = item.Quantity <= 0;
+
+                <article class="shop-item-card"
+                         data-shop-item
+                         data-upc="@item.UPC"
+                         data-stock="@item.Quantity"
+                         data-category="@item.Category"
+                         data-item-name="@item.ItemName"
+                         data-brand-name="@item.BrandName"
+                         data-unit-size="@item.UnitSize">
+                    <div class="shop-item-image">
+                        <img src="~/images/items/@(item.ImageName).png"
+                             alt="@item.ItemName"
+                             data-fallback-src="@Url.Action("GetImage", "Inventory", new { upc = item.UPC })"
+                             onerror="if (!this.dataset.retried) { this.dataset.retried = 'true'; this.src = this.dataset.fallbackSrc; } else { this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none'); }" />
+                        <div class="shop-image-fallback d-none">
+                            <i class="bi bi-bag-heart"></i>
+                        </div>
+                    </div>
+
+                    <div class="shop-item-body">
+                        <div class="shop-item-meta">@item.Category</div>
+                        <h2 class="shop-item-title">@item.ItemName</h2>
+                        <p class="shop-item-brand">@item.BrandName</p>
+                        <p class="shop-item-size">@item.UnitSize</p>
+                    </div>
+
+                    <div class="shop-item-footer">
+                        <span class="shop-stock @(isOutOfStock ? "shop-stock-empty" : "")">
+                            @(isOutOfStock ? "Out of stock" : $"{item.Quantity} available")
+                        </span>
+
+                        <button type="button"
+                                class="btn shop-add-button"
+                                data-upc="@item.UPC"
+                                @(isOutOfStock ? "disabled" : "")>
+                            @(isOutOfStock ? "Unavailable" : "Add to cart")
+                        </button>
+                    </div>
+                </article>
+            }
+        </div>
+
+        <div class="student-card text-center py-5 d-none" id="shopEmptyResults">
+            <h2 class="h5 mb-2">No pantry items match that search.</h2>
+            <p class="text-muted mb-0">Try a different search or switch categories to see more items.</p>
+        </div>
+
+        <nav aria-label="Shop page navigation" class="shop-pagination" id="shopPagination"></nav>
+    }
+
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const addUrl = '@Url.Action("AddToCart", "Shop")';
+            const checkoutUrl = '@Url.Action("Checkout", "Shop")';
+            const cartKey = 'pantreats-shop-cart';
+            const cartOpenKey = 'pantreats-shop-cart-open';
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const shopPage = document.querySelector('.shop-page');
+            const pageSize = Number(shopPage.dataset.pageSize || 20);
+            const itemCards = Array.from(document.querySelectorAll('[data-shop-item]'));
+            const totalPages = Math.max(1, Math.ceil(itemCards.length / pageSize));
+            const cartPanel = document.getElementById('shopCartPanel');
+            const cartToggleButton = document.getElementById('cartToggleButton');
+            const cartCloseButton = document.getElementById('cartCloseButton');
+            const cartItems = document.getElementById('cartItems');
+            const emptyCartMessage = document.getElementById('emptyCartMessage');
+            const cartCountBadge = document.getElementById('cartCountBadge');
+            const cartTotal = document.getElementById('cartTotal');
+            const cartStatus = document.getElementById('cartStatus');
+            const checkoutButton = document.getElementById('checkoutButton');
+            const viewOrdersLink = document.getElementById('viewOrdersLink');
+            const pagination = document.getElementById('shopPagination');
+            const searchInput = document.getElementById('shopSearchInput');
+            const categoryPills = Array.from(document.querySelectorAll('[data-category-filter]'));
+            const emptyResults = document.getElementById('shopEmptyResults');
+            const shopListAnchor = document.getElementById('shopFilterBar') || document.getElementById('shopGrid');
+
+            let cart = loadCart().map(normalizeCartItem).filter(item => item.upc);
+            let currentPage = 1;
+            let activeCategory = 'all';
+            let searchTerm = '';
+            let statusTimeoutId = null;
+            let statusHideTimeoutId = null;
+
+            document.querySelectorAll('.shop-add-button').forEach(button => {
+                button.addEventListener('click', () => addItem(button));
+            });
+
+            cartToggleButton.addEventListener('click', toggleCart);
+            cartCloseButton.addEventListener('click', closeCart);
+            checkoutButton.addEventListener('click', checkout);
+            searchInput?.addEventListener('input', () => {
+                searchTerm = searchInput.value.trim().toLowerCase();
+                renderPage(1);
+            });
+
+            categoryPills.forEach(button => {
+                button.addEventListener('click', () => {
+                    activeCategory = button.dataset.categoryFilter || 'all';
+                    categoryPills.forEach(pill => pill.classList.toggle('active', pill === button));
+                    renderPage(1);
+                });
+            });
+
+            renderPage(currentPage);
+            renderPagination();
+            renderCart();
+
+            if (sessionStorage.getItem(cartOpenKey) === 'true') {
+                openCart();
+            }
+
+            function loadCart() {
+                try {
+                    return JSON.parse(sessionStorage.getItem(cartKey) || '[]');
+                } catch {
+                    return [];
+                }
+            }
+
+            function saveCart() {
+                sessionStorage.setItem(cartKey, JSON.stringify(cart));
+            }
+
+            function normalizePage(page) {
+                const filteredPageCount = getTotalPages();
+
+                if (!Number.isFinite(page) || page < 1) {
+                    return 1;
+                }
+
+                return Math.min(page, filteredPageCount);
+            }
+
+            function renderPage(page) {
+                currentPage = normalizePage(page);
+
+                const filteredItems = getFilteredItems();
+                const start = (currentPage - 1) * pageSize;
+                const end = start + pageSize;
+
+                itemCards.forEach(card => {
+                    card.classList.add('d-none');
+                });
+
+                filteredItems.forEach((card, index) => {
+                    card.classList.toggle('d-none', index < start || index >= end);
+                });
+
+                const filteredCount = filteredItems.length;
+                const totalFilteredPages = getTotalPages(filteredCount);
+                emptyResults?.classList.toggle('d-none', filteredCount !== 0);
+                pagination.classList.toggle('d-none', totalFilteredPages <= 1 || filteredCount === 0);
+                renderPagination();
+            }
+
+            function renderPagination() {
+                if (!pagination) {
+                    return;
+                }
+
+                pagination.innerHTML = '';
+
+                const filteredCount = getFilteredItems().length;
+                const filteredPageCount = getTotalPages(filteredCount);
+
+                if (filteredPageCount <= 1) {
+                    return;
+                }
+
+                pagination.appendChild(createPageButton('Previous', currentPage - 1, currentPage === 1, 'shop-page-link'));
+
+                const numbers = document.createElement('div');
+                numbers.className = 'shop-page-numbers';
+
+                for (let page = 1; page <= filteredPageCount; page++) {
+                    numbers.appendChild(createPageButton(page, page, false, `shop-page-number ${page === currentPage ? 'active' : ''}`));
+                }
+
+                pagination.appendChild(numbers);
+                pagination.appendChild(createPageButton('Next', currentPage + 1, currentPage === filteredPageCount, 'shop-page-link'));
+            }
+
+            function createPageButton(label, page, disabled, className) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `btn ${className}`;
+                button.textContent = label;
+                button.disabled = disabled;
+                button.addEventListener('click', () => {
+                    renderPage(page);
+                    scrollToShopResults();
+                });
+                return button;
+            }
+
+            function scrollToShopResults() {
+                if (!shopListAnchor) {
+                    return;
+                }
+
+                const offset = 24;
+                const targetTop = Math.max(0, window.scrollY + shopListAnchor.getBoundingClientRect().top - offset);
+
+                window.scrollTo({
+                    top: targetTop,
+                    behavior: 'smooth'
+                });
+            }
+
+            function getFilteredItems() {
+                return itemCards.filter(card => {
+                    const category = String(card.dataset.category || '').toLowerCase();
+                    const itemName = String(card.dataset.itemName || '').toLowerCase();
+                    const brandName = String(card.dataset.brandName || '').toLowerCase();
+                    const unitSize = String(card.dataset.unitSize || '').toLowerCase();
+                    const matchesCategory = activeCategory === 'all' || category === activeCategory.toLowerCase();
+                    const matchesSearch = !searchTerm
+                        || itemName.includes(searchTerm)
+                        || brandName.includes(searchTerm)
+                        || unitSize.includes(searchTerm)
+                        || `${brandName} ${itemName}`.includes(searchTerm);
+
+                    return matchesCategory && matchesSearch;
+                });
+            }
+
+            function getTotalPages(filteredCount = getFilteredItems().length) {
+                return Math.max(1, Math.ceil(filteredCount / pageSize));
+            }
+
+            async function addItem(button) {
+                const upc = button.dataset.upc;
+                clearStatus();
+                viewOrdersLink.classList.add('d-none');
+
+                const existingItem = cart.find(item => item.upc === upc);
+                const requestedQuantity = (existingItem?.quantity || 0) + 1;
+
+                button.disabled = true;
+                const originalText = button.textContent;
+                button.textContent = 'Adding...';
+
+                try {
+                    const response = await fetch(addUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({ upc, requestedQuantity })
+                    });
+
+                    const result = await readJson(response);
+
+                    if (!response.ok || !result.success) {
+                        setStatus(result.message || 'That item could not be added.', 'danger');
+                        openCart();
+                        return;
+                    }
+
+                    if (existingItem) {
+                        existingItem.quantity = requestedQuantity;
+                    } else {
+                        const cartItem = normalizeCartItem(result.item);
+                        cartItem.quantity = 1;
+                        cart.push(cartItem);
+                    }
+
+                    saveCart();
+                    renderCart();
+                    setStatus(`${result.item.itemName} added.`, 'success');
+                    openCart();
+                } finally {
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
+            }
+
+            async function checkout() {
+                clearStatus();
+                viewOrdersLink.classList.add('d-none');
+
+                if (cart.length === 0) {
+                    setStatus('Add at least one item before checkout.', 'danger');
+                    return;
+                }
+
+                checkoutButton.disabled = true;
+                checkoutButton.textContent = 'Placing...';
+
+                try {
+                    const checkedOutUPCs = cart.flatMap(item => Array(item.quantity).fill(item.upc));
+                    const response = await fetch(checkoutUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({
+                            upcs: checkedOutUPCs
+                        })
+                    });
+
+                    const result = await readJson(response);
+
+                    if (!response.ok || !result.success) {
+                        setStatus(result.message || 'Checkout could not be completed.', 'danger');
+                        return;
+                    }
+
+                    checkedOutUPCs.forEach(decrementStock);
+                    cart = [];
+                    saveCart();
+                    renderCart();
+                    setStatus(result.message, 'success');
+                    viewOrdersLink.classList.remove('d-none');
+                } finally {
+                    checkoutButton.disabled = false;
+                    checkoutButton.textContent = 'Place order';
+                    renderCart();
+                }
+            }
+
+            function renderCart() {
+                cartItems.innerHTML = '';
+                const itemCount = getCartQuantity();
+
+                cartCountBadge.textContent = itemCount;
+                cartTotal.textContent = itemCount;
+                emptyCartMessage.classList.toggle('d-none', cart.length > 0);
+                checkoutButton.disabled = cart.length === 0;
+
+                cart.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'shop-cart-row';
+                    row.innerHTML = `
+                        <div class="shop-cart-details">
+                            <strong>${escapeHtml(item.itemName)}</strong>
+                            <span>${escapeHtml(item.brandName || 'Pantry item')} ${item.unitSize ? '&middot; ' + escapeHtml(item.unitSize) : ''}</span>
+                            <em>${item.quantity} ${item.quantity === 1 ? 'item' : 'items'} &middot; ${item.quantity} ${item.quantity === 1 ? 'point' : 'points'}</em>
+                        </div>
+                        <div class="shop-cart-quantity" data-cart-upc="${escapeHtml(item.upc)}">
+                            <button type="button" class="btn shop-cart-quantity-button" data-quantity-action="decrease" aria-label="Decrease quantity">-</button>
+                            <input type="number"
+                                   class="form-control shop-cart-quantity-input"
+                                   min="0"
+                                   step="1"
+                                   value="${item.quantity}"
+                                   inputmode="numeric"
+                                   aria-label="Quantity for ${escapeHtml(item.itemName)}" />
+                            <button type="button" class="btn shop-cart-quantity-button" data-quantity-action="increase" aria-label="Increase quantity">+</button>
+                        </div>
+                    `;
+
+                    const quantityWrap = row.querySelector('.shop-cart-quantity');
+                    const quantityInput = row.querySelector('.shop-cart-quantity-input');
+                    const decreaseButton = quantityWrap.querySelector('[data-quantity-action="decrease"]');
+                    const increaseButton = quantityWrap.querySelector('[data-quantity-action="increase"]');
+
+                    decreaseButton.addEventListener('click', () => {
+                        updateCartItemQuantity(item.upc, item.quantity - 1, true);
+                    });
+
+                    increaseButton.addEventListener('click', () => {
+                        updateCartItemQuantity(item.upc, item.quantity + 1, false);
+                    });
+
+                    quantityInput.addEventListener('change', () => {
+                        updateCartItemQuantity(item.upc, Number(quantityInput.value), true);
+                    });
+
+                    quantityInput.addEventListener('blur', () => {
+                        quantityInput.value = String(getCartItemQuantity(item.upc));
+                    });
+
+                    cartItems.appendChild(row);
+                });
+            }
+
+            function updateCartItemQuantity(upc, nextQuantity, allowRemoval) {
+                const cartItem = cart.find(item => item.upc === upc);
+                if (!cartItem) {
+                    return;
+                }
+
+                const parsedQuantity = Number(nextQuantity);
+                const stock = getAvailableStock(upc);
+
+                if (!Number.isFinite(parsedQuantity)) {
+                    renderCart();
+                    return;
+                }
+
+                if (parsedQuantity <= 0) {
+                    if (allowRemoval) {
+                        cart = cart.filter(item => item.upc !== upc);
+                        saveCart();
+                        renderCart();
+                    } else {
+                        renderCart();
+                    }
+
+                    return;
+                }
+
+                if (parsedQuantity > stock) {
+                    cartItem.quantity = stock;
+                    saveCart();
+                    renderCart();
+                    setStatus(`Only ${stock} ${cartItem.itemName} ${stock === 1 ? 'is' : 'are'} available right now.`, 'info');
+                    return;
+                }
+
+                cartItem.quantity = Math.max(1, Math.floor(parsedQuantity));
+                saveCart();
+                renderCart();
+            }
+
+            function getAvailableStock(upc) {
+                const card = itemCards.find(item => item.dataset.upc === upc);
+                return Math.max(0, Number(card?.dataset.stock || 0));
+            }
+
+            function getCartItemQuantity(upc) {
+                return cart.find(item => item.upc === upc)?.quantity || 1;
+            }
+
+            function decrementStock(upc) {
+                const card = itemCards.find(item => item.dataset.upc === upc);
+                if (!card) {
+                    return;
+                }
+
+                const stock = Math.max(0, Number(card.dataset.stock || 0) - 1);
+                const stockLabel = card.querySelector('.shop-stock');
+                const addButton = card.querySelector('.shop-add-button');
+                card.dataset.stock = String(stock);
+
+                if (stock <= 0) {
+                    stockLabel.textContent = 'Out of stock';
+                    stockLabel.classList.add('shop-stock-empty');
+                    addButton.textContent = 'Unavailable';
+                    addButton.disabled = true;
+                    return;
+                }
+
+                stockLabel.textContent = `${stock} available`;
+            }
+
+            function normalizeCartItem(item) {
+                return {
+                    upc: item.upc || item.UPC,
+                    itemName: item.itemName || item.ItemName,
+                    brandName: item.brandName || item.BrandName,
+                    unitSize: item.unitSize || item.UnitSize,
+                    quantity: Math.max(1, Number(item.quantity || item.Quantity || 1))
+                };
+            }
+
+            function getCartQuantity() {
+                return cart.reduce((total, item) => total + item.quantity, 0);
+            }
+
+            function toggleCart() {
+                if (cartPanel.classList.contains('d-none')) {
+                    openCart();
+                } else {
+                    closeCart();
+                }
+            }
+
+            function openCart() {
+                cartPanel.classList.remove('d-none');
+                cartToggleButton.setAttribute('aria-expanded', 'true');
+                sessionStorage.setItem(cartOpenKey, 'true');
+            }
+
+            function closeCart() {
+                cartPanel.classList.add('d-none');
+                cartToggleButton.setAttribute('aria-expanded', 'false');
+                sessionStorage.setItem(cartOpenKey, 'false');
+            }
+
+            async function readJson(response) {
+                try {
+                    return await response.json();
+                } catch {
+                    return { success: false };
+                }
+            }
+
+            function setStatus(message, type) {
+                if (statusTimeoutId) {
+                    window.clearTimeout(statusTimeoutId);
+                }
+
+                if (statusHideTimeoutId) {
+                    window.clearTimeout(statusHideTimeoutId);
+                    statusHideTimeoutId = null;
+                }
+
+                cartStatus.textContent = message;
+                cartStatus.className = `shop-cart-status shop-cart-status-${type} is-visible`;
+                statusTimeoutId = window.setTimeout(() => {
+                    clearStatus();
+                }, 3000);
+            }
+
+            function clearStatus() {
+                if (statusTimeoutId) {
+                    window.clearTimeout(statusTimeoutId);
+                    statusTimeoutId = null;
+                }
+
+                if (!cartStatus.textContent.trim().length) {
+                    cartStatus.className = 'shop-cart-status';
+                    return;
+                }
+
+                cartStatus.classList.remove('is-visible');
+                cartStatus.classList.add('is-hiding');
+
+                if (statusHideTimeoutId) {
+                    window.clearTimeout(statusHideTimeoutId);
+                }
+
+                statusHideTimeoutId = window.setTimeout(() => {
+                    cartStatus.textContent = '';
+                    cartStatus.className = 'shop-cart-status';
+                    statusHideTimeoutId = null;
+                }, 220);
+            }
+
+            function escapeHtml(value) {
+                return String(value || '')
+                    .replaceAll('&', '&amp;')
+                    .replaceAll('<', '&lt;')
+                    .replaceAll('>', '&gt;')
+                    .replaceAll('"', '&quot;')
+                    .replaceAll("'", '&#039;');
+            }
+        })();
+    </script>
+}

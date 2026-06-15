@@ -70,10 +70,10 @@ namespace Pantreats.Data
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
-            //check Vendors role exists -nick
-            if (!await roleManager.RoleExistsAsync("Vendors"))
+            //check Donors role exists -nick
+            if (!await roleManager.RoleExistsAsync("Donors"))
             {
-                await roleManager.CreateAsync(new IdentityRole("Vendors"));
+                await roleManager.CreateAsync(new IdentityRole("Donors"));
             }
 
 
@@ -91,7 +91,16 @@ namespace Pantreats.Data
                 };
 
                 await userManager.CreateAsync(donorUser, donorPassword);
-                await userManager.AddToRoleAsync(donorUser, "Vendors");
+                await userManager.AddToRoleAsync(donorUser, "Donors");
+            }
+            else if (await userManager.IsInRoleAsync(donorUser, "Vendors"))
+            {
+                await userManager.RemoveFromRoleAsync(donorUser, "Vendors");
+
+                if (!await userManager.IsInRoleAsync(donorUser, "Donors"))
+                {
+                    await userManager.AddToRoleAsync(donorUser, "Donors");
+                }
             }
         }
 

@@ -33,6 +33,11 @@ namespace Pantreats.Data
                 .HasForeignKey(oi => oi.InventoryUPC)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            //set all the points in inventory to have a default value of 1
+            modelBuilder.Entity<Inventory>()
+                .Property(i => i.Points)
+                .HasDefaultValue(1);
+
             //configures the relationships between Orders and OrderFulfilment
             modelBuilder.Entity<OrderFulfilment>()
                 .HasOne(of => of.Order)

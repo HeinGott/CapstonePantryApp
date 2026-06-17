@@ -4,36 +4,109 @@
     ViewData["Title"] = "Order History";
 }
 
-<div class="order-history py-4">
+<div class="order-history">
 
-    <h1>Order History</h1>
+    <div class="order-history-header">
+        <div>
+            <h1 class="order-history-title">Order History</h1>
+            <p class="order-history-subtitle">Click an order to view its details.</p>
+        </div>
+        <div>
+            <input type="text" id="orderSearch" class="form-control"
+                   placeholder="Search by Order ID..." oninput="filterOrders()" />
+        </div>
+    </div>
 
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th>Order Id</th>
-                <th>Date</th>
-                <th>Total Points</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @foreach (var order in Model)
-            {
-                <tr style="cursor:pointer" onclick="goToOrder(@order.OrderId)">
-                    <td>@order.OrderId</td>
-                    <td>@order.OrderDate.ToString("yyyy/MM/dd")</td>
-                    <td>@order.Total</td>
+    <div class="order-card">
+        <table class="table order-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Order Id</th>
+                    <th>Date</th>
+                    <th>Total Points</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody id="orderRows">
+                @foreach (var order in Model)
+                {
+                    <tr class="order-row" onclick="goToOrder(@order.OrderId)">
+                        <td>@order.OrderId</td>
+                        <td>@order.OrderDate.ToString("yyyy/MM/dd")</td>
+                        <td>@order.Total</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="order-pagination">
+        <div class="page-stepper">
+            <button type="button" class="page-arrow" id="prevArrow"
+                    onclick="changePage(-1)" aria-label="Previous page">
+                &lsaquo;
+            </button>
+
+            <input type="number" id="pageInput" class="page-input"
+                   value="1" min="1" onchange="goToPage()" />
+
+            <button type="button" class="page-arrow" id="nextArrow"
+                    onclick="changePage(1)" aria-label="Next page">
+                &rsaquo;
+            </button>
+        </div>
+    </div>
+
 </div>
 
 @section Scripts {
     <script>
+        const rowsPerPage = 20;
+        let currentPage = 1;
+        const allRows = Array.from(document.querySelectorAll('#orderRows tr'));
+
         function goToOrder(orderId) {
             window.location.href = '/Order/Details/' + orderId;
         }
+
+        function filteredRows() {
+            const term = document.getElementById('orderSearch').value.trim().toLowerCase();
+            return allRows.filter(row => row.cells[0].textContent.toLowerCase().includes(term));
+        }
+
+        function totalPages() {
+            return Math.max(1, Math.ceil(filteredRows().length / rowsPerPage));
+        }
+
+        function render() {
+            if (currentPage > totalPages()) currentPage = totalPages();
+            if (currentPage < 1) currentPage = 1;
+
+            const start = (currentPage - 1) * rowsPerPage;
+
+            allRows.forEach(row => row.style.display = 'none');
+            filteredRows().slice(start, start + rowsPerPage).forEach(row => row.style.display = '');
+
+            document.getElementById('pageInput').value = currentPage;
+            document.getElementById('prevArrow').disabled = currentPage === 1;
+            document.getElementById('nextArrow').disabled = currentPage === totalPages();
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            render();
+        }
+
+        function goToPage() {
+            const val = parseInt(document.getElementById('pageInput').value, 10);
+            if (val >= 1 && val <= totalPages()) currentPage = val;   // invalid -> ignored, stays on the current
+            render();
+        }
+
+        function filterOrders() {
+            currentPage = 1;
+            render();
+        }
+
+        render();
     </script>
 }

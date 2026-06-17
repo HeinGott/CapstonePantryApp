@@ -8,6 +8,11 @@
 
     <a asp-action="History" class="back-button">← Back to Order History</a>
 
+    @if (TempData["AddItemError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["AddItemError"]</div>
+    }
+
     @if (User.IsInRole("Admin"))
     {
         <div class="order-details-header-card">
@@ -43,8 +48,17 @@
     }
 
     <div class="order-card">
-        <h2 class="order-items-title">Items</h2>
-        <p class="order-items-subtitle">Items included in this order.</p>
+        <div class="order-items-header">
+            <div>
+                <h2 class="order-items-title">Items</h2>
+                <p class="order-items-subtitle">Items included in this order.</p>
+            </div>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <button type="button" id="openAddItem" class="inventory-edit-btn">Add Item</button>
+            }
+        </div>
 
         <div class="table-responsive">
             <table class="table order-table align-middle mb-0">
@@ -55,6 +69,10 @@
                         <th>Category</th>
                         <th>Quantity</th>
                         <th>Points</th>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <th>Actions</th>
+                        }
                     </tr>
                 </thead>
                 <tbody>
@@ -66,11 +84,258 @@
                             <td>@item.Category</td>
                             <td>@item.OrderQuantity</td>
                             <td>@item.Points</td>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <td>
+                                    <form asp-action="DeleteItem" asp-route-id="@item.OrderItemId" method="post"
+                                          onsubmit="return confirm('Remove this item from the order?');">
+                                        <button type="submit" class="inventory-delete-btn">Delete</button>
+                                    </form>
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
     </div>
+    @if (User.IsInRole("Admin"))
+    {
+        var inventoryItems = ViewBag.InventoryItems as List<Pantreats.Models.Inventory> ?? new List<Pantreats.Models.Inventory>();
 
+        <div class="add-item-overlay" id="addItemOverlay">
+            <div class="add-item-modal">
+                <div class="add-item-modal-header">
+                    <h2 class="order-items-title mb-0">Add an Item</h2>
+                    <button type="button" class="add-item-close" id="closeAddItem" aria-label="Close">&times;</button>
+                </div>
+
+                <div class="add-item-modal-body">
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <input type="text" id="addItemSearch" class="form-control"
+                                   autocomplete="off"
+                                   placeholder="Search name, brand, category..." />
+                        </div>
+                        <div class="col-md-3">
+                            <select id="addItemCategory" class="form-select">
+                                <option value="">Category: Any</option>
+                                @foreach (var category in inventoryItems.Select(x => x.Category).Distinct().OrderBy(x => x))
+                                {
+                                    <option value="@category">@category</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="addItemBrand" class="form-select">
+                                <option value="">Brand: Any</option>
+                                @foreach (var brand in inventoryItems.Select(x => x.BrandName).Distinct().OrderBy(x => x))
+                                {
+                                    <option value="@brand">@brand</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="resetAddItemSearch()">Reset</button>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="addItemInStock" />
+                        <label class="form-check-label" for="addItemInStock">Show in-stock only</label>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table student-table inventory-table align-middle mb-0" id="addItemTable">
+                            <thead>
+                                <tr>
+                                    <th>UPC</th>
+                                    <th>Name</th>
+                                    <th>Brand</th>
+                                    <th>Category</th>
+                                    <th>Unit Size</th>
+                                    <th>Quantity</th>
+                                    <th>Points</th>
+                                    <th>Add</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var inv in inventoryItems)
+                                {
+                                    <tr>
+                                        <td><span class="inventory-cell-text inventory-cell-text-single">@inv.UPC</span></td>
+                                        <td><span class="inventory-cell-text inventory-name-cell-text">@inv.ItemName</span></td>
+                                        <td><span class="inventory-cell-text">@inv.BrandName</span></td>
+                                        <td><span class="inventory-cell-text inventory-cell-text-single">@inv.Category</span></td>
+                                        <td><span class="inventory-cell-text inventory-cell-text-single">@inv.UnitSize</span></td>
+                                        <td><span class="inventory-cell-text inventory-cell-text-single">@inv.Quantity</span></td>
+                                        <td><span class="inventory-cell-text inventory-cell-text-single">@inv.Points</span></td>
+                                        <td class="inventory-actions-cell">
+                                            <form asp-action="AddItem"
+                                                  asp-route-id="@Model.OrderId"
+                                                  asp-route-upc="@inv.UPC"
+                                                  method="post"
+                                                  onsubmit="return askQuantity(this, @inv.Quantity);">
+                                                <input type="hidden" name="quantity" value="" />
+                                                <button type="submit" class="inventory-edit-btn">Add Item</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="order-pagination">
+                        <div class="page-stepper">
+                            <button type="button" class="page-arrow" id="addItemPrev"
+                                    onclick="changeAddItemPage(-1)" aria-label="Previous page">
+                                &lsaquo;
+                            </button>
+
+                            <input type="number" id="addItemPageInput" class="page-input"
+                                   value="1" min="1" onchange="goToAddItemPage()" />
+
+                            <button type="button" class="page-arrow" id="addItemNext"
+                                    onclick="changeAddItemPage(1)" aria-label="Next page">
+                                &rsaquo;
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    }
 </div>
+
+@section Scripts {
+    <script>
+        const openBtn = document.getElementById('openAddItem');
+        const overlay = document.getElementById('addItemOverlay');
+        const closeBtn = document.getElementById('closeAddItem');
+
+        if (openBtn && overlay && closeBtn) {
+            openBtn.addEventListener('click', () => overlay.classList.add('open'));
+            closeBtn.addEventListener('click', () => overlay.classList.remove('open'));
+
+            // click the dark backdrop (but not the modal box) to close
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.classList.remove('open');
+            });
+        }
+
+        function askQuantity(form, available) {
+            const input = prompt("How many do you want to add? (in stock: " + available + ")", "1");
+            if (input === null) return false; // admin hit Cancel
+
+            const qty = parseInt(input, 10);
+            if (isNaN(qty) || qty < 1) {
+                alert("Please enter a whole number of 1 or more.");
+                return false;
+            }
+            if (qty > available) {
+                alert("Only " + available + " in stock.");
+                return false;
+            }
+
+            form.querySelector('input[name="quantity"]').value = qty;
+            return true; // let the form submit
+        }
+
+        const addiSearch = document.getElementById('addItemSearch');
+        const addiCategory = document.getElementById('addItemCategory');
+        const addiBrand = document.getElementById('addItemBrand');
+        const addiInStock = document.getElementById('addItemInStock');
+
+        const addItemRowsPerPage = 20;
+        let addItemCurrentPage = 1;
+        const addItemAllRows = Array.from(document.querySelectorAll('#addItemTable tbody tr'));
+
+        function filteredAddItemRows() {
+            const searchValue = addiSearch ? addiSearch.value.toLowerCase() : '';
+            const categoryValue = addiCategory ? addiCategory.value.toLowerCase() : '';
+            const brandValue = addiBrand ? addiBrand.value.toLowerCase() : '';
+            const showStockOnly = addiInStock ? addiInStock.checked : false;
+
+            return addItemAllRows.filter(row => {
+                const upc = row.cells[0].innerText.toLowerCase();
+                const name = row.cells[1].innerText.toLowerCase();
+                const brand = row.cells[2].innerText.toLowerCase();
+                const category = row.cells[3].innerText.toLowerCase();
+                const quantity = parseInt(row.cells[5].innerText);
+
+                const matchesSearch =
+                    upc.includes(searchValue) ||
+                    name.includes(searchValue) ||
+                    brand.includes(searchValue) ||
+                    category.includes(searchValue);
+
+                const matchesCategory = categoryValue === '' || category === categoryValue;
+                const matchesBrand = brandValue === '' || brand === brandValue;
+                const matchesStock = !showStockOnly || quantity > 0;
+
+                return matchesSearch && matchesCategory && matchesBrand && matchesStock;
+            });
+        }
+
+        function addItemTotalPages() {
+            return Math.max(1, Math.ceil(filteredAddItemRows().length / addItemRowsPerPage));
+        }
+
+        function renderAddItem() {
+            if (addItemCurrentPage > addItemTotalPages()) addItemCurrentPage = addItemTotalPages();
+            if (addItemCurrentPage < 1) addItemCurrentPage = 1;
+
+            const start = (addItemCurrentPage - 1) * addItemRowsPerPage;
+
+            addItemAllRows.forEach(row => row.style.display = 'none');
+            filteredAddItemRows().slice(start, start + addItemRowsPerPage).forEach(row => row.style.display = '');
+
+            const pageInput = document.getElementById('addItemPageInput');
+            if (pageInput) pageInput.value = addItemCurrentPage;
+
+            const prev = document.getElementById('addItemPrev');
+            const next = document.getElementById('addItemNext');
+            if (prev) prev.disabled = addItemCurrentPage === 1;
+            if (next) next.disabled = addItemCurrentPage === addItemTotalPages();
+        }
+
+        function changeAddItemPage(delta) {
+            addItemCurrentPage += delta;
+            renderAddItem();
+        }
+
+        function goToAddItemPage() {
+            const val = parseInt(document.getElementById('addItemPageInput').value, 10);
+            if (val >= 1 && val <= addItemTotalPages()) addItemCurrentPage = val; // invalid -> ignored
+            renderAddItem();
+        }
+
+        function filterAddItemTable() {
+            addItemCurrentPage = 1; // searching jumps back to page 1
+            renderAddItem();
+        }
+
+        function resetAddItemSearch() {
+            if (addiSearch) addiSearch.value = '';
+            if (addiCategory) addiCategory.value = '';
+            if (addiBrand) addiBrand.value = '';
+            if (addiInStock) addiInStock.checked = false;
+            addItemCurrentPage = 1;
+            renderAddItem();
+        }
+
+        if (addiSearch) {
+            addiSearch.addEventListener('input', filterAddItemTable);
+            addiCategory.addEventListener('change', filterAddItemTable);
+            addiBrand.addEventListener('change', filterAddItemTable);
+            addiInStock.addEventListener('change', filterAddItemTable);
+        }
+
+        if (addItemAllRows.length > 0) {
+            renderAddItem(); // paginate on load so only 20 ever show
+        }
+    </script>
+}

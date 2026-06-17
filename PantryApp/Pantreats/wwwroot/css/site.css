@@ -75,10 +75,23 @@ body {
     color: rgba(255,255,255,0.8) !important;
     font-weight: 500;
     transition: color 0.2s ease;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none;
 }
 
     .pantreats-nav-link:hover {
         color: var(--pantreats-green) !important;
+    }
+
+    .pantreats-nav-link:focus,
+    .pantreats-nav-link:focus-visible,
+    .pantreats-nav-link.dropdown-toggle.show,
+    .pantreats-navbar .dropdown-toggle.show {
+        color: var(--pantreats-green) !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        outline: none;
     }
 
 a:hover {
@@ -274,6 +287,10 @@ a:hover {
     border: none;
     border-radius: 16px;
     padding: 10px;
+    margin-top: 0.45rem;
+    min-width: 14rem;
+    left: 0;
+    right: auto;
     box-shadow: 0 12px 35px rgba(15, 23, 42, 0.12);
 }
 

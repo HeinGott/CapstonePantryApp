@@ -20,7 +20,18 @@
 
             <div class="mb-3">
                 <label class="form-label">Password</label>
-                <input type="password" name="Password" class="form-control" placeholder="Enter your password" />
+                <div class="input-group">
+                    <input type="password"
+                           name="Password"
+                           id="donorLoginPasswordInput"
+                           class="form-control"
+                           placeholder="Enter your password" />
+                    <button class="btn btn-outline-secondary"
+                            type="button"
+                            id="toggleDonorLoginPasswordButton">
+                        Show
+                    </button>
+                </div>
             </div>
 
             <div class="mb-3 form-check">
@@ -39,3 +50,21 @@
 
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        const donorLoginPasswordInput = document.getElementById("donorLoginPasswordInput");
+        const toggleDonorLoginPasswordButton = document.getElementById("toggleDonorLoginPasswordButton");
+
+        toggleDonorLoginPasswordButton.addEventListener("click", function () {
+            if (donorLoginPasswordInput.type === "password") {
+                donorLoginPasswordInput.type = "text";
+                toggleDonorLoginPasswordButton.textContent = "Hide";
+            }
+            else {
+                donorLoginPasswordInput.type = "password";
+                toggleDonorLoginPasswordButton.textContent = "Show";
+            }
+        });
+    </script>
+}

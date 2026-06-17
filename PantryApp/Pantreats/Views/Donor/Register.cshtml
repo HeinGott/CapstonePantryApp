@@ -43,18 +43,34 @@
 
                 <div class="mb-3">
                     <label class="form-label">Password</label>
-                    <input type="password"
-                           name="Password"
-                           class="form-control"
-                           placeholder="Enter your password" />
+                    <div class="input-group">
+                        <input type="password"
+                               name="Password"
+                               id="donorRegisterPasswordInput"
+                               class="form-control"
+                               placeholder="Enter your password" />
+                        <button class="btn btn-outline-secondary"
+                                type="button"
+                                id="toggleDonorRegisterPasswordButton">
+                            Show
+                        </button>
+                    </div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Confirm Password</label>
-                    <input type="password"
-                           name="ConfirmPassword"
-                           class="form-control"
-                           placeholder="Confirm your password" />
+                    <div class="input-group">
+                        <input type="password"
+                               name="ConfirmPassword"
+                               id="donorRegisterConfirmPasswordInput"
+                               class="form-control"
+                               placeholder="Confirm your password" />
+                        <button class="btn btn-outline-secondary"
+                                type="button"
+                                id="toggleDonorRegisterConfirmPasswordButton">
+                            Show
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit"
@@ -74,6 +90,26 @@
         </div>
     </div>
 </form>
- 
 
-   
+@section Scripts {
+    <script>
+        function wirePasswordToggle(inputId, buttonId) {
+            const input = document.getElementById(inputId);
+            const button = document.getElementById(buttonId);
+
+            button.addEventListener("click", function () {
+                if (input.type === "password") {
+                    input.type = "text";
+                    button.textContent = "Hide";
+                }
+                else {
+                    input.type = "password";
+                    button.textContent = "Show";
+                }
+            });
+        }
+
+        wirePasswordToggle("donorRegisterPasswordInput", "toggleDonorRegisterPasswordButton");
+        wirePasswordToggle("donorRegisterConfirmPasswordInput", "toggleDonorRegisterConfirmPasswordButton");
+    </script>
+}

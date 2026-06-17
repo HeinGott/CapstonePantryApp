@@ -30,7 +30,6 @@ namespace Pantreats.Controllers
 
             var orders = query
                 .OrderByDescending(o => o.OrderDate)
-                .Take(20)
                 .ToList();
 
             return View(orders);
@@ -57,25 +56,104 @@ namespace Pantreats.Controllers
                 }
             }
 
+            if (User.IsInRole("Admin"))
+            {
+                ViewBag.InventoryItems = _context.Inventory
+                    .OrderBy(i => i.ItemName)
+                    .ToList();
+            }
+
             return View(order);
         }
 
-        //this will delete an order, but only if you're an admin
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
+        public IActionResult DeleteItem(int id)
         {
-            var order = _context.Orders.FirstOrDefault(o => o.OrderId == id);
+            var item = _context.OrderItems.FirstOrDefault(i => i.OrderItemId == id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            var orderId = item.OrderId;
+
+            //this will restore the stock
+            if (item.InventoryUPC != null)
+            {
+                var inventory = _context.Inventory.FirstOrDefault(inv => inv.UPC == item.InventoryUPC);
+                if (inventory != null)
+                {
+                    inventory.Quantity += item.OrderQuantity;
+                }
+            }
+
+            //remove the item from the order
+            _context.OrderItems.Remove(item);
+
+            //recalculate the order total
+            var order = _context.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefault(o => o.OrderId == orderId);
+
+            if (order != null)
+            {
+                order.Total = order.OrderItems
+                    .Where(i => i.OrderItemId != id)   // skip the one we just removed (still tracked until save)
+                    .Sum(i => i.Points * i.OrderQuantity);
+            }
+
+            _context.SaveChanges();
+
+            return RedirectToAction("Details", new { id = orderId });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddItem(int id, string upc, int quantity)
+        {
+            var order = _context.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefault(o => o.OrderId == id);
+
             if (order == null)
             {
                 return NotFound();
             }
 
-            _context.Orders.Remove(order);
+            // re-look-up the inventory item to ensure we have the latest stock and points values (don't trust the form)
+            var inventory = _context.Inventory.FirstOrDefault(inv => inv.UPC == upc);
+            if (inventory == null)
+            {
+                return NotFound();
+            }
+
+            // quantity must be positive AND not exceed available stock (so stock can't go negative)
+            if (quantity < 1 || quantity > inventory.Quantity)
+            {
+                TempData["AddItemError"] = $"Invalid quantity for {inventory.ItemName}.";
+                return RedirectToAction("Details", new { id });
+            }
+
+            // building a mini inventory to add items to the order
+            var item = new OrderItem
+            {
+                InventoryUPC = inventory.UPC,
+                ItemName = inventory.ItemName,
+                Category = inventory.Category,
+                OrderQuantity = quantity,
+                Points = inventory.Points
+            };
+
+            order.OrderItems.Add(item); // add the item to the order
+            inventory.Quantity -= quantity; //updating the quanity in stock
+            order.Total = order.OrderItems.Sum(i => i.Points * i.OrderQuantity); // recompute the total based on all items in the order
+
             _context.SaveChanges();
 
-            return RedirectToAction("History");
+            return RedirectToAction("Details", new { id });
         }
 
 

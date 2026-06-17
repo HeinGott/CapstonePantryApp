@@ -1252,6 +1252,56 @@ a:hover {
     .order-row:hover td {
         background-color: var(--pantreats-blue-soft);
     }
+.order-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+/*pagination buttons*/
+.page-stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.page-arrow {
+    border: none;
+    background: none;
+    padding: 0.35rem 0.75rem;
+    color: var(--pantreats-blue);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+    .page-arrow:hover:not(:disabled) {
+        background: #f3f4f6;
+    }
+
+    .page-arrow:disabled {
+        color: #ccc;
+        cursor: default;
+    }
+
+.page-input {
+    width: 48px;
+    text-align: center;
+    border: none;
+    border-left: 1px solid #ced4da;
+    border-right: 1px solid #ced4da;
+    outline: none;
+    padding: 0.35rem 0;
+    -moz-appearance: textfield;
+}
+
+    .page-input::-webkit-outer-spin-button,
+    .page-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 /*order details page*/
 .back-button {
     display: inline-block;
@@ -1324,6 +1374,62 @@ a:hover {
     font-size: 15px;
     font-weight: bold;
     margin-bottom: 1rem;
+}
+.order-items-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/*order add item modal for details page*/
+.add-item-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(16, 47, 97, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    padding: 1rem;
+}
+
+    .add-item-overlay.open {
+        display: flex;
+    }
+
+.add-item-modal {
+    background: #ffffff;
+    border-radius: 20px;
+    width: min(900px, 100%);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(16, 47, 97, 0.25);
+}
+
+.add-item-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--pantreats-border);
+}
+
+.add-item-close {
+    border: none;
+    background: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+.add-item-modal-body {
+    padding: 1rem 1.5rem 1.5rem;
+    overflow-y: auto;
 }
 
 /* fulfilment page */
@@ -1498,6 +1604,11 @@ a:hover {
 
 .inventory-table th:nth-child(6),
 .inventory-table td:nth-child(6) {
+    width: 9%;
+}
+
+.inventory-table th:nth-child(7),
+.inventory-table td:nth-child(7) {
     width: 9%;
 }
 

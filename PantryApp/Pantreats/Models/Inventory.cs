@@ -15,6 +15,7 @@ namespace Pantreats.Models
         public string GenderUse { get; set; }
         public string UnitSize { get; set; }
         public int Quantity { get; set; }
+        public int Points { get; set; }
 
         public InventoryImage? InventoryImage { get; set; } //navigation property
     }

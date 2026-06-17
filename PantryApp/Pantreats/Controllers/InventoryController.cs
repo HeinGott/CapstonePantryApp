@@ -28,7 +28,8 @@ namespace Pantreats.Controllers
                     ItemName = i.ItemName,
                     Quantity = i.Quantity,
                     BrandName = i.BrandName,
-                    Category = i.Category
+                    Category = i.Category,
+                    Points = i.Points
                 })
                 .ToList();
             // Store total count in ViewBag
@@ -224,6 +225,7 @@ namespace Pantreats.Controllers
             dbItem.GenderUse = item.GenderUse;
             dbItem.UnitSize = item.UnitSize;
             dbItem.Quantity = item.Quantity;
+            dbItem.Points = item.Points;
 
             await _context.SaveChangesAsync();
 

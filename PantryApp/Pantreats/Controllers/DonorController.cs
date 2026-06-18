@@ -234,6 +234,16 @@ namespace Pantreats.Controllers
             return View(model);
         }
 
+        //ADMIN PAGE TO SHOW ALL DONOR DONATIONS
+        public async Task<IActionResult> Donations()
+        {
+            var donations = await _context.Donations
+                .Include(d => d.Donor)
+                .Include(d => d.DonationItems)
+                .ToListAsync();
+            return View(donations);
+        }
+
         public IActionResult CreateDonation()
         {
             return View();

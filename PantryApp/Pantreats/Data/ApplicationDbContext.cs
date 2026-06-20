@@ -30,13 +30,17 @@ namespace Pantreats.Data
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Inventory)
                 .WithMany()
-                .HasForeignKey(oi => oi.InventoryUPC)
+                .HasForeignKey(oi => oi.InventoryItemId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             //set all the points in inventory to have a default value of 1
             modelBuilder.Entity<Inventory>()
                 .Property(i => i.Points)
                 .HasDefaultValue(1);
+
+            modelBuilder.Entity<Inventory>()
+                .HasIndex(i => i.UPC)
+                .IsUnique();
 
             //configures the relationships between Orders and OrderFulfilment
             modelBuilder.Entity<OrderFulfilment>()
@@ -47,14 +51,14 @@ namespace Pantreats.Data
 
             modelBuilder.Entity<InventoryImage>(entity =>
             {
-                entity.HasKey(e => e.UPC);
+                entity.HasKey(e => e.InventoryItemId);
 
                 entity.Property(e => e.ImageData)
                       .HasColumnType("varbinary(max)");
                 //configures the relationships between InventoryImage and Inventory
                 entity.HasOne(e => e.Inventory)
                     .WithOne(i => i.InventoryImage)
-                    .HasForeignKey<InventoryImage>(e => e.UPC);
+                    .HasForeignKey<InventoryImage>(e => e.InventoryItemId);
 
             });
         }

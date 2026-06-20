@@ -5,6 +5,7 @@ namespace Pantreats.Models
     {
         public int OrderItemId { get; set; }
         public int OrderId { get; set; } // Foreign key to Orders
+        public int? InventoryItemId { get; set; } // Foreign key to Inventory
         public string? InventoryUPC { get; set; } // Foreign key to Inventory
         public string ItemName { get; set; }
         public string Category { get; set; }

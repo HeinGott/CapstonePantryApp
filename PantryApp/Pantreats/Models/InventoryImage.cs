@@ -5,7 +5,7 @@ namespace Pantreats.Models
     public class InventoryImage
     {
         [Key]
-        public string UPC {  get; set; }
+        public int InventoryItemId { get; set; }
 
         [Column(TypeName = "varbinary(max)")]
         public byte[] ImageData { get; set; }

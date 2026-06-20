@@ -2,13 +2,166 @@
 
 @{
     ViewData["Title"] = "Shop";
-    var categories = Model.Items
-        .Select(item => item.Category)
-        .Where(category => !string.IsNullOrWhiteSpace(category))
+    var subcategories = Model.Items
+        .Select(item => item.Subcategory)
+        .Where(subcategory => !string.IsNullOrWhiteSpace(subcategory))
         .Distinct(StringComparer.OrdinalIgnoreCase)
-        .OrderBy(category => category)
+        .OrderBy(subcategory => subcategory)
         .ToList();
+
+    string GetSubcategoryIconPath(string subcategory) => subcategory.ToLowerInvariant() switch
+    {
+        var value when value.Contains("bean") => "~/images/subcategories/bean-green-bean-snap-svgrepo-com.svg",
+        var value when value.Contains("grocery") || value.Contains("cereal") || value.Contains("pantry") => "~/images/subcategories/groceries-svgrepo-com.svg",
+        var value when value.Contains("pasta") => "~/images/subcategories/pasta-svgrepo-com.svg",
+        var value when value.Contains("poultry") || value.Contains("chicken") || value.Contains("meat") => "~/images/subcategories/poultry-leg-svgrepo-com.svg",
+        var value when value.Contains("snack") => "~/images/subcategories/snacks-popcorn-svgrepo-com.svg",
+        var value when value.Contains("soup") => "~/images/subcategories/soup-svgrepo-com.svg",
+        var value when value.Contains("tomato") => "~/images/subcategories/tomato-svgrepo-com.svg",
+        var value when value.Contains("toothpaste") || value.Contains("dental") || value.Contains("toiletry") || value.Contains("hygiene") || value.Contains("oral") => "~/images/subcategories/toothpaste-health-care-svgrepo-com.svg",
+        var value when value.Contains("vegetable") || value.Contains("produce") || value.Contains("salad") => "~/images/subcategories/vegetables-salad-svgrepo-com.svg",
+        _ => string.Empty
+    };
+
+    string GetSubcategoryDisplayName(string subcategory) =>
+        string.Equals(subcategory, "Pantry - Other", StringComparison.OrdinalIgnoreCase) ? "Other" : subcategory;
 }
+
+<style>
+    .shop-page .shop-filter-bar {
+        display: block;
+        border: 1px solid #d8e2ef;
+        border-radius: 24px;
+        background: #fff;
+        padding: 1.35rem 1.35rem 1rem;
+        box-shadow: none;
+    }
+
+    .shop-page .shop-subcategory-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        width: 100%;
+    }
+
+    .shop-page .shop-subcategory-card {
+        border: 0;
+        background: transparent;
+        padding: .35rem .25rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .55rem;
+        color: #183153;
+        transition: transform .15s ease, opacity .15s ease;
+        width: 100%;
+    }
+
+    .shop-page .shop-subcategory-card:hover {
+        transform: translateY(-2px);
+        opacity: .92;
+    }
+
+    .shop-page .shop-subcategory-card:focus {
+        outline: 0;
+    }
+
+    .shop-page .shop-subcategory-card:focus-visible {
+        outline: 2px solid rgba(24, 49, 83, .25);
+        outline-offset: 3px;
+        border-radius: 20px;
+    }
+
+    .shop-page .shop-subcategory-card.active .shop-subcategory-icon {
+        background: #183153;
+        color: #fff;
+        box-shadow: 0 10px 20px rgba(24, 49, 83, .18);
+    }
+
+    .shop-page .shop-subcategory-card.active .shop-subcategory-label {
+        color: #183153;
+    }
+
+    .shop-page .shop-subcategory-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #e8f1df;
+        overflow: hidden;
+        padding: .7rem;
+    }
+
+    .shop-page .shop-subcategory-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: brightness(0) saturate(100%) invert(49%) sepia(64%) saturate(563%) hue-rotate(46deg) brightness(96%) contrast(88%);
+    }
+
+    .shop-page .shop-subcategory-fallback {
+        color: #74a833;
+        font-size: 1.35rem;
+    }
+
+    .shop-page .shop-subcategory-label {
+        font-size: .92rem;
+        font-weight: 600;
+        line-height: 1.2;
+        text-align: center;
+    }
+
+    .shop-page .shop-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: nowrap;
+        width: 100%;
+    }
+
+    .shop-page .shop-toolbar-search {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .shop-page .shop-search-input-wrap {
+        width: 100%;
+    }
+
+    .shop-page .shop-search-input-wrap .form-control {
+        width: 100%;
+    }
+
+    .shop-page .shop-toolbar-actions {
+        flex: 0 0 auto;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: nowrap;
+    }
+
+    .shop-page .shop-cart-button {
+        width: auto;
+        white-space: nowrap;
+    }
+
+    @@media (max-width: 768px) {
+        .shop-page .shop-toolbar {
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+
+        .shop-page .shop-toolbar-actions,
+        .shop-page .shop-cart-button {
+            width: 100%;
+        }
+    }
+</style>
 
 <div class="shop-page py-4"
      data-page-size="@Model.PageSize"
@@ -67,42 +220,57 @@
     else
     {
         <section class="shop-filter-bar mb-4" id="shopFilterBar">
-            <div class="shop-filter-search">
-                <label class="form-label mb-2" for="shopSearchInput">Find an item</label>
-                <div class="shop-search-input-wrap">
-                    <i class="bi bi-search"></i>
-                    <input type="search"
-                           class="form-control"
-                           id="shopSearchInput"
-                           placeholder="Search by item name, brand, or size" />
-                </div>
-            </div>
-
-            <div class="shop-filter-pills-wrap">
-                <span class="shop-filter-label">Category</span>
-                <div class="shop-filter-pills" id="shopCategoryPills">
-                    <button type="button" class="btn shop-category-pill active" data-category-filter="all">All</button>
-                    @foreach (var category in categories)
-                    {
-                        <button type="button"
-                                class="btn shop-category-pill"
-                                data-category-filter="@category">
-                            @category
-                        </button>
-                    }
-                </div>
-            </div>
-
-            <div class="shop-filter-cart">
-                <button type="button"
-                        class="btn shop-cart-button"
-                        id="cartToggleButton"
-                        aria-controls="shopCartPanel"
-                        aria-expanded="false">
-                    <i class="bi bi-basket2"></i>
-                    Cart
-                    <span id="cartCountBadge" class="badge rounded-pill">0</span>
+            <div class="shop-subcategory-strip">
+                <button type="button" class="shop-subcategory-card active" data-subcategory-filter="all">
+                    <span class="shop-subcategory-icon">
+                        <img src="@Url.Content("~/images/subcategories/groceries-svgrepo-com.svg")" alt="All Items" />
+                    </span>
+                    <span class="shop-subcategory-label">All Items</span>
                 </button>
+                @foreach (var subcategory in subcategories)
+                {
+                    var iconPath = GetSubcategoryIconPath(subcategory);
+                    var displayName = GetSubcategoryDisplayName(subcategory);
+                    <button type="button"
+                            class="shop-subcategory-card"
+                            data-subcategory-filter="@subcategory">
+                        <span class="shop-subcategory-icon">
+                            @if (!string.IsNullOrWhiteSpace(iconPath))
+                            {
+                                <img src="@Url.Content(iconPath)" alt="@displayName" />
+                            }
+                            else
+                            {
+                                <i class="bi bi-tag-fill shop-subcategory-fallback"></i>
+                            }
+                        </span>
+                        <span class="shop-subcategory-label">@displayName</span>
+                    </button>
+                }
+            </div>
+
+            <div class="shop-toolbar">
+                <div class="shop-toolbar-search">
+                    <div class="shop-search-input-wrap">
+                        <i class="bi bi-search"></i>
+                        <input type="search"
+                               class="form-control"
+                               id="shopSearchInput"
+                               placeholder="Search by item name, brand, subcategory, or size" />
+                    </div>
+                </div>
+
+                <div class="shop-toolbar-actions">
+                    <button type="button"
+                            class="btn shop-cart-button"
+                            id="cartToggleButton"
+                            aria-controls="shopCartPanel"
+                            aria-expanded="false">
+                        <i class="bi bi-basket2"></i>
+                        Cart
+                        <span id="cartCountBadge" class="badge rounded-pill">0</span>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -115,14 +283,14 @@
                          data-shop-item
                          data-upc="@item.UPC"
                          data-stock="@item.Quantity"
-                         data-category="@item.Category"
+                         data-subcategory="@item.Subcategory"
                          data-item-name="@item.ItemName"
                          data-brand-name="@item.BrandName"
                          data-unit-size="@item.UnitSize">
                     <div class="shop-item-image">
                         <img src="~/images/items/@(item.ImageName).png"
                              alt="@item.ItemName"
-                             data-fallback-src="@Url.Action("GetImage", "Inventory", new { upc = item.UPC })"
+                             data-fallback-src="@Url.Action("GetImage", "Inventory", new { itemId = item.ItemId })"
                              onerror="if (!this.dataset.retried) { this.dataset.retried = 'true'; this.src = this.dataset.fallbackSrc; } else { this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none'); }" />
                         <div class="shop-image-fallback d-none">
                             <i class="bi bi-bag-heart"></i>
@@ -130,7 +298,7 @@
                     </div>
 
                     <div class="shop-item-body">
-                        <div class="shop-item-meta">@item.Category</div>
+                        <div class="shop-item-meta">@item.Subcategory</div>
                         <h2 class="shop-item-title">@item.ItemName</h2>
                         <p class="shop-item-brand">@item.BrandName</p>
                         <p class="shop-item-size">@item.UnitSize</p>
@@ -186,13 +354,13 @@
             const viewOrdersLink = document.getElementById('viewOrdersLink');
             const pagination = document.getElementById('shopPagination');
             const searchInput = document.getElementById('shopSearchInput');
-            const categoryPills = Array.from(document.querySelectorAll('[data-category-filter]'));
+            const subcategoryButtons = Array.from(document.querySelectorAll('[data-subcategory-filter]'));
             const emptyResults = document.getElementById('shopEmptyResults');
             const shopListAnchor = document.getElementById('shopFilterBar') || document.getElementById('shopGrid');
 
             let cart = loadCart().map(normalizeCartItem).filter(item => item.upc);
             let currentPage = 1;
-            let activeCategory = 'all';
+            let activeSubcategory = 'all';
             let searchTerm = '';
             let statusTimeoutId = null;
             let statusHideTimeoutId = null;
@@ -209,10 +377,10 @@
                 renderPage(1);
             });
 
-            categoryPills.forEach(button => {
+            subcategoryButtons.forEach(button => {
                 button.addEventListener('click', () => {
-                    activeCategory = button.dataset.categoryFilter || 'all';
-                    categoryPills.forEach(pill => pill.classList.toggle('active', pill === button));
+                    activeSubcategory = button.dataset.subcategoryFilter || 'all';
+                    subcategoryButtons.forEach(pill => pill.classList.toggle('active', pill === button));
                     renderPage(1);
                 });
             });
@@ -325,18 +493,19 @@
 
             function getFilteredItems() {
                 return itemCards.filter(card => {
-                    const category = String(card.dataset.category || '').toLowerCase();
+                    const subcategory = String(card.dataset.subcategory || '').toLowerCase();
                     const itemName = String(card.dataset.itemName || '').toLowerCase();
                     const brandName = String(card.dataset.brandName || '').toLowerCase();
                     const unitSize = String(card.dataset.unitSize || '').toLowerCase();
-                    const matchesCategory = activeCategory === 'all' || category === activeCategory.toLowerCase();
+                    const matchesSubcategory = activeSubcategory === 'all' || subcategory === activeSubcategory.toLowerCase();
                     const matchesSearch = !searchTerm
                         || itemName.includes(searchTerm)
                         || brandName.includes(searchTerm)
+                        || subcategory.includes(searchTerm)
                         || unitSize.includes(searchTerm)
                         || `${brandName} ${itemName}`.includes(searchTerm);
 
-                    return matchesCategory && matchesSearch;
+                    return matchesSubcategory && matchesSearch;
                 });
             }
 

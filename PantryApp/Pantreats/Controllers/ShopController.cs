@@ -31,10 +31,12 @@ namespace Pantreats.Controllers
             var items = await query
                 .Select(i => new ShopItemViewModel
                 {
+                    ItemId = i.ItemId,
                     UPC = i.UPC,
                     ItemName = i.ItemName,
                     BrandName = i.BrandName,
                     Category = i.Category,
+                    Subcategory = i.Subcategory,
                     UnitSize = i.UnitSize,
                     Quantity = i.Quantity,
                     ImageName = BuildImageName(i.ItemName)
@@ -67,10 +69,12 @@ namespace Pantreats.Controllers
                 .Where(i => i.UPC == request.UPC)
                 .Select(i => new ShopItemViewModel
                 {
+                    ItemId = i.ItemId,
                     UPC = i.UPC,
                     ItemName = i.ItemName,
                     BrandName = i.BrandName,
                     Category = i.Category,
+                    Subcategory = i.Subcategory,
                     UnitSize = i.UnitSize,
                     Quantity = i.Quantity,
                     ImageName = BuildImageName(i.ItemName)
@@ -161,6 +165,7 @@ namespace Pantreats.Controllers
                     _context.OrderItems.Add(new OrderItem
                     {
                         OrderId = order.OrderId,
+                        InventoryItemId = inventoryItem.ItemId,
                         InventoryUPC = inventoryItem.UPC,
                         ItemName = inventoryItem.ItemName,
                         Category = inventoryItem.Category,

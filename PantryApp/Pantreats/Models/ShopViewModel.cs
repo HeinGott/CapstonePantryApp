@@ -14,10 +14,12 @@ namespace Pantreats.Models
 
     public class ShopItemViewModel
     {
+        public int ItemId { get; set; }
         public string UPC { get; set; } = string.Empty;
         public string ItemName { get; set; } = string.Empty;
         public string BrandName { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
+        public string Subcategory { get; set; } = string.Empty;
         public string UnitSize { get; set; } = string.Empty;
         public int Quantity { get; set; }
         public string ImageName { get; set; } = string.Empty;

@@ -308,8 +308,11 @@ namespace Pantreats.Data.Migrations
 
             modelBuilder.Entity("Pantreats.Models.Inventory", b =>
                 {
-                    b.Property<string>("UPC")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("ItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ItemId"));
 
                     b.Property<string>("BrandName")
                         .IsRequired()
@@ -343,16 +346,20 @@ namespace Pantreats.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("UPC");
+                    b.Property<string>("UPC")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ItemId");
+
+                    b.HasIndex("UPC")
+                        .IsUnique();
 
                     b.ToTable("Inventory");
                 });
 
             modelBuilder.Entity("Pantreats.Models.InventoryImage", b =>
                 {
-                    b.Property<string>("UPC")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -361,7 +368,10 @@ namespace Pantreats.Data.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
-                    b.HasKey("UPC");
+                    b.Property<int>("InventoryItemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("InventoryItemId");
 
                     b.ToTable("InventoryImages");
                 });
@@ -461,8 +471,11 @@ namespace Pantreats.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("InventoryItemId")
+                        .HasColumnType("int");
+
                     b.Property<string>("InventoryUPC")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ItemName")
                         .IsRequired()
@@ -479,7 +492,7 @@ namespace Pantreats.Data.Migrations
 
                     b.HasKey("OrderItemId");
 
-                    b.HasIndex("InventoryUPC");
+                    b.HasIndex("InventoryItemId");
 
                     b.HasIndex("OrderId");
 
@@ -759,7 +772,7 @@ namespace Pantreats.Data.Migrations
                 {
                     b.HasOne("Pantreats.Models.Inventory", "Inventory")
                         .WithOne("InventoryImage")
-                        .HasForeignKey("Pantreats.Models.InventoryImage", "UPC")
+                        .HasForeignKey("Pantreats.Models.InventoryImage", "InventoryItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -781,7 +794,7 @@ namespace Pantreats.Data.Migrations
                 {
                     b.HasOne("Pantreats.Models.Inventory", "Inventory")
                         .WithMany()
-                        .HasForeignKey("InventoryUPC")
+                        .HasForeignKey("InventoryItemId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Pantreats.Models.Order", null)

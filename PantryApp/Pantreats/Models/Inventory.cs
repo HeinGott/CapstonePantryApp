@@ -7,6 +7,7 @@ namespace Pantreats.Models
     public class Inventory
     {
         [Key]
+        public int ItemId { get; set; }
         public string UPC { get; set; }
         public string ItemName { get; set; }
         public string BrandName { get; set; }

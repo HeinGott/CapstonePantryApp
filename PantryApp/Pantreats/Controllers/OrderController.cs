@@ -82,7 +82,9 @@ namespace Pantreats.Controllers
             //this will restore the stock
             if (item.InventoryUPC != null)
             {
-                var inventory = _context.Inventory.FirstOrDefault(inv => inv.UPC == item.InventoryUPC);
+                var inventory = item.InventoryItemId.HasValue
+                    ? _context.Inventory.FirstOrDefault(inv => inv.ItemId == item.InventoryItemId.Value)
+                    : _context.Inventory.FirstOrDefault(inv => inv.UPC == item.InventoryUPC);
                 if (inventory != null)
                 {
                     inventory.Quantity += item.OrderQuantity;
@@ -140,6 +142,7 @@ namespace Pantreats.Controllers
             // building a mini inventory to add items to the order
             var item = new OrderItem
             {
+                InventoryItemId = inventory.ItemId,
                 InventoryUPC = inventory.UPC,
                 ItemName = inventory.ItemName,
                 Category = inventory.Category,

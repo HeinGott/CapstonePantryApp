@@ -124,6 +124,7 @@ using (var scope = app.Services.CreateScope())
     using (var dbScope = app.Services.CreateScope())
     {
         var dbContext = dbScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        dbContext.Database.Migrate();
         //DbSeeder.ClearInventory(dbContext); this clears the inventory table if not commented out 
         DbSeeder.SeedInventory(dbContext, env);
     }

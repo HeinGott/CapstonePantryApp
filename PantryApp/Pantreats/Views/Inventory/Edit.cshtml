@@ -14,19 +14,20 @@
 
     <div class="student-card">
         <form asp-controller="Inventory" asp-action="Edit" method="post" enctype="multipart/form-data">
-            <input type="hidden" asp-for="UPC" />
+            <input type="hidden" asp-for="ItemId" />
 
             <div class="mb-3">
                 <label class="form-label">Current Image</label><br />
 
-                <img src="@Url.Action("GetImage", "Inventory", new { upc = Model.UPC })"
+                <img src="@Url.Action("GetImage", "Inventory", new { itemId = Model.ItemId })"
                      style="max-width:200px; border-radius:8px;"
                      onerror="this.style.display='none'" />
             </div>
 
             <div class="mb-3">
                 <label class="form-label">UPC</label>
-                <input asp-for="UPC" class="form-control" disabled />
+                <input asp-for="UPC" class="form-control" />
+                <span asp-validation-for="UPC" class="text-danger"></span>
             </div>
 
             <div class="mb-3">

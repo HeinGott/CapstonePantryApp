@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Pantreats.Data;
+using Pantreats.Models;
 
 namespace Pantreats.Controllers
 {
     public class InventoryController : Controller
     {
-
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _context;
-
 
         public InventoryController(HttpClient httpClient, ApplicationDbContext context)
         {
@@ -18,176 +19,111 @@ namespace Pantreats.Controllers
 
         public IActionResult Index()
         {
-            //query list of inventory items from db
-            var inventory = _context.Inventory //.AsNoTracking() is important to keep page load fast -nick
+            var inventory = _context.Inventory
                 .AsNoTracking()
                 .OrderBy(i => i.ItemName)
                 .Select(i => new Inventory
                 {
+                    ItemId = i.ItemId,
                     UPC = i.UPC,
                     ItemName = i.ItemName,
                     Quantity = i.Quantity,
                     BrandName = i.BrandName,
-                    Category = i.Category,
+                    Subcategory = i.Subcategory,
+                    UnitSize = i.UnitSize,
                     Points = i.Points
                 })
                 .ToList();
-            // Store total count in ViewBag
+
             ViewBag.Count = inventory.Count;
-            // Send list to the view
             return View(inventory);
         }
 
-
-
-        [HttpPost]
-        public async Task<IActionResult> LookupUPC(string upc)
+        [HttpGet]
+        public async Task<IActionResult> Create(string? upc)
         {
-            if (string.IsNullOrEmpty(upc))
+            var model = new Inventory
             {
-                ViewBag.Error = "UPC is required";
-                return View("UPCResult");
-            }
+                UPC = upc?.Trim() ?? string.Empty,
+                ItemName = string.Empty,
+                BrandName = string.Empty,
+                Category = string.Empty,
+                Subcategory = string.Empty,
+                GenderUse = string.Empty,
+                UnitSize = string.Empty,
+                Quantity = 1
+            };
 
-            //string userKey = "YOUR_UPCITEMDB_KEY"; this project will use free api which does not need userkey, only update if switching to paid -Nick
-            string apiUrl = $"https://api.upcitemdb.com/prod/trial/lookup?upc={upc}";
-
-            try
+            if (!string.IsNullOrWhiteSpace(upc))
             {
-                var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
-                /*
-                 * only use this if using paid version of api -Nick
-                request.Headers.Add("user_key", userKey);
-                request.Headers.Add("key_type", "3scale");
-                */
-                var response = await _httpClient.SendAsync(request);
+                var lookupResult = await TryLookupProductAsync(upc.Trim());
 
-                if (!response.IsSuccessStatusCode)
+                if (lookupResult.Success && lookupResult.Product != null)
                 {
-                    ViewBag.Error = "Product not found";
-                    return View("UPCResult");
+                    ApplyLookupToInventory(model, lookupResult.Product, upc.Trim());
+                    ViewBag.LookupImageUrl = lookupResult.Product.images;
+                    ViewBag.LookupSucceeded = true;
                 }
-
-                var json = await response.Content.ReadAsStringAsync();
-
-                //UPCitemDB returns JSON object with items array -Nick
-                var obj = JsonConvert.DeserializeObject<dynamic>(json);
-
-                if (obj.items == null || obj.items.Count == 0)
+                else
                 {
-                    ViewBag.Error = "Product not found";
-                    return View("UPCResult");
+                    ViewBag.LookupError = lookupResult.ErrorMessage ?? "Product not found";
                 }
-
-                var item = obj.items[0];
-
-                var product = new LookupResult
-                {
-                    title = item.title,
-                    brand = item.brand,
-                    category = item.category,
-                    description = item.description,
-                    weight = item.weight,
-                    images = item.images != null && item.images.Count > 0 ? item.images[0].ToString() : null
-                };
-
-               
-
-
-                ViewBag.UPC = upc;
-
-                return View("UPCResult", product); 
             }
-            catch (Exception ex)
-            {
-                ViewBag.Error = ex.Message;
-                return View("UPCResult");
-            }
+
+            return View(model);
         }
 
+        [HttpPost]
+        public IActionResult LookupUPC(string upc)
+        {
+            if (string.IsNullOrWhiteSpace(upc))
+            {
+                return RedirectToAction(nameof(Create));
+            }
+
+            return RedirectToAction(nameof(Create), new { upc = upc.Trim() });
+        }
 
         [HttpPost]
-        public async Task<IActionResult> AddInventoryItem(Inventory item, IFormFile? imageFile, string imageUrl)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Inventory item, IFormFile? imageFile, string? imageUrl)
         {
+            NormalizeInventory(item);
+
+            if (string.IsNullOrWhiteSpace(item.UPC))
+            {
+                ModelState.AddModelError(nameof(item.UPC), "UPC is required.");
+            }
+
+            if (await _context.Inventory.AnyAsync(i => i.UPC == item.UPC))
+            {
+                ModelState.AddModelError(nameof(item.UPC), "An inventory item with this UPC already exists.");
+            }
 
             if (!ModelState.IsValid)
             {
-                ViewBag.Error = "Invalid Model";
-                return RedirectToAction(nameof(Index));
+                ViewBag.LookupImageUrl = imageUrl;
+                return View(item);
             }
-
-            
 
             _context.Inventory.Add(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-
-            //user file upload
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                using var ms = new MemoryStream();
-
-                byte[] imageBytes = null;
-                string contentType = null;
-
-
-                await imageFile.CopyToAsync(ms);
-
-                imageBytes = ms.ToArray();
-                contentType = imageFile.ContentType;
-
-
-
-                _context.InventoryImages.Add(new InventoryImage
-                {
-                    UPC = item.UPC,
-                    ImageData = imageBytes,
-                    ContentType = contentType
-                });
-
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
-            }
-
-
-
-            //if imageurl exists save to db for item upc
-            if (!string.IsNullOrEmpty(imageUrl))
-            {
-                try
-                {
-                    var response = await _httpClient.GetAsync(imageUrl);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var bytes = await response.Content.ReadAsByteArrayAsync();
-
-                        _context.InventoryImages.Add(new InventoryImage
-                        {
-                            UPC = item.UPC,
-                            ImageData = bytes,
-                            ContentType = response.Content.Headers.ContentType?.MediaType ?? "image/jpeg"
-                        });
-
-                        await _context.SaveChangesAsync();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Image save failed: " + ex.Message);
-                }
-            }
-
-
+            await SaveInventoryImageAsync(item.ItemId, imageFile, imageUrl);
 
             return RedirectToAction(nameof(Index));
         }
 
-
-        public IActionResult Edit(string upc)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public Task<IActionResult> AddInventoryItem(Inventory item, IFormFile? imageFile, string? imageUrl)
         {
-            var item = _context.Inventory.Include(i=> i.InventoryImage).FirstOrDefault(i => i.UPC == upc);
+            return Create(item, imageFile, imageUrl);
+        }
+
+        public IActionResult Edit(int id)
+        {
+            var item = _context.Inventory.Include(i => i.InventoryImage).FirstOrDefault(i => i.ItemId == id);
 
             if (item == null)
             {
@@ -198,26 +134,34 @@ namespace Pantreats.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Inventory item)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Inventory item, IFormFile? imageFile, string? imageUrl)
         {
+            NormalizeInventory(item);
+
+            if (string.IsNullOrWhiteSpace(item.UPC))
+            {
+                ModelState.AddModelError(nameof(item.UPC), "UPC is required.");
+            }
+
+            if (await _context.Inventory.AnyAsync(i => i.UPC == item.UPC && i.ItemId != item.ItemId))
+            {
+                ModelState.AddModelError(nameof(item.UPC), "An inventory item with this UPC already exists.");
+            }
+
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage);
-
-                return BadRequest(errors);
+                return View(item);
             }
-            var imageUrl = Request.Form["imageUrl"].ToString();
-            var imageFile = Request.Form.Files["imageFile"];
 
-            var dbItem = await _context.Inventory
-                .FirstOrDefaultAsync(i => i.UPC == item.UPC); //find item in db because it is no longer tracked
+            var dbItem = await _context.Inventory.FirstOrDefaultAsync(i => i.ItemId == item.ItemId);
 
             if (dbItem == null)
+            {
                 return NotFound();
+            }
 
-            
+            dbItem.UPC = item.UPC;
             dbItem.ItemName = item.ItemName;
             dbItem.BrandName = item.BrandName;
             dbItem.Category = item.Category;
@@ -228,84 +172,48 @@ namespace Pantreats.Controllers
             dbItem.Points = item.Points;
 
             await _context.SaveChangesAsync();
-
-            //check if user gave image
-            if ((imageFile == null || imageFile.Length == 0) && string.IsNullOrWhiteSpace(imageUrl))
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
-            byte[] imageBytes = null;
-            string contentType = null;
-
-            //user file upload
-            if(imageFile != null && imageFile.Length > 0)
-            {
-                using var ms = new MemoryStream();
-                
-                await imageFile.CopyToAsync(ms);
-
-                imageBytes = ms.ToArray();
-                contentType = imageFile.ContentType;
-            }
-
-            //user image url
-            else if(!string.IsNullOrWhiteSpace(imageUrl))
-            {
-                var response = await _httpClient.GetAsync(imageUrl);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    imageBytes = await response.Content.ReadAsByteArrayAsync();
-                    contentType = response.Content.Headers.ContentType?.MediaType;
-                }
-            }
-
-            if(imageBytes != null)
-            {
-                var existing = await _context.InventoryImages.FindAsync(item.UPC);
-
-                //make new inventoryimage entry if not existing replace if existing in table
-                if(existing == null)
-                {
-                    _context.InventoryImages.Add(new InventoryImage
-                    {
-                        UPC = item.UPC,
-                        ImageData = imageBytes,
-                        ContentType = contentType
-                    });
-                }
-                else
-                {
-                    existing.ImageData = imageBytes;
-                    existing.ContentType = contentType;
-                }
-                await _context.SaveChangesAsync();
-            }
+            await SaveInventoryImageAsync(item.ItemId, imageFile, imageUrl);
 
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
-        public IActionResult DeleteConfirmed(string upc)
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
         {
-            var item = _context.Inventory.FirstOrDefault(i => i.UPC == upc);
+            var item = _context.Inventory.FirstOrDefault(i => i.ItemId == id);
 
             if (item != null)
             {
+                var itemName = item.ItemName;
                 _context.Inventory.Remove(item);
                 _context.SaveChanges();
+                TempData["InventoryToast"] = $"{itemName} deleted successfully.";
             }
 
             return RedirectToAction(nameof(Index));
         }
 
-
-        public async Task<IActionResult> GetImage(string upc)
+        public async Task<IActionResult> GetImage(int? itemId, string? upc)
         {
-            var image = await _context.InventoryImages.FindAsync(upc);
+            int? resolvedItemId = itemId;
 
-            if(image == null)
+            if (!resolvedItemId.HasValue && !string.IsNullOrWhiteSpace(upc))
+            {
+                resolvedItemId = await _context.Inventory
+                    .Where(i => i.UPC == upc)
+                    .Select(i => (int?)i.ItemId)
+                    .FirstOrDefaultAsync();
+            }
+
+            if (!resolvedItemId.HasValue)
+            {
+                return NotFound();
+            }
+
+            var image = await _context.InventoryImages.FirstOrDefaultAsync(i => i.InventoryItemId == resolvedItemId.Value);
+
+            if (image == null)
             {
                 return NotFound();
             }
@@ -313,5 +221,127 @@ namespace Pantreats.Controllers
             return File(image.ImageData, image.ContentType);
         }
 
+        private async Task SaveInventoryImageAsync(int itemId, IFormFile? imageFile, string? imageUrl)
+        {
+            byte[]? imageBytes = null;
+            string? contentType = null;
+
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                using var ms = new MemoryStream();
+                await imageFile.CopyToAsync(ms);
+                imageBytes = ms.ToArray();
+                contentType = imageFile.ContentType;
+            }
+            else if (!string.IsNullOrWhiteSpace(imageUrl))
+            {
+                try
+                {
+                    var response = await _httpClient.GetAsync(imageUrl);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        imageBytes = await response.Content.ReadAsByteArrayAsync();
+                        contentType = response.Content.Headers.ContentType?.MediaType ?? "image/jpeg";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Image save failed: " + ex.Message);
+                }
+            }
+
+            if (imageBytes == null)
+            {
+                return;
+            }
+
+            var existing = await _context.InventoryImages.FirstOrDefaultAsync(i => i.InventoryItemId == itemId);
+
+            if (existing == null)
+            {
+                _context.InventoryImages.Add(new InventoryImage
+                {
+                    InventoryItemId = itemId,
+                    ImageData = imageBytes,
+                    ContentType = contentType ?? "image/jpeg"
+                });
+            }
+            else
+            {
+                existing.ImageData = imageBytes;
+                existing.ContentType = contentType ?? existing.ContentType;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task<(bool Success, LookupResult? Product, string? ErrorMessage)> TryLookupProductAsync(string upc)
+        {
+            if (string.IsNullOrWhiteSpace(upc))
+            {
+                return (false, null, "UPC is required");
+            }
+
+            var apiUrl = $"https://api.upcitemdb.com/prod/trial/lookup?upc={upc}";
+
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
+                var response = await _httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return (false, null, "Product not found");
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var obj = JsonConvert.DeserializeObject<dynamic>(json);
+
+                if (obj?.items == null || obj.items.Count == 0)
+                {
+                    return (false, null, "Product not found");
+                }
+
+                var item = obj.items[0];
+
+                var product = new LookupResult
+                {
+                    upc = upc,
+                    title = item.title,
+                    brand = item.brand,
+                    category = item.category,
+                    description = item.description,
+                    weight = item.weight,
+                    images = item.images != null && item.images.Count > 0 ? item.images[0].ToString() : null
+                };
+
+                return (true, product, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, null, ex.Message);
+            }
+        }
+
+        private static void ApplyLookupToInventory(Inventory inventory, LookupResult product, string upc)
+        {
+            inventory.UPC = upc;
+            inventory.ItemName = product.title ?? string.Empty;
+            inventory.BrandName = product.brand ?? string.Empty;
+            inventory.Category = product.category ?? string.Empty;
+            inventory.UnitSize = product.weight ?? string.Empty;
+        }
+
+        private static void NormalizeInventory(Inventory item)
+        {
+            item.UPC = item.UPC?.Trim() ?? string.Empty;
+            item.ItemName ??= string.Empty;
+            item.BrandName ??= string.Empty;
+            item.Category ??= string.Empty;
+            item.Subcategory ??= string.Empty;
+            item.GenderUse ??= string.Empty;
+            item.UnitSize ??= string.Empty;
+        }
     }
 }

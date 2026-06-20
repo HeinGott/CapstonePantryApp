@@ -196,39 +196,27 @@ namespace Pantreats.Controllers
             var donor = _context.Donors
                 .FirstOrDefault(d => d.UserId == userId);
 
-            var donorName = donor != null ? donor.Name : User.Identity?.Name ?? "Donor";
+            if (donor == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var donations = _context.Donations
+                .Include(d => d.DonationItems)
+                .Where(d => d.DonorId == donor.DonorID)
+                .OrderByDescending(d => d.DonationDate)
+                .ToList();
 
             var model = new DonorDashboardViewModel
             {
-                DonorName = donorName,
-                TotalDonations = 2,
-                TotalItemsDonated = 15,
-                LastDonationDate = DateTime.Now,
-                Donations = new List<Donation>
-        {
-            new Donation
-            {
-                DonationId = 1,
-                DonorId = donor?.DonorID ?? 0,
-                DonationDate = DateTime.Now.AddDays(-10),
-                Status = "Approved",
-                DonationItems = new List<DonationItem>
-                {
-                    new DonationItem { ItemName = "Rice", Quantity = 10 }
-                }
-            },
-            new Donation
-            {
-                DonationId = 2,
-                DonorId = donor?.DonorID ?? 0,
-                DonationDate = DateTime.Now,
-                Status = "Pending",
-                DonationItems = new List<DonationItem>
-                {
-                    new DonationItem { ItemName = "Beans", Quantity = 5 }
-                }
-            }
-        }
+                DonorName = donor.Name,
+                TotalDonations = donations.Count,
+                TotalItemsDonated = donations
+                    .SelectMany(d => d.DonationItems)
+                    .Sum(i => i.Quantity),
+                LastDonationDate = donations
+                    .FirstOrDefault()?.DonationDate,
+                Donations = donations
             };
 
             return View(model);

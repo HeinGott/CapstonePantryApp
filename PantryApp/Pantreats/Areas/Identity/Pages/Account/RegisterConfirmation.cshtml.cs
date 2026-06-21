@@ -44,7 +44,11 @@ namespace Pantreats.Areas.Identity.Pages.Account
         /// </summary>
         public string EmailConfirmationUrl { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string email, string returnUrl = null)
+        public string ReturnUrl { get; set; }
+
+        public string RegistrationType { get; set; }
+
+        public async Task<IActionResult> OnGetAsync(string email, string returnUrl = null, string role = null)
         {
             if (email == null)
             {
@@ -59,6 +63,8 @@ namespace Pantreats.Areas.Identity.Pages.Account
             }
 
             Email = email;
+            ReturnUrl = returnUrl;
+            RegistrationType = NormalizeRegistrationType(role);
             // Once you add a real email sender, you should remove this code that lets you confirm the account
             DisplayConfirmAccountLink = true;
             if (DisplayConfirmAccountLink)
@@ -74,6 +80,21 @@ namespace Pantreats.Areas.Identity.Pages.Account
             }
 
             return Page();
+        }
+
+        private static string NormalizeRegistrationType(string registrationType)
+        {
+            if (string.IsNullOrWhiteSpace(registrationType))
+            {
+                return string.Empty;
+            }
+
+            return registrationType.Trim().ToLowerInvariant() switch
+            {
+                "student" => "student",
+                "donor" => "donor",
+                _ => string.Empty
+            };
         }
     }
 }

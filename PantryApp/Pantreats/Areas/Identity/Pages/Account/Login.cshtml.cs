@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using Pantreats.Data;
+using Pantreats.Models;
 
 namespace Pantreats.Areas.Identity.Pages.Account
 {
@@ -22,15 +24,18 @@ namespace Pantreats.Areas.Identity.Pages.Account
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly ApplicationDbContext _context;
 
         public LoginModel(
             SignInManager<IdentityUser> signInManager,
             UserManager<IdentityUser> userManager,
-            ILogger<LoginModel> logger)
+            ILogger<LoginModel> logger,
+            ApplicationDbContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
+            _context = context;
         }
 
         /// <summary>
@@ -144,7 +149,7 @@ namespace Pantreats.Areas.Identity.Pages.Account
 
                         if (await _userManager.IsInRoleAsync(user, "Students"))
                         {
-                            return RedirectToAction("Index", "Home");
+                            return RedirectToAction("Index", "Shop");
                         }
 
                         if (await _userManager.IsInRoleAsync(user, "Volunteers"))
@@ -156,6 +161,20 @@ namespace Pantreats.Areas.Identity.Pages.Account
                         {
                             return RedirectToAction("Index", "Donor"); // Redirect to Donor dashboard
                         }
+
+                        var application = await _context.UserApplications
+                            .AsNoTracking()
+                            .OrderByDescending(foundApplication => foundApplication.RegistrationDate)
+                            .ThenByDescending(foundApplication => foundApplication.ApplicationId)
+                            .FirstOrDefaultAsync(foundApplication => foundApplication.UserId == user.Id);
+
+                        if (application?.ApplicationStatus == ApplicationStatuses.Pending ||
+                            application?.ApplicationStatus == ApplicationStatuses.Approved)
+                        {
+                            return RedirectToAction("Status", "Student");
+                        }
+
+                        return RedirectToAction("Apply", "Student");
                     }
 
                     return LocalRedirect(returnUrl);

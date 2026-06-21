@@ -1,4 +1,5 @@
 using DocumentFormat.OpenXml.InkML;
+using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -49,7 +50,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 // turn on identity and roles
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = true;
+    options.SignIn.RequireConfirmedAccount = false;
 })
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -124,7 +125,7 @@ using (var scope = app.Services.CreateScope())
     using (var dbScope = app.Services.CreateScope())
     {
         var dbContext = dbScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.Migrate();
+        await PrepareDatabaseAsync(dbContext);
         //DbSeeder.ClearInventory(dbContext); this clears the inventory table if not commented out 
         DbSeeder.SeedInventory(dbContext, env);
     }
@@ -161,6 +162,71 @@ app.MapRazorPages()
 
 app.Run();
 
+static async Task PrepareDatabaseAsync(ApplicationDbContext dbContext)
+{
+    const string duplicateSchemaMigrationId = "20260621175421_StudentApplicationWorkflow";
+    const string currentEfProductVersion = "10.0.9";
+
+    if (await dbContext.Database.CanConnectAsync())
+    {
+        var pendingMigrations = (await dbContext.Database.GetPendingMigrationsAsync()).ToList();
+
+        // A legacy migration was accidentally created as a full schema snapshot.
+        // If the schema already exists, record that migration so startup can continue.
+        if (pendingMigrations.Contains(duplicateSchemaMigrationId) &&
+            await TableExistsAsync(dbContext, "AspNetRoles") &&
+            await TableExistsAsync(dbContext, "__EFMigrationsHistory") &&
+            !await MigrationHistoryContainsAsync(dbContext, duplicateSchemaMigrationId))
+        {
+            await dbContext.Database.ExecuteSqlRawAsync(
+                "INSERT INTO __EFMigrationsHistory (MigrationId, ProductVersion) VALUES ({0}, {1})",
+                duplicateSchemaMigrationId,
+                currentEfProductVersion);
+        }
+    }
+
+    await dbContext.Database.MigrateAsync();
+}
+
+static async Task<bool> TableExistsAsync(ApplicationDbContext dbContext, string tableName)
+{
+    var connectionString = dbContext.Database.GetConnectionString()
+        ?? throw new InvalidOperationException("The database connection string has not been initialized.");
+
+    await using var connection = new SqlConnection(connectionString);
+    await connection.OpenAsync();
+
+    await using var command = connection.CreateCommand();
+    command.CommandText = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @tableName";
+
+    var parameter = command.CreateParameter();
+    parameter.ParameterName = "@tableName";
+    parameter.Value = tableName;
+    command.Parameters.Add(parameter);
+
+    var result = await command.ExecuteScalarAsync();
+    return Convert.ToInt32(result) > 0;
+}
+
+static async Task<bool> MigrationHistoryContainsAsync(ApplicationDbContext dbContext, string migrationId)
+{
+    var connectionString = dbContext.Database.GetConnectionString()
+        ?? throw new InvalidOperationException("The database connection string has not been initialized.");
+
+    await using var connection = new SqlConnection(connectionString);
+    await connection.OpenAsync();
+
+    await using var command = connection.CreateCommand();
+    command.CommandText = "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId = @migrationId";
+
+    var parameter = command.CreateParameter();
+    parameter.ParameterName = "@migrationId";
+    parameter.Value = migrationId;
+    command.Parameters.Add(parameter);
+
+    var result = await command.ExecuteScalarAsync();
+    return Convert.ToInt32(result) > 0;
+}
 
 
 

@@ -160,7 +160,7 @@ namespace Pantreats.Controllers
 
         public IActionResult Register() //add this to show the registration page
         {
-            return View();
+            return RedirectToPage("/Account/Register", new { area = "Identity", role = "donor" });
         }
 
         public IActionResult Login()

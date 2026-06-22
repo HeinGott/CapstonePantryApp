@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using System.Text.RegularExpressions;
 
 namespace Pantreats.Controllers
@@ -146,19 +145,11 @@ namespace Pantreats.Controllers
 
             if (inventoryItems.Any())
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "Anonymous";
-                var userEmail = User.Identity?.Name ?? "Anonymous";
-                var application = await _context.UserApplications
-                    .AsNoTracking()
-                    .OrderByDescending(foundApplication => foundApplication.RegistrationDate)
-                    .ThenByDescending(foundApplication => foundApplication.ApplicationId)
-                    .FirstOrDefaultAsync(foundApplication => foundApplication.UserId == userId);
-
                 order = new Order
                 {
-                    UserId = userId,
-                    Email = userEmail,
-                    PhoneNum = application?.PhoneNum ?? "Not Provided",
+                    UserId = User.Identity?.Name ?? "Anonymous",
+                    Email = User.Identity?.Name ?? "Anonymous",
+                    PhoneNum = "Not Provided",
                     OrderDate = DateTime.Now,
                     Total = selectedUPCs.Count
                 };

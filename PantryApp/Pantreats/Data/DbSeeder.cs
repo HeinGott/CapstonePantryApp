@@ -38,7 +38,6 @@ namespace Pantreats.Data
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
-            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
 
             //check Students role exists -nick
             if (!await roleManager.RoleExistsAsync("Students"))
@@ -62,43 +61,6 @@ namespace Pantreats.Data
 
                 await userManager.CreateAsync(studentUser, studentPassword);
                 await userManager.AddToRoleAsync(studentUser, "Students");
-            }
-
-            if (!context.UserApplications.Any(application => application.UserId == studentUser.Id))
-            {
-                context.UserApplications.Add(new UserApplication
-                {
-                    UserId = studentUser.Id,
-                    StudentId = 10001,
-                    RegistrationDate = DateTime.UtcNow,
-                    ApplicationStatus = ApplicationStatuses.Approved,
-                    ReviewedAt = DateTime.UtcNow,
-                    ReviewedByUserId = studentUser.Id,
-                    FirstName = "Student",
-                    MiddleName = "Demo",
-                    LastName = "User",
-                    DOB = new DateTime(2000, 1, 1),
-                    PhoneNum = "555-0100",
-                    Gender = "Prefer not to say",
-                    StudentStatus = "Full Time",
-                    HouseholdBabiesToddlers = 0,
-                    HouseholdBabiesChildren = 0,
-                    HouseholdTeens = 0,
-                    HouseholdAdults = 1,
-                    HasTransportation = true,
-                    EmploymentStatus = "Student Only",
-                    EmployedHouseMembers = 0,
-                    HasSNAP = false,
-                    HasWIC = false,
-                    HasTANF = false,
-                    IsInterestedInSNAP = false,
-                    IsInterestedInWIC = false,
-                    IsInterestedInTANF = false,
-                    IsActive = true,
-                    Campus = "Main Campus"
-                });
-
-                await context.SaveChangesAsync();
             }
         }
 

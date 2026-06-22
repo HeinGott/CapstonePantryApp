@@ -23,12 +23,9 @@ namespace Pantreats.Controllers
 
             if (!User.IsInRole("Admin"))
             {
-                var userName = User.Identity!.Name;
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var userName = User.Identity!.Name; 
 
-                query = query.Where(o =>
-                    (!string.IsNullOrWhiteSpace(userId) && o.UserId == userId) ||
-                    (!string.IsNullOrWhiteSpace(userName) && (o.UserId == userName || o.Email == userName)));
+                query = query.Where(o => o.UserId == userName);
             }
 
             var orders = query
@@ -51,14 +48,9 @@ namespace Pantreats.Controllers
 
             if (!User.IsInRole("Admin"))
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var userName = User.Identity!.Name;
+                var userId = User.Identity!.Name;
 
-                var isOwner =
-                    (!string.IsNullOrWhiteSpace(userId) && order.UserId == userId) ||
-                    (!string.IsNullOrWhiteSpace(userName) && (order.UserId == userName || order.Email == userName));
-
-                if (!isOwner)
+                if (order.UserId != userId)
                 {
                     return NotFound();
                 }

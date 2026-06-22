@@ -1,252 +1,177 @@
-@model Pantreats.Models.StudentDetailsViewModel
-
-@{
+﻿@{
     ViewData["Title"] = "Student Details";
 
-    string FormatDate(DateTime? value) => value.HasValue ? value.Value.ToString("MM/dd/yyyy") : "Not provided";
-    string FormatDateTime(DateTime? value) => value.HasValue ? value.Value.ToLocalTime().ToString("MM/dd/yyyy h:mm tt") : "Not reviewed yet";
-    string FormatBool(bool value) => value ? "Yes" : "No";
-    string FormatNullableBool(bool? value) => value.HasValue ? (value.Value ? "Yes" : "No") : "Not provided";
+    var studentId = ViewBag.StudentId;
+
+    var studentName = "Jimmy Hendrix";
+    var studentNumber = "10001";
+    var email = "jhendrix392@sccsc.edu";
+    var pointsAvailable = 0;
+
+    var history = new List<dynamic>
+    {
+        new { Type = "Local Transaction", Date = "04/01/2026", Description = "Pantry visit", PointsUsed = 0 },
+        new { Type = "Order", Date = "04/03/2026", Description = "Online pantry order", PointsUsed = 0 },
+        new { Type = "Local Transaction", Date = "04/10/2026", Description = "In-person item pickup", PointsUsed = 0 },
+        new { Type = "Order", Date = "04/15/2026", Description = "Scheduled order pickup", PointsUsed = 0 }
+    };
 }
 
 <div class="student-details-page py-4">
+
     <div class="mb-3">
-        <a asp-action="Index" class="btn student-back-btn">&larr; Back to Students</a>
+        <a asp-controller="Student" asp-action="Index" class="btn student-back-btn">
+            ← Back to Students
+        </a>
     </div>
 
-    <section class="student-review-shell mb-4">
-        <div class="student-review-hero">
-            <div>
-                <p class="student-review-eyebrow mb-2">Application Review</p>
-                <h1 class="student-details-title mb-1">@Model.FullName</h1>
-                <p class="student-details-subtitle mb-0">Student ID Number: @Model.StudentId</p>
-            </div>
-
-            <div class="student-review-status-wrap">
-                <span class="student-review-badge student-review-badge-@Model.ApplicationStatus.ToLowerInvariant()">
-                    @Model.ApplicationStatus
-                </span>
-            </div>
+    <div class="student-profile-card mb-4">
+        <div>
+            <h1 class="student-details-title mb-1">@studentName</h1>
+            <p class="student-details-subtitle mb-0">
+                Student ID Number: @studentNumber
+            </p>
         </div>
 
-        <div class="student-review-summary">
-            <div class="student-review-summary-item">
-                <span>Campus</span>
-                <strong>@Model.Campus</strong>
-            </div>
-            <div class="student-review-summary-item">
-                <span>Student Status</span>
-                <strong>@Model.StudentStatus</strong>
-            </div>
-            <div class="student-review-summary-item">
-                <span>Submitted</span>
-                <strong>@FormatDateTime(Model.SubmittedAt)</strong>
-            </div>
-            <div class="student-review-summary-item">
-                <span>Reviewed</span>
-                <strong>@FormatDateTime(Model.ReviewedAt)</strong>
-            </div>
-        </div>
-    </section>
-
-    <section class="student-review-panel mb-4">
-        <div class="student-review-panel-header">
-            <div>
-                <h2 class="student-section-title mb-1">Identity</h2>
-                <p class="student-page-subtitle mb-0">Core student information for verification.</p>
-            </div>
-        </div>
-
-        <div class="student-fact-list">
-            <div class="student-fact-row">
-                <span>Full legal name</span>
-                <strong>@Model.DisplayLegalName</strong>
-            </div>
-            <div class="student-fact-row">
+        <div class="student-profile-grid mt-4">
+            <div class="student-profile-item">
                 <span>Email</span>
-                <strong>@(string.IsNullOrWhiteSpace(Model.Email) ? "Not available" : Model.Email)</strong>
+                <strong>@email</strong>
             </div>
-            <div class="student-fact-row">
-                <span>Phone number</span>
-                <strong>@Model.DisplayPhoneNumber</strong>
+
+            <div class="student-profile-item">
+                <span>Points Available</span>
+                <strong>@pointsAvailable</strong>
             </div>
-            <div class="student-fact-row">
-                <span>Date of birth</span>
-                <strong>@FormatDate(Model.DateOfBirth)</strong>
-            </div>
-            <div class="student-fact-row">
-                <span>Gender</span>
-                <strong>@Model.DisplayGender</strong>
-            </div>
-            <div class="student-fact-row">
-                <span>Application record</span>
-                <strong>#@Model.ApplicationId</strong>
+
+            <div class="student-profile-item">
+                <span>Student Record ID</span>
+                <strong>@studentId</strong>
             </div>
         </div>
-    </section>
+    </div>
 
-    <section class="student-review-panel mb-4">
-        <div class="student-review-panel-header">
+    <div class="student-card">
+        <div class="student-history-header mb-3">
             <div>
-                <h2 class="student-section-title mb-1">Need Snapshot</h2>
-                <p class="student-page-subtitle mb-0">Quick context for household and support needs.</p>
+                <h2 class="student-section-title mb-1">History</h2>
+                <p class="student-page-subtitle mb-0">
+                    View local transactions and online orders in one place.
+                </p>
+            </div>
+
+            <div class="student-filter-buttons">
+                <button class="btn student-filter-btn active" onclick="filterHistory('all', this)">All</button>
+                <button class="btn student-filter-btn" onclick="filterHistory('local transaction', this)">Local Transactions</button>
+                <button class="btn student-filter-btn" onclick="filterHistory('order', this)">Orders</button>
             </div>
         </div>
 
-        <div class="student-fact-list student-fact-list-compact">
-            <div class="student-fact-row">
-                <span>Household size</span>
-                <strong>@Model.HouseholdTotal people</strong>
-            </div>
-            <div class="student-fact-stack">
-                <span>Household breakdown</span>
-                <div class="student-support-pills student-support-pills-tight">
-                    <span class="student-support-pill">@Model.HouseholdBabiesToddlers babies</span>
-                    <span class="student-support-pill">@Model.HouseholdChildren children</span>
-                    <span class="student-support-pill">@Model.HouseholdTeens teens</span>
-                    <span class="student-support-pill">@Model.HouseholdAdults adults</span>
-                </div>
-            </div>
-            <div class="student-fact-row">
-                <span>Employment</span>
-                <strong>@Model.EmploymentStatus</strong>
-            </div>
-            <div class="student-fact-row student-fact-subrow">
-                <span>Working household members</span>
-                <strong>@Model.EmployedHouseMembers</strong>
-            </div>
-            <div class="student-fact-row">
-                <span>Transportation access</span>
-                <strong>@FormatNullableBool(Model.HasTransportation)</strong>
-            </div>
-            <div class="student-fact-stack">
-                <span>Current benefits</span>
-                <div class="student-support-pills student-support-pills-tight">
-                    <span class="student-support-pill @(Model.HasSnap ? "active" : "")">SNAP: @FormatBool(Model.HasSnap)</span>
-                    <span class="student-support-pill @(Model.HasWic ? "active" : "")">WIC: @FormatBool(Model.HasWic)</span>
-                    <span class="student-support-pill @(Model.HasTanf ? "active" : "")">TANF: @FormatBool(Model.HasTanf)</span>
-                </div>
-            </div>
-        </div>
-    </section>
+        <div class="table-responsive">
+            <table class="table student-table align-middle mb-0" id="historyTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('historyTable', 0, this)">Type</th>
+                        <th onclick="sortTable('historyTable', 1, this)">Date</th>
+                        <th onclick="sortTable('historyTable', 2, this)">Description</th>
+                        <th onclick="sortTable('historyTable', 3, this)">Points Used</th>
+                    </tr>
+                </thead>
 
-    <section class="student-review-panel mb-4">
-        <div class="student-review-panel-header">
-            <div>
-                <h2 class="student-section-title mb-1">Support Interest</h2>
-                <p class="student-page-subtitle mb-0">Programs the student wants help connecting to.</p>
-            </div>
-        </div>
-
-        <div class="student-support-pills">
-            <span class="student-support-pill @(Model.InterestedInSnap ? "active" : "")">SNAP Help: @FormatBool(Model.InterestedInSnap)</span>
-            <span class="student-support-pill @(Model.InterestedInWic ? "active" : "")">WIC Help: @FormatBool(Model.InterestedInWic)</span>
-            <span class="student-support-pill @(Model.InterestedInTanf ? "active" : "")">TANF Help: @FormatBool(Model.InterestedInTanf)</span>
-        </div>
-
-        @if (!string.IsNullOrWhiteSpace(Model.ReviewNotes))
-        {
-            <div class="student-review-note mt-4">
-                <span>Latest Review Notes</span>
-                <p class="mb-0">@Model.ReviewNotes</p>
-            </div>
-        }
-    </section>
-
-    <section class="student-review-panel mb-4">
-        <div class="student-review-panel-header">
-            <div>
-                <h2 class="student-section-title mb-1">Decision</h2>
-                <p class="student-page-subtitle mb-0">Approve or reject after reviewing the application details.</p>
-            </div>
-        </div>
-
-        @if (Model.ApplicationStatus == Pantreats.Models.ApplicationStatuses.Pending)
-        {
-            <div class="student-decision-grid">
-                <form asp-action="Approve" asp-route-id="@Model.ApplicationId" method="post" class="student-decision-form student-decision-form-approve">
-                    @Html.AntiForgeryToken()
-                    <label class="form-label">Approval notes</label>
-                    <textarea name="reviewNotes" class="form-control" rows="4" placeholder="Optional note for the application record"></textarea>
-                    <button type="submit" class="btn btn-success mt-3">Approve Student</button>
-                </form>
-
-                <form asp-action="Reject" asp-route-id="@Model.ApplicationId" method="post" class="student-decision-form student-decision-form-reject">
-                    @Html.AntiForgeryToken()
-                    <label class="form-label">Rejection notes</label>
-                    <textarea name="reviewNotes" class="form-control" rows="4" placeholder="Tell the student what needs to be fixed"></textarea>
-                    <button type="submit" class="btn btn-outline-danger mt-3">Reject Application</button>
-                </form>
-            </div>
-        }
-        else
-        {
-            <div class="student-fact-list">
-                <div class="student-fact-row">
-                    <span>Current status</span>
-                    <strong>@Model.ApplicationStatus</strong>
-                </div>
-                <div class="student-fact-row">
-                    <span>Reviewed on</span>
-                    <strong>@FormatDateTime(Model.ReviewedAt)</strong>
-                </div>
-            </div>
-        }
-    </section>
-
-    @if (Model.ShowOrderHistory)
-    {
-        <section class="student-card">
-            <div class="student-history-header mb-3">
-                <div>
-                    <h2 class="student-section-title mb-1">Order History</h2>
-                    <p class="student-page-subtitle mb-0">
-                        Available after approval so admins can review pantry usage over time.
-                    </p>
-                </div>
-            </div>
-
-            <div class="student-order-meta mb-3">
-                <span>Total Orders</span>
-                <strong>@Model.TotalOrders</strong>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table student-table align-middle mb-0" id="historyTable">
-                    <thead>
-                        <tr>
-                            <th>Order #</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Items</th>
-                            <th>Points Used</th>
+                <tbody>
+                    @foreach (var item in history)
+                    {
+                        <tr class="student-history-row">
+                            <td>@item.Type</td>
+                            <td>@item.Date</td>
+                            <td>@item.Description</td>
+                            <td>@item.PointsUsed</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @if (!Model.OrderHistory.Any())
-                        {
-                            <tr>
-                                <td colspan="5" class="text-muted">This student has not placed any orders yet.</td>
-                            </tr>
-                        }
-                        else
-                        {
-                            @foreach (var item in Model.OrderHistory)
-                            {
-                                <tr class="student-history-row">
-                                    <td>
-                                        <a asp-controller="Order" asp-action="Details" asp-route-id="@item.OrderId">#@item.OrderId</a>
-                                    </td>
-                                    <td>@item.OrderDate.ToString("MM/dd/yyyy")</td>
-                                    <td>@item.Status</td>
-                                    <td>@item.ItemCount</td>
-                                    <td>@item.PointsUsed</td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
+
+@section Scripts {
+    <script>
+        function filterHistory(type, button) {
+            let table = document.getElementById("historyTable");
+            let rows = table.getElementsByTagName("tr");
+            let buttons = document.getElementsByClassName("student-filter-btn");
+
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove("active");
+            }
+
+            button.classList.add("active");
+
+            for (let i = 1; i < rows.length; i++) {
+                let historyType = rows[i].cells[0].innerText.toLowerCase();
+
+                if (type === "all" || historyType === type) {
+                    rows[i].style.display = "";
+                }
+                else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+
+        function sortTable(tableId, columnNumber, header) {
+            let table = document.getElementById(tableId);
+            let tbody = table.tBodies[0];
+            let rows = Array.from(tbody.rows);
+            let currentSort = header.getAttribute("data-sort");
+
+            let newSort = "asc";
+
+            if (currentSort === "asc") {
+                newSort = "desc";
+            }
+
+            let headers = table.querySelectorAll("th");
+
+            headers.forEach(function (th) {
+                th.removeAttribute("data-sort");
+            });
+
+            header.setAttribute("data-sort", newSort);
+
+            rows.sort(function (a, b) {
+                let firstValue = a.cells[columnNumber].innerText.trim().toLowerCase();
+                let secondValue = b.cells[columnNumber].innerText.trim().toLowerCase();
+
+                let firstDate = Date.parse(firstValue);
+                let secondDate = Date.parse(secondValue);
+
+                if (!isNaN(firstDate) && !isNaN(secondDate)) {
+                    return newSort === "asc" ? firstDate - secondDate : secondDate - firstDate;
+                }
+
+                let firstNumber = parseFloat(firstValue);
+                let secondNumber = parseFloat(secondValue);
+
+                if (!isNaN(firstNumber) && !isNaN(secondNumber)) {
+                    return newSort === "asc" ? firstNumber - secondNumber : secondNumber - firstNumber;
+                }
+
+                if (firstValue < secondValue) {
+                    return newSort === "asc" ? -1 : 1;
+                }
+
+                if (firstValue > secondValue) {
+                    return newSort === "asc" ? 1 : -1;
+                }
+
+                return 0;
+            });
+
+            rows.forEach(function (row) {
+                tbody.appendChild(row);
+            });
+        }
+    </script>
+}

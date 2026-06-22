@@ -154,7 +154,7 @@ namespace Pantreats.Areas.Identity.Pages.Account
 
                         if (await _userManager.IsInRoleAsync(user, "Donors"))
                         {
-                            return RedirectToAction("Index", "Donor"); // Redirect to Donor dashboard
+                            return RedirectToAction("Dashboard", "Donor"); // Redirect to Donor dashboard
                         }
                     }
 

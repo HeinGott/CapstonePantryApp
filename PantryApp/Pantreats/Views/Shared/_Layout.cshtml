@@ -106,11 +106,19 @@
                                     </li>
                                 }
 
+                                @if (User.Identity?.IsAuthenticated == true &&
+                                    !User.IsInRole("Admin") &&
+                                    !User.IsInRole("Students") &&
+                                    !User.IsInRole("Volunteers") &&
+                                    !User.IsInRole("Donors"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link pantreats-nav-link" asp-controller="Student" asp-action="Status">Student Application</a>
+                                    </li>
+                                }
+
                                 @if(User.IsInRole("Students"))
-                                {       
-                                    <li class=" nav-item">
-                                    <a class="nav-link pantreats-nav-link" asp-controller="Student" asp-action="Apply">Apply</a>
-                                    </li> 
+                                {
                                     <li class="nav-item">
                                         <a class="nav-link pantreats-nav-link" asp-controller="Shop" asp-action="Index">Shop</a>
                                     </li>

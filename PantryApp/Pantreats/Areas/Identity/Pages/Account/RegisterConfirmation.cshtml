@@ -1,23 +1,46 @@
-﻿@page
+@page
 @model RegisterConfirmationModel
 @{
-    ViewData["Title"] = "Register confirmation";
+    ViewData["Title"] = "Registration Complete";
+    var continueLabel = Model.RegistrationType == "donor"
+        ? "Continue to donor dashboard"
+        : "Continue to student application";
 }
 
-<h1>@ViewData["Title"]</h1>
-@{
-    if (@Model.DisplayConfirmAccountLink)
-    {
-<p>
-    This app does not currently have a real email sender registered, see <a href="https://aka.ms/aspaccountconf">these docs</a> for how to configure a real email sender.
-    Normally this would be emailed: <a id="confirm-link" href="@Model.EmailConfirmationUrl">Click here to confirm your account</a>
-</p>
-    }
-    else
-    {
-<p>
-        Please check your email to confirm your account.
-</p>
-    }
-}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h3 mb-3 text-center">@ViewData["Title"]</h1>
 
+                    <p class="text-center text-muted mb-4">
+                        Your account for <strong>@Model.Email</strong> has been created.
+                    </p>
+
+                    @if (Model.DisplayConfirmAccountLink)
+                    {
+                        <div class="alert alert-info" role="alert">
+                            Email delivery is not fully configured here yet, so the confirmation link is shown directly below.
+                        </div>
+
+                        <p class="mb-3 text-center">
+                            <a id="confirm-link" href="@Model.EmailConfirmationUrl">Click here to confirm your account</a>
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="text-center">
+                            Please check your email to confirm your account.
+                        </p>
+                    }
+
+                    <div class="d-grid gap-3 mt-4">
+                        <a class="btn btn-primary" href="@Model.ReturnUrl">@continueLabel</a>
+                        <a asp-page="./Login" class="btn btn-outline-secondary">Go to login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

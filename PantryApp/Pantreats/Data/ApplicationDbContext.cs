@@ -42,6 +42,17 @@ namespace Pantreats.Data
                 .HasIndex(i => i.UPC)
                 .IsUnique();
 
+            modelBuilder.Entity<UserApplication>()
+                .Property(application => application.UserId)
+                .HasMaxLength(450);
+
+            modelBuilder.Entity<UserApplication>()
+                .HasIndex(application => application.UserId);
+
+            modelBuilder.Entity<UserApplication>()
+                .Property(application => application.ApplicationStatus)
+                .HasDefaultValue(ApplicationStatuses.Pending);
+
             //configures the relationships between Orders and OrderFulfilment
             modelBuilder.Entity<OrderFulfilment>()
                 .HasOne(of => of.Order)

@@ -12,6 +12,14 @@ namespace Pantreats.Models
 
         public DateTime RegistrationDate { get; set; }
 
+        public string ApplicationStatus { get; set; } = ApplicationStatuses.Pending;
+
+        public DateTime? ReviewedAt { get; set; }
+
+        public string? ReviewedByUserId { get; set; }
+
+        public string? ReviewNotes { get; set; }
+
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public string LastName { get; set; }

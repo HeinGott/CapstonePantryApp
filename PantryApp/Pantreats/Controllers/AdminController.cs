@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Pantreats.Models;
 using Microsoft.EntityFrameworkCore;
 using Pantreats.Data;
+using System.Security.Claims;
 
 namespace Pantreats.Controllers
 {
@@ -170,6 +171,134 @@ namespace Pantreats.Controllers
             }
 
             return RedirectToAction("Users");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return RedirectToAction(nameof(Users));
+            }
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.Equals(currentUserId, userId, StringComparison.Ordinal))
+            {
+                TempData["StatusMessage"] = "You can't delete the account you're currently signed in with.";
+                TempData["StatusType"] = "error";
+                return RedirectToAction(nameof(UserEdit), new { id = userId });
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["StatusMessage"] = "That user no longer exists.";
+                TempData["StatusType"] = "error";
+                return RedirectToAction(nameof(Users));
+            }
+
+            var email = user.Email ?? string.Empty;
+            var userName = user.UserName ?? string.Empty;
+
+            var donor = await _context.Donors
+                .FirstOrDefaultAsync(existingDonor => existingDonor.UserId == userId);
+
+            if (donor != null)
+            {
+                var donations = await _context.Donations
+                    .Where(donation => donation.DonorId == donor.DonorID)
+                    .ToListAsync();
+
+                if (donations.Any())
+                {
+                    var donationIds = donations.Select(donation => donation.DonationId).ToList();
+                    var donationItems = await _context.DonationItems
+                        .Where(donationItem => donationIds.Contains(donationItem.DonationId))
+                        .ToListAsync();
+
+                    if (donationItems.Any())
+                    {
+                        _context.DonationItems.RemoveRange(donationItems);
+                    }
+
+                    _context.Donations.RemoveRange(donations);
+                }
+
+                _context.Donors.Remove(donor);
+            }
+
+            var userApplications = await _context.UserApplications
+                .Where(application => application.UserId == userId)
+                .ToListAsync();
+
+            if (userApplications.Any())
+            {
+                _context.UserApplications.RemoveRange(userApplications);
+            }
+
+            var volunteerApplications = await _context.VolunteerApplications
+                .Where(application => application.UserId == userId)
+                .ToListAsync();
+
+            if (volunteerApplications.Any())
+            {
+                _context.VolunteerApplications.RemoveRange(volunteerApplications);
+            }
+
+            var itemRequests = await _context.ItemRequest
+                .Where(request => request.UserName == userName || (!string.IsNullOrWhiteSpace(email) && request.UserName == email))
+                .ToListAsync();
+
+            if (itemRequests.Any())
+            {
+                _context.ItemRequest.RemoveRange(itemRequests);
+            }
+
+            var orders = await _context.Orders
+                .Where(order => order.UserId == userId ||
+                                order.UserId == userName ||
+                                (!string.IsNullOrWhiteSpace(email) && (order.UserId == email || order.Email == email)))
+                .ToListAsync();
+
+            if (orders.Any())
+            {
+                var orderIds = orders.Select(order => order.OrderId).ToList();
+
+                var orderItems = await _context.OrderItems
+                    .Where(orderItem => orderIds.Contains(orderItem.OrderId))
+                    .ToListAsync();
+
+                if (orderItems.Any())
+                {
+                    _context.OrderItems.RemoveRange(orderItems);
+                }
+
+                var fulfilments = await _context.OrderFulfilments
+                    .Where(fulfilment => orderIds.Contains(fulfilment.OrderId))
+                    .ToListAsync();
+
+                if (fulfilments.Any())
+                {
+                    _context.OrderFulfilments.RemoveRange(fulfilments);
+                }
+
+                _context.Orders.RemoveRange(orders);
+            }
+
+            await _context.SaveChangesAsync();
+
+            var deleteResult = await _userManager.DeleteAsync(user);
+            if (!deleteResult.Succeeded)
+            {
+                TempData["StatusMessage"] = deleteResult.Errors.FirstOrDefault()?.Description ?? "Unable to delete that user.";
+                TempData["StatusType"] = "error";
+                return RedirectToAction(nameof(UserEdit), new { id = userId });
+            }
+
+            TempData["StatusMessage"] = $"Deleted user {email}.";
+            TempData["StatusType"] = "success";
+            return RedirectToAction(nameof(Users));
         }
 
         // View Donations - Trevor

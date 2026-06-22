@@ -1,28 +1,24 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using Pantreats.Models;
 
 namespace Pantreats.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
+        private readonly ApplicationDbContext _context;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IUserStore<IdentityUser> _userStore;
@@ -31,12 +27,14 @@ namespace Pantreats.Areas.Identity.Pages.Account
         private readonly IEmailSender _emailSender;
 
         public RegisterModel(
+            ApplicationDbContext context,
             UserManager<IdentityUser> userManager,
             IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
+            _context = context;
             _userManager = userManager;
             _userStore = userStore;
             _emailStore = GetEmailStore();
@@ -45,71 +43,66 @@ namespace Pantreats.Areas.Identity.Pages.Account
             _emailSender = emailSender;
         }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [BindProperty]
-        public InputModel Input { get; set; }
+        public InputModel Input { get; set; } = new();
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public string ReturnUrl { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+        public IList<AuthenticationScheme> ExternalLogins { get; set; } = new List<AuthenticationScheme>();
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
+        public string AccountType { get; private set; } = string.Empty;
+
+        public bool ShowRoleChooser => string.IsNullOrWhiteSpace(AccountType);
+
+        public bool IsStudentRegistration => AccountType == "student";
+
+        public bool IsDonorRegistration => AccountType == "donor";
+
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [DataType(DataType.Password)]
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Display(Name = "Full name")]
+            public string FullName { get; set; }
+
+            [Display(Name = "Phone number")]
+            public string PhoneNumber { get; set; }
         }
 
-
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = null, string accountType = null)
         {
             ReturnUrl = returnUrl;
+            AccountType = NormalizeAccountType(accountType);
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null, string accountType = null)
         {
             returnUrl ??= Url.Content("~/");
+            AccountType = NormalizeAccountType(accountType);
+            ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            if (ShowRoleChooser)
+            {
+                ModelState.AddModelError(string.Empty, "Choose whether you're registering as a student or donor.");
+                return Page();
+            }
+
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
@@ -122,13 +115,24 @@ namespace Pantreats.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
+                    if (IsStudentRegistration)
+                    {
+                        await _userManager.AddToRoleAsync(user, "Students");
+                    }
+
+                    if (IsDonorRegistration)
+                    {
+                        await _userManager.AddToRoleAsync(user, "Donors");
+                        await EnsureDonorProfileAsync(user.Id);
+                    }
+
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
                         pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                        values: new { area = "Identity", userId, code, returnUrl },
                         protocol: Request.Scheme);
 
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
@@ -136,22 +140,69 @@ namespace Pantreats.Areas.Identity.Pages.Account
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                        return RedirectToPage("RegisterConfirmation", new
+                        {
+                            email = Input.Email,
+                            returnUrl,
+                            accountType = AccountType,
+                            continueUrl = GetContinueUrl(AccountType)
+                        });
                     }
-                    else
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
-                    }
+
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return LocalRedirect(GetContinueUrl(AccountType) ?? returnUrl);
                 }
+
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
+        }
+
+        private async Task EnsureDonorProfileAsync(string userId)
+        {
+            var existingDonor = await _context.Donors.FirstOrDefaultAsync(donor => donor.UserId == userId);
+            if (existingDonor != null)
+            {
+                existingDonor.Name = string.IsNullOrWhiteSpace(Input.FullName) ? existingDonor.Name : Input.FullName.Trim();
+                existingDonor.PhoneNumber = string.IsNullOrWhiteSpace(Input.PhoneNumber) ? existingDonor.PhoneNumber : Input.PhoneNumber.Trim();
+                existingDonor.Email = Input.Email;
+                await _context.SaveChangesAsync();
+                return;
+            }
+
+            _context.Donors.Add(new Donor
+            {
+                UserId = userId,
+                Email = Input.Email,
+                Name = string.IsNullOrWhiteSpace(Input.FullName) ? Input.Email : Input.FullName.Trim(),
+                PhoneNumber = string.IsNullOrWhiteSpace(Input.PhoneNumber) ? null : Input.PhoneNumber.Trim()
+            });
+
+            await _context.SaveChangesAsync();
+        }
+
+        private static string GetContinueUrl(string accountType)
+        {
+            return accountType switch
+            {
+                "student" => "/Student/Apply",
+                "donor" => "/Donor/Dashboard",
+                _ => null
+            };
+        }
+
+        private static string NormalizeAccountType(string accountType)
+        {
+            return (accountType ?? string.Empty).Trim().ToLowerInvariant() switch
+            {
+                "student" => "student",
+                "donor" => "donor",
+                _ => string.Empty
+            };
         }
 
         private IdentityUser CreateUser()
@@ -174,6 +225,7 @@ namespace Pantreats.Areas.Identity.Pages.Account
             {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
+
             return (IUserEmailStore<IdentityUser>)_userStore;
         }
     }

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Pantreats.Models;
 using Pantreats.Services;
 using System.Security.Claims;
 
@@ -18,14 +20,21 @@ namespace Pantreats.Controllers
 
         public IActionResult History()
         {
+            var accessResult = EnsureApprovedStudentAccess();
+            if (accessResult != null)
+            {
+                return accessResult;
+            }
+
             IQueryable<Order> query = _context.Orders
                 .Include(o => o.OrderItems);
 
             if (!User.IsInRole("Admin"))
             {
-                var userName = User.Identity!.Name; 
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity!.Name;
 
-                query = query.Where(o => o.UserId == userName);
+                query = query.Where(o => o.UserId == userId || o.UserId == email || o.Email == email);
             }
 
             var orders = query
@@ -37,6 +46,12 @@ namespace Pantreats.Controllers
 
         public IActionResult Details(int id)
         {
+            var accessResult = EnsureApprovedStudentAccess();
+            if (accessResult != null)
+            {
+                return accessResult;
+            }
+
             var order = _context.Orders
                 .Include(o => o.OrderItems)
                 .FirstOrDefault(o => o.OrderId == id);
@@ -48,9 +63,10 @@ namespace Pantreats.Controllers
 
             if (!User.IsInRole("Admin"))
             {
-                var userId = User.Identity!.Name;
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity!.Name;
 
-                if (order.UserId != userId)
+                if (order.UserId != userId && order.UserId != email && order.Email != email)
                 {
                     return NotFound();
                 }
@@ -79,7 +95,6 @@ namespace Pantreats.Controllers
 
             var orderId = item.OrderId;
 
-            //this will restore the stock
             if (item.InventoryUPC != null)
             {
                 var inventory = item.InventoryItemId.HasValue
@@ -91,10 +106,8 @@ namespace Pantreats.Controllers
                 }
             }
 
-            //remove the item from the order
             _context.OrderItems.Remove(item);
 
-            //recalculate the order total
             var order = _context.Orders
                 .Include(o => o.OrderItems)
                 .FirstOrDefault(o => o.OrderId == orderId);
@@ -102,7 +115,7 @@ namespace Pantreats.Controllers
             if (order != null)
             {
                 order.Total = order.OrderItems
-                    .Where(i => i.OrderItemId != id)   // skip the one we just removed (still tracked until save)
+                    .Where(i => i.OrderItemId != id)
                     .Sum(i => i.Points * i.OrderQuantity);
             }
 
@@ -125,21 +138,18 @@ namespace Pantreats.Controllers
                 return NotFound();
             }
 
-            // re-look-up the inventory item to ensure we have the latest stock and points values (don't trust the form)
             var inventory = _context.Inventory.FirstOrDefault(inv => inv.UPC == upc);
             if (inventory == null)
             {
                 return NotFound();
             }
 
-            // quantity must be positive AND not exceed available stock (so stock can't go negative)
             if (quantity < 1 || quantity > inventory.Quantity)
             {
                 TempData["AddItemError"] = $"Invalid quantity for {inventory.ItemName}.";
                 return RedirectToAction("Details", new { id });
             }
 
-            // building a mini inventory to add items to the order
             var item = new OrderItem
             {
                 InventoryItemId = inventory.ItemId,
@@ -150,24 +160,52 @@ namespace Pantreats.Controllers
                 Points = inventory.Points
             };
 
-            order.OrderItems.Add(item); // add the item to the order
-            inventory.Quantity -= quantity; //updating the quanity in stock
-            order.Total = order.OrderItems.Sum(i => i.Points * i.OrderQuantity); // recompute the total based on all items in the order
+            order.OrderItems.Add(item);
+            inventory.Quantity -= quantity;
+            order.Total = order.OrderItems.Sum(i => i.Points * i.OrderQuantity);
 
             _context.SaveChanges();
 
             return RedirectToAction("Details", new { id });
         }
 
+        private IActionResult? EnsureApprovedStudentAccess()
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return null;
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Challenge();
+            }
+
+            var status = _context.UserApplications
+                .AsNoTracking()
+                .Where(application => application.UserId == userId)
+                .OrderByDescending(application => application.RegistrationDate)
+                .ThenByDescending(application => application.ApplicationId)
+                .Select(application => application.ApplicationStatus)
+                .FirstOrDefault();
+
+            if (status == ApplicationStatuses.Approved)
+            {
+                return null;
+            }
+
+            TempData["ApplicationAccessMessage"] = "Your student application still needs approval before order access is unlocked.";
+            return RedirectToAction("Status", "Student");
+        }
 
         [AllowAnonymous]
         public async Task<IActionResult> TestEmail()
         {
             var sent = await _emailService.SendOrderConfirmationAsync(
-                "jakegmain@gmail.com", 999, "https://localhost/Order/Details/999"); //we use this for the checkout page, user email, order id, the order detail url
+                "jakegmain@gmail.com", 999, "https://localhost/Order/Details/999");
 
             return Content(sent ? "Sent — check your email." : "Send failed — check the Output window.");
         }
     }
-
 }

@@ -1,4 +1,5 @@
 using DocumentFormat.OpenXml.InkML;
+using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -124,7 +125,7 @@ using (var scope = app.Services.CreateScope())
     using (var dbScope = app.Services.CreateScope())
     {
         var dbContext = dbScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.Migrate();
+        await PrepareDatabaseAsync(dbContext);
         //DbSeeder.ClearInventory(dbContext); this clears the inventory table if not commented out 
         DbSeeder.SeedInventory(dbContext, env);
     }
@@ -161,5 +162,88 @@ app.MapRazorPages()
 
 app.Run();
 
+static async Task PrepareDatabaseAsync(ApplicationDbContext dbContext)
+{
+    await EnsureStudentApplicationWorkflowSchemaAsync(dbContext);
 
+    try
+    {
+        await dbContext.Database.MigrateAsync();
+        await EnsureStudentApplicationWorkflowSchemaAsync(dbContext);
+    }
+    catch (SqlException ex) when (ex.Message.Contains("AspNetRoles", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine("Skipping duplicate identity schema migration because the local database already contains ASP.NET Identity tables.");
+    }
+}
 
+static async Task EnsureStudentApplicationWorkflowSchemaAsync(ApplicationDbContext dbContext)
+{
+    var connectionString = dbContext.Database.GetConnectionString();
+    if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        return;
+    }
+
+    await using var connection = new SqlConnection(connectionString);
+    await connection.OpenAsync();
+
+    if (!await TableExistsAsync(connection, "UserApplications"))
+    {
+        return;
+    }
+
+    if (!await ColumnExistsAsync(connection, "UserApplications", "ApplicationStatus"))
+    {
+        await ExecuteNonQueryAsync(connection, "ALTER TABLE [UserApplications] ADD [ApplicationStatus] nvarchar(32) NULL;");
+    }
+
+    if (!await ColumnExistsAsync(connection, "UserApplications", "ReviewedAt"))
+    {
+        await ExecuteNonQueryAsync(connection, "ALTER TABLE [UserApplications] ADD [ReviewedAt] datetime2 NULL;");
+    }
+
+    if (!await ColumnExistsAsync(connection, "UserApplications", "ReviewedByUserId"))
+    {
+        await ExecuteNonQueryAsync(connection, "ALTER TABLE [UserApplications] ADD [ReviewedByUserId] nvarchar(450) NULL;");
+    }
+
+    if (!await ColumnExistsAsync(connection, "UserApplications", "ReviewNotes"))
+    {
+        await ExecuteNonQueryAsync(connection, "ALTER TABLE [UserApplications] ADD [ReviewNotes] nvarchar(max) NULL;");
+    }
+
+    await ExecuteNonQueryAsync(connection, """
+        UPDATE [UserApplications]
+        SET [ApplicationStatus] = CASE WHEN [IsActive] = 1 THEN 'Approved' ELSE 'Pending' END
+        WHERE [ApplicationStatus] IS NULL OR LTRIM(RTRIM([ApplicationStatus])) = '';
+        """);
+}
+
+static async Task<bool> TableExistsAsync(SqlConnection connection, string tableName)
+{
+    await using var command = connection.CreateCommand();
+    command.CommandText = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @tableName;";
+    command.Parameters.AddWithValue("@tableName", tableName);
+    return Convert.ToInt32(await command.ExecuteScalarAsync()) > 0;
+}
+
+static async Task<bool> ColumnExistsAsync(SqlConnection connection, string tableName, string columnName)
+{
+    await using var command = connection.CreateCommand();
+    command.CommandText = """
+        SELECT COUNT(*)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName;
+        """;
+    command.Parameters.AddWithValue("@tableName", tableName);
+    command.Parameters.AddWithValue("@columnName", columnName);
+    return Convert.ToInt32(await command.ExecuteScalarAsync()) > 0;
+}
+
+static async Task ExecuteNonQueryAsync(SqlConnection connection, string sql)
+{
+    await using var command = connection.CreateCommand();
+    command.CommandText = sql;
+    await command.ExecuteNonQueryAsync();
+}

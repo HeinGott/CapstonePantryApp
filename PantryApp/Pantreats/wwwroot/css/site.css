@@ -2325,3 +2325,231 @@ a:hover {
         width: 100% !important;
     }
 }
+
+.student-review-shell,
+.student-review-panel {
+    border: 1px solid rgba(16, 47, 97, 0.12);
+    border-radius: 2rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(249, 251, 255, 1) 100%);
+    box-shadow: 0 16px 40px rgba(16, 47, 97, 0.06);
+    padding: 2rem;
+}
+
+.student-review-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.student-review-eyebrow {
+    color: var(--pantreats-green);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.student-review-status-wrap {
+    flex: 0 0 auto;
+}
+
+.student-review-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.student-review-badge-pending {
+    background: #64748b;
+    color: #ffffff;
+}
+
+.student-review-badge-approved {
+    background: #198754;
+    color: #ffffff;
+}
+
+.student-review-badge-rejected {
+    background: #dc3545;
+    color: #ffffff;
+}
+
+.student-review-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.75rem;
+}
+
+.student-review-summary-item {
+    border: 1px solid rgba(16, 47, 97, 0.1);
+    border-radius: 1.25rem;
+    background: rgba(243, 247, 252, 0.95);
+    padding: 1rem 1.1rem;
+}
+
+.student-review-summary-item span {
+    display: block;
+    color: #53719d;
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+}
+
+.student-review-summary-item strong {
+    color: var(--pantreats-blue);
+    font-size: 1.02rem;
+    font-weight: 800;
+}
+
+.student-review-panel-header {
+    margin-bottom: 1.5rem;
+}
+
+.student-fact-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.student-fact-list-compact {
+    gap: 0.2rem;
+}
+
+.student-fact-row,
+.student-fact-stack {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.15rem 0;
+    border-bottom: 1px solid rgba(16, 47, 97, 0.08);
+}
+
+.student-fact-list > :last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.student-fact-row span,
+.student-fact-stack > span {
+    color: #53719d;
+    font-size: 0.95rem;
+}
+
+.student-fact-row strong {
+    color: var(--pantreats-blue);
+    font-size: 1rem;
+    font-weight: 800;
+    text-align: right;
+}
+
+.student-fact-subrow strong {
+    font-weight: 700;
+}
+
+.student-fact-stack {
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.student-support-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+}
+
+.student-support-pills-tight {
+    gap: 0.75rem;
+}
+
+.student-support-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(16, 47, 97, 0.14);
+    border-radius: 999px;
+    background: #f7f9fc;
+    color: #4c6b95;
+    font-weight: 700;
+    padding: 0.8rem 1.15rem;
+}
+
+.student-support-pill.active {
+    border-color: rgba(94, 159, 69, 0.28);
+    background: #edf7e8;
+    color: #2f6b1c;
+}
+
+.student-review-note {
+    border-left: 4px solid var(--pantreats-green);
+    border-radius: 1rem;
+    background: #f6fbf3;
+    padding: 1rem 1.1rem;
+}
+
+.student-review-note span {
+    display: block;
+    color: #53719d;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+
+.student-decision-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.student-decision-form {
+    border: 1px solid rgba(16, 47, 97, 0.08);
+    border-radius: 1.25rem;
+    background: rgba(255, 255, 255, 0.78);
+    padding: 1rem;
+}
+
+.student-order-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 1px solid rgba(16, 47, 97, 0.08);
+    border-radius: 999px;
+    background: #f4f7fc;
+    color: #53719d;
+    padding: 0.55rem 0.95rem;
+}
+
+.student-order-meta strong {
+    color: var(--pantreats-blue);
+}
+
+@media (max-width: 991.98px) {
+    .student-review-summary,
+    .student-decision-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .student-review-shell,
+    .student-review-panel {
+        padding: 1.4rem;
+        border-radius: 1.5rem;
+    }
+
+    .student-review-hero,
+    .student-fact-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .student-fact-row strong {
+        text-align: left;
+    }
+}

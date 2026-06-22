@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+@inject Pantreats.Data.ApplicationDbContext DbContext
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -14,6 +15,18 @@
     @{
         var hideNavbar = ViewData["HideNavbar"] as bool? ?? false;
         var fullWidth = ViewData["FullWidth"] as bool? ?? false;
+        var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var hasApprovedStudentAccess = false;
+
+        if (!string.IsNullOrWhiteSpace(currentUserId))
+        {
+            hasApprovedStudentAccess = DbContext.UserApplications
+                .Where(application => application.UserId == currentUserId)
+                .OrderByDescending(application => application.RegistrationDate)
+                .ThenByDescending(application => application.ApplicationId)
+                .Select(application => application.ApplicationStatus == Pantreats.Models.ApplicationStatuses.Approved)
+                .FirstOrDefault();
+        }
     }
 
     <div class="pantreats-page-shell">
@@ -68,7 +81,7 @@
                                             <li>
                                                 <a class="dropdown-item pantreats-dropdown-item" asp-controller="Donor" asp-action="Index">View Donors</a>
                                             </li>
-                                        
+
                                             <li>
                                                 <a class="dropdown-item pantreats-dropdown-item" asp-controller="Admin" asp-action="Donations">Donation Approval</a>
                                             </li>
@@ -106,16 +119,31 @@
                                     </li>
                                 }
 
-                                @if(User.IsInRole("Students"))
-                                {       
+                                @if (User.IsInRole("Students"))
+                                {
                                     <li class=" nav-item">
-                                    <a class="nav-link pantreats-nav-link" asp-controller="Student" asp-action="Apply">Apply</a>
-                                    </li> 
-                                    <li class="nav-item">
-                                        <a class="nav-link pantreats-nav-link" asp-controller="Shop" asp-action="Index">Shop</a>
+                                        <a class="nav-link pantreats-nav-link" asp-controller="Student" asp-action="Status">Application</a>
                                     </li>
+
+                                    @if (hasApprovedStudentAccess)
+                                    {
+                                        <li class="nav-item">
+                                            <a class="nav-link pantreats-nav-link" asp-controller="Shop" asp-action="Index">Shop</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link pantreats-nav-link" asp-controller="Order" asp-action="History">Orders</a>
+                                        </li>
+                                    }
+                                }
+
+                                @if (User.Identity?.IsAuthenticated == true &&
+                                    !User.IsInRole("Admin") &&
+                                    !User.IsInRole("Students") &&
+                                    !User.IsInRole("Volunteers") &&
+                                    !User.IsInRole("Donors"))
+                                {
                                     <li class="nav-item">
-                                        <a class="nav-link pantreats-nav-link" asp-controller="Order" asp-action="History">Orders</a>
+                                        <a class="nav-link pantreats-nav-link" asp-controller="Student" asp-action="Status">Application</a>
                                     </li>
                                 }
 
@@ -143,8 +171,6 @@
                                     <a class="nav-link pantreats-nav-link" asp-controller="Home" asp-action="Privacy">Privacy</a>
                                 </li>
                             </ul>
-
-
 
                             <partial name="_LoginPartial" />
                         </div>

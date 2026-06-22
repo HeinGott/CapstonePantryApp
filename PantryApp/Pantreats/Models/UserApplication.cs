@@ -45,5 +45,13 @@ namespace Pantreats.Models
         public bool IsActive { get; set; }
 
         public string Campus { get; set; }
+
+        public string ApplicationStatus { get; set; } = ApplicationStatuses.Pending;
+
+        public DateTime? ReviewedAt { get; set; }
+
+        public string? ReviewedByUserId { get; set; }
+
+        public string? ReviewNotes { get; set; }
     }
 }

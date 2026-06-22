@@ -11,16 +11,26 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
+using Pantreats.Data;
+using Pantreats.Models;
 
 namespace Pantreats.Areas.Identity.Pages.Account
 {
     public class ConfirmEmailModel : PageModel
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly ApplicationDbContext _context;
 
-        public ConfirmEmailModel(UserManager<IdentityUser> userManager)
+        public ConfirmEmailModel(
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
+            _context = context;
         }
 
         /// <summary>
@@ -29,7 +39,8 @@ namespace Pantreats.Areas.Identity.Pages.Account
         /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
-        public async Task<IActionResult> OnGetAsync(string userId, string code)
+
+        public async Task<IActionResult> OnGetAsync(string userId, string code, string returnUrl = null)
         {
             if (userId == null || code == null)
             {
@@ -44,8 +55,62 @@ namespace Pantreats.Areas.Identity.Pages.Account
 
             code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
             var result = await _userManager.ConfirmEmailAsync(user, code);
-            StatusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+            if (!result.Succeeded)
+            {
+                StatusMessage = "Error confirming your email.";
+                return Page();
+            }
+
+            await _signInManager.SignInAsync(user, isPersistent: false);
+
+            var destination = await GetPostConfirmationDestinationAsync(user, returnUrl);
+            if (!string.IsNullOrWhiteSpace(destination))
+            {
+                return LocalRedirect(destination);
+            }
+
+            StatusMessage = "Thank you for confirming your email.";
             return Page();
+        }
+
+        private async Task<string> GetPostConfirmationDestinationAsync(IdentityUser user, string? returnUrl)
+        {
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return returnUrl;
+            }
+
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                return "/Admin";
+            }
+
+            if (await _userManager.IsInRoleAsync(user, "Donors"))
+            {
+                return "/Donor/Dashboard";
+            }
+
+            if (await _userManager.IsInRoleAsync(user, "Students"))
+            {
+                var latestStatus = await _context.UserApplications
+                    .AsNoTracking()
+                    .Where(application => application.UserId == user.Id)
+                    .OrderByDescending(application => application.RegistrationDate)
+                    .ThenByDescending(application => application.ApplicationId)
+                    .Select(application => application.ApplicationStatus)
+                    .FirstOrDefaultAsync();
+
+                return latestStatus == ApplicationStatuses.Approved
+                    ? "/Shop"
+                    : "/Student/Status";
+            }
+
+            if (await _userManager.IsInRoleAsync(user, "Volunteers"))
+            {
+                return "/Volunteer/ApplyVolunteer";
+            }
+
+            return "/";
         }
     }
 }

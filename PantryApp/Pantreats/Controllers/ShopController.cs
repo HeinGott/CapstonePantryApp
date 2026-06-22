@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Security.Claims;
 
 namespace Pantreats.Controllers
 {
@@ -17,6 +18,12 @@ namespace Pantreats.Controllers
         [HttpGet("")]
         public async Task<IActionResult> Index(int page = 1)
         {
+            var accessResult = await EnsureApprovedStudentAccessAsync();
+            if (accessResult != null)
+            {
+                return accessResult;
+            }
+
             page = Math.Max(page, 1);
 
             var query = _context.Inventory
@@ -57,6 +64,12 @@ namespace Pantreats.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToCart([FromBody] ShopAddCartRequest request)
         {
+            var accessResult = await EnsureApprovedStudentJsonAccessAsync();
+            if (accessResult != null)
+            {
+                return accessResult;
+            }
+
             if (request == null || string.IsNullOrWhiteSpace(request.UPC))
             {
                 return BadRequest(new { success = false, message = "Choose an item first." });
@@ -107,6 +120,12 @@ namespace Pantreats.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout([FromBody] ShopCheckoutRequest request)
         {
+            var accessResult = await EnsureApprovedStudentJsonAccessAsync();
+            if (accessResult != null)
+            {
+                return accessResult;
+            }
+
             var selectedUPCs = request?.UPCs?
                 .Where(upc => !string.IsNullOrWhiteSpace(upc))
                 .ToList() ?? new List<string>();
@@ -147,8 +166,8 @@ namespace Pantreats.Controllers
             {
                 order = new Order
                 {
-                    UserId = User.Identity?.Name ?? "Anonymous",
-                    Email = User.Identity?.Name ?? "Anonymous",
+                    UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? "Anonymous",
+                    Email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name ?? "Anonymous",
                     PhoneNum = "Not Provided",
                     OrderDate = DateTime.Now,
                     Total = selectedUPCs.Count
@@ -201,6 +220,51 @@ namespace Pantreats.Controllers
                 .ToLowerInvariant();
 
             return Regex.Replace(normalized, "[^a-z0-9]", string.Empty);
+        }
+
+        private async Task<IActionResult?> EnsureApprovedStudentAccessAsync()
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return null;
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Challenge();
+            }
+
+            var status = await _context.UserApplications
+                .AsNoTracking()
+                .Where(application => application.UserId == userId)
+                .OrderByDescending(application => application.RegistrationDate)
+                .ThenByDescending(application => application.ApplicationId)
+                .Select(application => application.ApplicationStatus)
+                .FirstOrDefaultAsync();
+
+            if (status == ApplicationStatuses.Approved)
+            {
+                return null;
+            }
+
+            TempData["ApplicationAccessMessage"] = "Your student application still needs approval before shop access is unlocked.";
+            return RedirectToAction("Status", "Student");
+        }
+
+        private async Task<IActionResult?> EnsureApprovedStudentJsonAccessAsync()
+        {
+            var accessResult = await EnsureApprovedStudentAccessAsync();
+            if (accessResult == null || User.IsInRole("Admin"))
+            {
+                return null;
+            }
+
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                success = false,
+                message = "Your student application still needs approval before shop access is unlocked."
+            });
         }
     }
 }

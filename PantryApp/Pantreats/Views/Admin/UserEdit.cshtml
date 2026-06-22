@@ -13,6 +13,16 @@
         </p>
     </div>
 
+    @if (TempData["StatusMessage"] is string statusMessage)
+    {
+        var statusType = TempData["StatusType"] as string ?? "success";
+        var alertClass = statusType == "error" ? "alert-danger" : "alert-success";
+
+        <div class="alert @alertClass" role="alert">
+            @statusMessage
+        </div>
+    }
+
     <div class="student-card">
         <form asp-controller="Admin" asp-action="UserEdit" method="post">
             <input asp-for="UserId" type="hidden" />
@@ -48,8 +58,36 @@
             <div class="mt-4 d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Save Changes</button>
                 <a asp-controller="Admin" asp-action="Users" class="btn btn-outline-secondary">Cancel</a>
+                <button type="button"
+                        class="btn btn-outline-danger ms-auto"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteUserModal">
+                    Delete User
+                </button>
             </div>
         </form>
+    </div>
+
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="deleteUserModalLabel">Delete user account?</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    This will permanently remove <strong>@Model.Email</strong> and any related student, donor, volunteer, request, donation, and order records tied to that account.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form asp-controller="Admin" asp-action="DeleteUser" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="userId" value="@Model.UserId" />
+                        <button type="submit" class="btn btn-danger">Yes, delete user</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>

@@ -1,144 +1,127 @@
-﻿@{
-    ViewData["Title"] = "Students";
+@model Pantreats.Models.StudentAdminIndexViewModel
 
-    var students = new List<dynamic>
-    {
-        new { Id = 1, Name = "Jimmy Hendrix", StudentNumber = "10001" },
-        new { Id = 2, Name = "Sarah Johnson", StudentNumber = "10002" },
-        new { Id = 3, Name = "Michael Brown", StudentNumber = "10003" },
-        new { Id = 4, Name = "Emily Davis", StudentNumber = "10004" },
-        new { Id = 5, Name = "Chris Wilson", StudentNumber = "10005" }
-    };
+@{
+    ViewData["Title"] = "Students";
 }
 
 <div class="student-page py-4">
-
     <div class="student-page-header mb-4">
         <div>
             <h1 class="student-page-title mb-1">Students</h1>
             <p class="student-page-subtitle mb-0">
-                View student records and open a student profile to see more details.
+                Review pending applications and manage approved student pantry users.
             </p>
-        </div>
-
-        <div class="student-search-box">
-            <input type="text" id="studentSearch" class="form-control" placeholder="Search student..." onkeyup="searchStudents()" />
         </div>
     </div>
 
-    <div class="student-card">
+    <div class="student-card mb-4">
+        <div class="student-history-header mb-3">
+            <div>
+                <h2 class="student-section-title mb-1">Pending Applicants</h2>
+                <p class="student-page-subtitle mb-0">
+                    These applications still need an admin decision.
+                </p>
+            </div>
+        </div>
+
         <div class="table-responsive">
-            <table class="table student-table align-middle mb-0" id="studentTable">
+            <table class="table student-table align-middle mb-0">
                 <thead>
                     <tr>
-                        <th onclick="sortTable('studentTable', 0, this)">Student Name</th>
-                        <th onclick="sortTable('studentTable', 1, this)">Student ID Number</th>
+                        <th>Name</th>
+                        <th>Student ID</th>
+                        <th>Email</th>
+                        <th>Submitted</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    @foreach (var student in students)
+                    @if (!Model.PendingApplications.Any())
                     {
-                        <tr class="student-row" onclick="goToStudent(@student.Id)">
-                            <td>@student.Name</td>
-                            <td>@student.StudentNumber</td>
+                        <tr>
+                            <td colspan="4" class="text-muted">No pending applications right now.</td>
                         </tr>
+                    }
+                    else
+                    {
+                        @foreach (var application in Model.PendingApplications)
+                        {
+                            <tr class="student-row"
+                                role="button"
+                                tabindex="0"
+                                onclick="goToStudentDetails(@application.ApplicationId)"
+                                onkeydown="openStudentDetailsFromKey(event, @application.ApplicationId)">
+                                <td>@application.FullName</td>
+                                <td>@application.StudentId</td>
+                                <td>@application.Email</td>
+                                <td>@application.SubmittedAt.ToLocalTime().ToString("MM/dd/yyyy")</td>
+                            </tr>
+                        }
                     }
                 </tbody>
             </table>
         </div>
     </div>
 
+    <div class="student-card">
+        <div class="student-history-header mb-3">
+            <div>
+                <h2 class="student-section-title mb-1">Approved Students</h2>
+                <p class="student-page-subtitle mb-0">
+                    Active students with pantry access and order history.
+                </p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table student-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Student ID</th>
+                        <th>Email</th>
+                        <th>Approved Record</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.ApprovedStudents.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-muted">No approved students yet.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var student in Model.ApprovedStudents)
+                        {
+                            <tr class="student-row"
+                                role="button"
+                                tabindex="0"
+                                onclick="goToStudentDetails(@student.ApplicationId)"
+                                onkeydown="openStudentDetailsFromKey(event, @student.ApplicationId)">
+                                <td>@student.FullName</td>
+                                <td>@student.StudentId</td>
+                                <td>@student.Email</td>
+                                <td>@student.SubmittedAt.ToLocalTime().ToString("MM/dd/yyyy")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <script>
-        function goToStudent(id) {
+        function goToStudentDetails(id) {
             window.location.href = '/Student/Details/' + id;
         }
 
-        function searchStudents() {
-            let input = document.getElementById("studentSearch");
-            let filter = input.value.toLowerCase();
-            let table = document.getElementById("studentTable");
-            let rows = table.getElementsByTagName("tr");
-
-            for (let i = 1; i < rows.length; i++) {
-                let rowText = rows[i].innerText.toLowerCase();
-
-                if (rowText.includes(filter)) {
-                    rows[i].style.display = "";
-                }
-                else {
-                    rows[i].style.display = "none";
-                }
+        function openStudentDetailsFromKey(event, id) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                goToStudentDetails(id);
             }
-        }
-
-        function sortTable(tableId, columnNumber, header) {
-            let table = document.getElementById(tableId);
-            let tbody = table.tBodies[0];
-            let rows = Array.from(tbody.rows);
-            let currentSort = header.getAttribute("data-sort");
-
-            let newSort = "asc";
-
-            if (currentSort === "asc") {
-                newSort = "desc";
-            }
-
-            let headers = table.querySelectorAll("th");
-
-            headers.forEach(function (th) {
-                th.removeAttribute("data-sort");
-            });
-
-            header.setAttribute("data-sort", newSort);
-
-            rows.sort(function (a, b) {
-                let firstValue = a.cells[columnNumber].innerText.trim();
-                let secondValue = b.cells[columnNumber].innerText.trim();
-
-                // sort student name by last name
-                if (columnNumber === 0) {
-                    let firstLastName = firstValue.split(" ").slice(-1)[0].toLowerCase();
-                    let secondLastName = secondValue.split(" ").slice(-1)[0].toLowerCase();
-
-                    if (firstLastName < secondLastName) {
-                        return newSort === "asc" ? -1 : 1;
-                    }
-
-                    if (firstLastName > secondLastName) {
-                        return newSort === "asc" ? 1 : -1;
-                    }
-
-                    return 0;
-                }
-
-                let firstLower = firstValue.toLowerCase();
-                let secondLower = secondValue.toLowerCase();
-
-                let firstNumber = parseFloat(firstLower);
-                let secondNumber = parseFloat(secondLower);
-
-                if (!isNaN(firstNumber) && !isNaN(secondNumber)) {
-                    return newSort === "asc" ? firstNumber - secondNumber : secondNumber - firstNumber;
-                }
-
-                if (firstLower < secondLower) {
-                    return newSort === "asc" ? -1 : 1;
-                }
-
-                if (firstLower > secondLower) {
-                    return newSort === "asc" ? 1 : -1;
-                }
-
-                return 0;
-            });
-
-            rows.forEach(function (row) {
-                tbody.appendChild(row);
-            });
         }
     </script>
 }

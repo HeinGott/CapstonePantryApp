@@ -1,10 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -26,31 +24,26 @@ namespace Pantreats.Areas.Identity.Pages.Account
             _sender = sender;
         }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public string Email { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public bool DisplayConfirmAccountLink { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public string EmailConfirmationUrl { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string email, string returnUrl = null)
+        public string AccountType { get; set; } = string.Empty;
+
+        public string ContinueUrl { get; set; } = string.Empty;
+
+        public string ContinueLabel => AccountType == "student" ? "Go To Student Application" : "Go To Donor Dashboard";
+
+        public async Task<IActionResult> OnGetAsync(string email, string returnUrl = null, string accountType = null, string continueUrl = null)
         {
             if (email == null)
             {
                 return RedirectToPage("/Index");
             }
-            returnUrl = returnUrl ?? Url.Content("~/");
+
+            returnUrl ??= Url.Content("~/");
 
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
@@ -59,7 +52,9 @@ namespace Pantreats.Areas.Identity.Pages.Account
             }
 
             Email = email;
-            // Once you add a real email sender, you should remove this code that lets you confirm the account
+            AccountType = NormalizeAccountType(accountType);
+            ContinueUrl = string.IsNullOrWhiteSpace(continueUrl) ? GetDefaultContinueUrl(AccountType) : continueUrl;
+
             DisplayConfirmAccountLink = true;
             if (DisplayConfirmAccountLink)
             {
@@ -69,11 +64,26 @@ namespace Pantreats.Areas.Identity.Pages.Account
                 EmailConfirmationUrl = Url.Page(
                     "/Account/ConfirmEmail",
                     pageHandler: null,
-                    values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                    values: new { area = "Identity", userId, code, returnUrl },
                     protocol: Request.Scheme);
             }
 
             return Page();
+        }
+
+        private static string NormalizeAccountType(string accountType)
+        {
+            return (accountType ?? string.Empty).Trim().ToLowerInvariant() switch
+            {
+                "student" => "student",
+                "donor" => "donor",
+                _ => string.Empty
+            };
+        }
+
+        private static string GetDefaultContinueUrl(string accountType)
+        {
+            return accountType == "student" ? "/Student/Apply" : "/Donor/Dashboard";
         }
     }
 }

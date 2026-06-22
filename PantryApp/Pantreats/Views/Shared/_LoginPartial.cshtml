@@ -1,15 +1,23 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@using Pantreats.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
+        var currentUser = await UserManager.GetUserAsync(User);
+        var profilePic = currentUser?.ImagePath != null
+        ? $"/Profile/ProfilePicture?userId={currentUser.Id}"
+        : "/images/default-profile.png";
+
         <li class="nav-item">
             <a class="nav-link pantreats-nav-link"
                    asp-area="Identity"
                    asp-page="/Account/Manage/Index"
                    title="Manage">
+                   <img src="@profilePic" alt=" "Profile"
+                       style="width:35px; height:35px; border-radius:50%; object-fit:cover; margin-right:6px" />
                 Hello @User.Identity?.Name!
             </a>
         </li>

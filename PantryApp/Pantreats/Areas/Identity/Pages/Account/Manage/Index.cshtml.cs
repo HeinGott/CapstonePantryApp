@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
@@ -9,20 +9,25 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Hosting;
+using Org.BouncyCastle.Security;
 
 namespace Pantreats.Areas.Identity.Pages.Account.Manage
 {
     public class IndexModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IWebHostEnvironment _environment;
 
         public IndexModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IWebHostEnvironment environment)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _environment = environment;
         }
 
         /// <summary>
@@ -60,7 +65,7 @@ namespace Pantreats.Areas.Identity.Pages.Account.Manage
             public string PhoneNumber { get; set; }
         }
 
-        private async Task LoadAsync(IdentityUser user)
+        private async Task LoadAsync(ApplicationUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
@@ -85,6 +90,9 @@ namespace Pantreats.Areas.Identity.Pages.Account.Manage
             return Page();
         }
 
+        [BindProperty]
+        public IFormFile ProfilePicture { get; set; }
+
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -97,6 +105,27 @@ namespace Pantreats.Areas.Identity.Pages.Account.Manage
             {
                 await LoadAsync(user);
                 return Page();
+            }
+
+            //Some assistance from Claude used
+            if(ProfilePicture != null && ProfilePicture.Length > 0)
+            {
+                var uploadFolder = @"C:\PantreatsUploads\profiles";
+                Directory.CreateDirectory(uploadFolder);
+
+                var uploadName = user.Id + Path.GetExtension(ProfilePicture.FileName);
+                var uploadPath = Path.Combine(uploadFolder, uploadName);
+                
+
+                using (var stream = new FileStream(uploadPath, FileMode.Create))
+                {
+                    await ProfilePicture.CopyToAsync(stream);
+                    stream.Close();
+                }
+
+                user.ImagePath = "/uploads/profiles" + uploadName;
+                await _userManager.UpdateAsync(user);
+
             }
 
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);

@@ -1,4 +1,4 @@
-﻿namespace Pantreats.Models
+namespace Pantreats.Models
 {
     public class OrderFulfilment
     {

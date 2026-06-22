@@ -1,4 +1,4 @@
-﻿namespace Pantreats.Services
+namespace Pantreats.Services
 {
     public interface IEmailService
     {

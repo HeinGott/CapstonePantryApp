@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
 namespace Pantreats.Data
 {
@@ -7,7 +7,7 @@ namespace Pantreats.Data
         public static async Task SeedAdminAsync(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
             //check admin role exists -nick
             if (!await roleManager.RoleExistsAsync("Admin"))
@@ -22,7 +22,7 @@ namespace Pantreats.Data
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
             {
-                adminUser = new IdentityUser
+                adminUser = new ApplicationUser
                 {
                     UserName = adminEmail,
                     Email = adminEmail,
@@ -37,7 +37,7 @@ namespace Pantreats.Data
         public static async Task SeedStudentAsync(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
             //check Students role exists -nick
             if (!await roleManager.RoleExistsAsync("Students"))
@@ -52,7 +52,7 @@ namespace Pantreats.Data
             var studentUser = await userManager.FindByEmailAsync(studentEmail);
             if (studentUser == null)
             {
-                studentUser = new IdentityUser
+                studentUser = new ApplicationUser
                 {
                     UserName = studentEmail,
                     Email = studentEmail,
@@ -68,7 +68,7 @@ namespace Pantreats.Data
         public static async Task SeedDonorAsync(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
             //check Donors role exists -nick
             if (!await roleManager.RoleExistsAsync("Donors"))
@@ -83,7 +83,7 @@ namespace Pantreats.Data
             var donorUser = await userManager.FindByEmailAsync(donorEmail);
             if (donorUser == null)
             {
-                donorUser = new IdentityUser
+                donorUser = new ApplicationUser
                 {
                     UserName = donorEmail,
                     Email = donorEmail,
@@ -107,7 +107,7 @@ namespace Pantreats.Data
         public static async Task SeedVolunteerAsync(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
             //check Volunteers role exists -nick
             if (!await roleManager.RoleExistsAsync("Volunteers"))
@@ -122,7 +122,7 @@ namespace Pantreats.Data
             var volunteerUser = await userManager.FindByEmailAsync(volunteerEmail);
             if (volunteerUser == null)
             {
-                volunteerUser = new IdentityUser
+                volunteerUser = new ApplicationUser
                 {
                     UserName = volunteerEmail,
                     Email = volunteerEmail,

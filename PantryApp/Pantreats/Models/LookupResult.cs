@@ -1,4 +1,4 @@
-﻿
+
 namespace Pantreats.Models
 {
     public class LookupResult

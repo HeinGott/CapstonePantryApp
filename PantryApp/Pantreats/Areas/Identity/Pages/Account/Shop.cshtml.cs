@@ -1,4 +1,4 @@
-﻿using Pantreats.Models;
+using Pantreats.Models;
 using System.IO;
 using Pantreats.Data;
 using Microsoft.AspNetCore.Mvc;

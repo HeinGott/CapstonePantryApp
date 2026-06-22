@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Pantreats.Data;
 using Pantreats.Models;
 
@@ -32,7 +32,7 @@ namespace Pantreats.Controllers
                 return View("ApplyVolunteer", model);
             }
 
-            // Map ViewModel → Entity
+            // Map ViewModel ? Entity
             var application = new VolunteerApplication
             {
                 UserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value,

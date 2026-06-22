@@ -5,24 +5,18 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Pantreats.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateDonorName : Migration
+    public partial class AddImagePath : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "VendorID",
-                table: "Vendors",
-                newName: "DonorID");
+
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "DonorID",
-                table: "Vendors",
-                newName: "VendorID");
+
         }
     }
 }

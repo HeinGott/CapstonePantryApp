@@ -3,7 +3,41 @@ function toggleOrder(orderId) {
     content.classList.toggle("open");
 }
 
+function formatPhoneNumber(value) {
+    const digits = value.replace(/\D/g, "").slice(0, 10);
+
+    if (digits.length === 0) {
+        return "";
+    }
+
+    if (digits.length <= 3) {
+        return `(${digits}`;
+    }
+
+    if (digits.length <= 6) {
+        return `(${digits.slice(0, 3)}) - ${digits.slice(3)}`;
+    }
+
+    return `(${digits.slice(0, 3)}) - ${digits.slice(3, 6)} - ${digits.slice(6)}`;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+    const phoneInputs = document.querySelectorAll(
+        "input[name$='PhoneNumber'], input[name$='PhoneNum'], input[id$='PhoneNumber'], input[id$='PhoneNum']"
+    );
+
+    phoneInputs.forEach((input) => {
+        input.placeholder = "(222) - 222 - 2222";
+        input.setAttribute("inputmode", "numeric");
+        input.setAttribute("autocomplete", "tel-national");
+
+        input.value = formatPhoneNumber(input.value);
+
+        input.addEventListener("input", () => {
+            input.value = formatPhoneNumber(input.value);
+        });
+    });
+
     const navbar = document.querySelector(".pantreats-navbar");
 
     if (!navbar || typeof bootstrap === "undefined" || !bootstrap.Dropdown) {

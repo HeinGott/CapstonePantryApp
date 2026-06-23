@@ -4,6 +4,10 @@
     ViewData["Title"] = "Apply";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+}
+
 <div class="pantreats-white-section">
     <div class="container">
 
@@ -52,11 +56,12 @@
                         <span asp-validation-for="StudentId" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-4 pantreats-date-field">
                         <label class="form-label">DOB</label>
                         <input asp-for="DOB"
-                               type="date"
-                               class="form-control"
+                               type="text"
+                               class="form-control pantreats-date-input"
+                               id="studentDobInput"
                                min="1960-01-01" />
                         <span asp-validation-for="DOB" class="text-danger"></span>
                     </div>
@@ -239,3 +244,144 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dobInput = document.getElementById("studentDobInput");
+
+            if (!dobInput || typeof flatpickr === "undefined") {
+                return;
+            }
+
+            function getYearPageStart(year) {
+                return Math.max(1960, Math.floor((year - 1960) / 12) * 12 + 1960);
+            }
+
+            function wireYearPicker(instance) {
+                const calendar = instance.calendarContainer;
+                const yearInput = calendar.querySelector(".cur-year");
+
+                if (!calendar || !yearInput || calendar.dataset.yearPickerReady === "true") {
+                    return;
+                }
+
+                calendar.dataset.yearPickerReady = "true";
+                yearInput.readOnly = true;
+                yearInput.setAttribute("aria-label", "Choose year");
+                yearInput.setAttribute("role", "button");
+
+                let yearPageStart = getYearPageStart(instance.currentYear);
+                const panel = document.createElement("div");
+                panel.className = "pantreats-year-panel";
+                panel.hidden = true;
+                calendar.appendChild(panel);
+
+                function renderYearPanel() {
+                    const maxYear = new Date().getFullYear();
+                    const maxPageStart = getYearPageStart(maxYear);
+                    yearPageStart = Math.min(Math.max(1960, yearPageStart), maxPageStart);
+
+                    const years = Array.from({ length: 12 }, (_, index) => yearPageStart + index);
+                    const canGoBack = yearPageStart > 1960;
+                    const canGoForward = yearPageStart < maxPageStart;
+
+                    panel.innerHTML = `
+                        <div class="pantreats-year-panel-header">
+                            <button type="button" class="pantreats-year-panel-nav" data-year-direction="previous" ${canGoBack ? "" : "disabled"} aria-label="Previous years">&lsaquo;</button>
+                            <span>${yearPageStart} - ${Math.min(yearPageStart + 11, maxYear)}</span>
+                            <button type="button" class="pantreats-year-panel-nav" data-year-direction="next" ${canGoForward ? "" : "disabled"} aria-label="Next years">&rsaquo;</button>
+                        </div>
+                        <div class="pantreats-year-grid">
+                            ${years.map(function (year) {
+                                const isDisabled = year < 1960 || year > maxYear;
+                                const isActive = year === instance.currentYear;
+                                return `<button type="button" class="pantreats-year-option${isActive ? " is-active" : ""}" data-year="${year}" ${isDisabled ? "disabled" : ""}>${year}</button>`;
+                            }).join("")}
+                        </div>`;
+                }
+
+                function toggleYearPanel(forceOpen) {
+                    const shouldOpen = typeof forceOpen === "boolean" ? forceOpen : panel.hidden;
+                    yearPageStart = getYearPageStart(instance.currentYear);
+                    renderYearPanel();
+                    panel.hidden = !shouldOpen;
+                }
+
+                yearInput.addEventListener("click", function () {
+                    toggleYearPanel();
+                });
+
+                yearInput.addEventListener("keydown", function (event) {
+                    if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        toggleYearPanel();
+                    }
+                });
+
+                panel.addEventListener("pointerdown", function (event) {
+                    event.stopPropagation();
+                });
+
+                panel.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const navButton = event.target.closest("[data-year-direction]");
+                    const yearButton = event.target.closest("[data-year]");
+
+                    if (navButton) {
+                        yearPageStart += navButton.dataset.yearDirection === "next" ? 12 : -12;
+                        renderYearPanel();
+                        return;
+                    }
+
+                    if (yearButton) {
+                        instance.jumpToDate(new Date(Number(yearButton.dataset.year), instance.currentMonth, 1));
+                        toggleYearPanel(false);
+                    }
+                });
+
+                document.addEventListener("click", function (event) {
+                    if (!calendar.contains(event.target)) {
+                        toggleYearPanel(false);
+                    }
+                });
+            }
+
+            flatpickr(dobInput, {
+                altInput: true,
+                altInputClass: "form-control pantreats-date-display",
+                altFormat: "m/d/Y",
+                allowInput: true,
+                dateFormat: "Y-m-d",
+                disableMobile: true,
+                maxDate: "today",
+                minDate: "1960-01-01",
+                monthSelectorType: "static",
+                position: "below left",
+                static: true,
+                onOpen: function (selectedDates, dateStr, instance) {
+                    if (selectedDates.length === 0) {
+                        instance.jumpToDate("2000-01-01");
+                    }
+                    wireYearPicker(instance);
+                },
+                onReady: function (selectedDates, dateStr, instance) {
+                    if (selectedDates.length === 0) {
+                        instance.jumpToDate("2000-01-01");
+                    }
+                    wireYearPicker(instance);
+                },
+                onMonthChange: function (selectedDates, dateStr, instance) {
+                    wireYearPicker(instance);
+                },
+                onYearChange: function (selectedDates, dateStr, instance) {
+                    wireYearPicker(instance);
+                }
+            });
+        });
+    </script>
+}

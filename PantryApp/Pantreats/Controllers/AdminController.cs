@@ -32,9 +32,84 @@ namespace Pantreats.Controllers
             _roleManager = roleManager;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var orders = await _context.Orders
+                .AsNoTracking()
+                .Include(order => order.OrderItems)
+                .Include(order => order.OrderFulfilment)
+                .OrderByDescending(order => order.OrderDate)
+                .ToListAsync();
+
+            var applications = await _context.UserApplications
+                .AsNoTracking()
+                .OrderByDescending(application => application.RegistrationDate)
+                .ThenByDescending(application => application.ApplicationId)
+                .ToListAsync();
+
+            var latestApplications = applications
+                .GroupBy(application => application.UserId)
+                .Select(group => group.First())
+                .ToList();
+
+            var donations = await _context.Donations
+                .AsNoTracking()
+                .Include(donation => donation.Donor)
+                .Include(donation => donation.DonationItems)
+                .OrderByDescending(donation => donation.DonationDate)
+                .ToListAsync();
+
+            var model = new AdminDashboardViewModel
+            {
+                NewOrders = orders.Count(order =>
+                    order.OrderFulfilment == null ||
+                    !string.Equals(order.OrderFulfilment.OrderStatus, "Fulfilled", StringComparison.OrdinalIgnoreCase)),
+                PendingApplications = latestApplications.Count(application =>
+                    string.IsNullOrWhiteSpace(application.ApplicationStatus) ||
+                    application.ApplicationStatus == ApplicationStatuses.Pending),
+                NewDonations = donations.Count(donation =>
+                    string.Equals(donation.Status, "Pending", StringComparison.OrdinalIgnoreCase)),
+                RecentOrders = orders
+                    .Take(4)
+                    .Select(order => new AdminDashboardOrderViewModel
+                    {
+                        OrderId = order.OrderId,
+                        StudentEmail = order.Email,
+                        SubmittedAt = order.OrderDate,
+                        Status = order.OrderFulfilment?.OrderStatus ?? "Submitted",
+                        ItemCount = order.OrderItems.Sum(item => item.OrderQuantity),
+                        PointsUsed = order.Total
+                    })
+                    .ToList(),
+                RecentApplications = latestApplications
+                    .Where(application =>
+                        string.IsNullOrWhiteSpace(application.ApplicationStatus) ||
+                        application.ApplicationStatus == ApplicationStatuses.Pending)
+                    .OrderBy(application => application.RegistrationDate)
+                    .Take(4)
+                    .Select(application => new AdminDashboardApplicationViewModel
+                    {
+                        ApplicationId = application.ApplicationId,
+                        StudentName = BuildFullName(application.FirstName, application.MiddleName, application.LastName),
+                        StudentId = application.StudentId,
+                        SubmittedAt = application.RegistrationDate
+                    })
+                    .ToList(),
+                RecentDonations = donations
+                    .Take(4)
+                    .Select(donation => new AdminDashboardDonationViewModel
+                    {
+                        DonationId = donation.DonationId,
+                        DonorName = donation.Donor?.Name ?? "Donor",
+                        SubmittedAt = donation.DonationDate,
+                        Status = donation.Status,
+                        ItemCount = donation.DonationItems.Count,
+                        TotalUnits = donation.DonationItems.Sum(item => item.Quantity)
+                    })
+                    .ToList()
+            };
+
+            return View(model);
         }
 
         public async Task<IActionResult> Users()
@@ -376,6 +451,12 @@ namespace Pantreats.Controllers
             return string.IsNullOrEmpty(normalizedRole)
                 ? "No Role"
                 : AllowedRoles[normalizedRole];
+        }
+
+        private static string BuildFullName(string firstName, string middleName, string lastName)
+        {
+            return string.Join(" ", new[] { firstName, middleName, lastName }
+                .Where(namePart => !string.IsNullOrWhiteSpace(namePart)));
         }
 
         private static void PopulateRoleOptions(UserEditViewModel model)

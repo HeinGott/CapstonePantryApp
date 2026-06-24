@@ -1,295 +1,195 @@
-﻿@{
+@model Pantreats.Models.AdminDashboardViewModel
+
+@{
     ViewData["Title"] = "Admin Dashboard";
+    ViewData["FullWidth"] = true;
+    var adminName = User.Identity?.Name ?? "Admin";
+    var displayName = adminName.Contains('@') ? adminName.Split('@')[0] : adminName;
 }
 
-<div class="admin-dashboard py-4">
-
-    <section class="admin-hero mb-4">
-        <div class="row align-items-center g-4">
-
-            <div class="col-lg-9">
-                <h1 class="admin-page-title mb-2">Admin Dashboard</h1>
-
-                <p class="admin-page-subtitle mb-0">
-                    Use the sections below to manage students, inventory, vendors, and reporting tools as your system grows.
-                </p>
-            </div>
-
-            <div class="col-lg-3">
-                <div class="admin-hero-side-card">
-                    <div class="admin-hero-side-label">Welcome</div>
-
-                    <div class="admin-hero-side-value">
-                        Lerkeshia Littlejohn
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <section class="admin-stats mb-4">
-        <div class="row g-4">
-
-            <div class="col-md-6 col-xl-3">
-                <div class="admin-stat-card">
-                    <div>
-                        <div class="admin-stat-label">Student Visits</div>
-                        <div class="admin-stat-value">0</div>
-                        <div class="admin-stat-note">This month</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-3">
-                <div class="admin-stat-card">
-                    <div>
-                        <div class="admin-stat-label">Points Used</div>
-                        <div class="admin-stat-value">0</div>
-                        <div class="admin-stat-note">Tracked monthly activity</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-3">
-                <div class="admin-stat-card">
-                    <div>
-                        <div class="admin-stat-label">Low Stock Items</div>
-                        <div class="admin-stat-value">0</div>
-                        <div class="admin-stat-note">Needs restocking</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-3">
-                <div class="admin-stat-card">
-                    <div>
-                        <div class="admin-stat-label">Monthly Limit Claims</div>
-                        <div class="admin-stat-value">0</div>
-                        <div class="admin-stat-note">Current cycle</div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <section class="admin-reporting mb-4">
-        <div class="row g-4">
-
-            <div class="col-lg-6">
-                <div class="admin-panel h-100">
-                    <div class="admin-panel-header">
-                        <div>
-                            <span class="admin-panel-kicker">Inventory Patterns</span>
-                            <h2 class="admin-panel-title mb-1">Top Item Categories</h2>
-                        </div>
-                    </div>
-
-                    <div class="category-list mt-4">
-
-                        <div class="category-row">
-                            <span>Snacks</span>
-                            <strong>40%</strong>
-                        </div>
-                        <div class="progress admin-progress mb-3">
-                            <div class="progress-bar" style="width: 40%;"></div>
-                        </div>
-
-                        <div class="category-row">
-                            <span>Beverages</span>
-                            <strong>40%</strong>
-                        </div>
-                        <div class="progress admin-progress mb-3">
-                            <div class="progress-bar" style="width: 40%;"></div>
-                        </div>
-
-                        <div class="category-row">
-                            <span>Meals</span>
-                            <strong>16%</strong>
-                        </div>
-                        <div class="progress admin-progress mb-3">
-                            <div class="progress-bar" style="width: 16%;"></div>
-                        </div>
-
-                        <div class="category-row">
-                            <span>Hygiene</span>
-                            <strong>4%</strong>
-                        </div>
-                        <div class="progress admin-progress">
-                            <div class="progress-bar" style="width: 4%;"></div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-6">
-                <div class="admin-panel h-100">
-                    <div class="admin-panel-header">
-                        <div>
-                            <span class="admin-panel-kicker">Visit Patterns</span>
-                            <h2 class="admin-panel-title mb-1">Busiest Days</h2>
-                        </div>
-                    </div>
-
-                    <div class="category-list mt-4">
-
-                        <div class="category-row">
-                            <span>Monday</span>
-                            <strong>22%</strong>
-                        </div>
-                        <div class="progress admin-progress mb-3">
-                            <div class="progress-bar" style="width: 22%;"></div>
-                        </div>
-
-                        <div class="category-row">
-                            <span>Tuesday</span>
-                            <strong>26%</strong>
-                        </div>
-                        <div class="progress admin-progress mb-3">
-                            <div class="progress-bar" style="width: 26%;"></div>
-                        </div>
-
-                        <div class="category-row">
-                            <span>Wednesday</span>
-                            <strong>24%</strong>
-                        </div>
-                        <div class="progress admin-progress mb-3">
-                            <div class="progress-bar" style="width: 24%;"></div>
-                        </div>
-
-                        <div class="category-row">
-                            <span>Thursday</span>
-                            <strong>21%</strong>
-                        </div>
-                        <div class="progress admin-progress mb-3">
-                            <div class="progress-bar" style="width: 21%;"></div>
-                        </div>
-
-                        <div class="category-row">
-                            <span>Friday</span>
-                            <strong>7%</strong>
-                        </div>
-                        <div class="progress admin-progress">
-                            <div class="progress-bar" style="width: 7%;"></div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <section class="admin-management">
-        <div class="mb-3">
-            <h2 class="admin-section-title mb-1">Management Areas</h2>
-
-            <p class="admin-section-text mb-0">
-                Access the major areas used to manage pantry operations.
+<div class="admin-dashboard">
+    <section class="admin-hero">
+        <div class="admin-hero-copy">
+            <span class="admin-eyebrow">Admin Dashboard</span>
+            <h1 class="admin-page-title mb-2">Hello, @displayName</h1>
+            <p class="admin-page-subtitle mb-0">
+                Keep orders moving, review applications, and stay on top of incoming donations from one clean workspace.
             </p>
         </div>
 
-        <div class="row g-4">
-            <div class="col-md-6 col-xl-4">
-                <div class="admin-tile">
-                    <div class="admin-tile-content">
-                        <h3 class="admin-tile-title">Item Requests</h3>
-
-                        <p class="admin-tile-text">
-                            Review pantry requests submitted by users.
-                        </p>
-                    </div>
-
-                    <a asp-area="Identity"
-                           asp-page="/Account/ItemRequests"
-                           class="btn admin-tile-btn">
-                        View Requests
-                    </a>
-                </div>
-            </div>
-            <div class="col-md-6 col-xl-4">
-                <div class="admin-tile">
-                    <div class="admin-tile-content">
-                        <h3 class="admin-tile-title">Students</h3>
-
-                        <p class="admin-tile-text">
-                            Manage student records, badge lookup details, and pantry access history.
-                        </p>
-                    </div>
-
-                    <a asp-controller="Student" asp-action="Index" class="btn admin-tile-btn">
-                        View Students
-                    </a>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-4">
-                <div class="admin-tile">
-                    <div class="admin-tile-content">
-                        <h3 class="admin-tile-title">Inventory</h3>
-
-                        <p class="admin-tile-text">
-                            Track item quantities, restocking needs, and pantry item rules.
-                        </p>
-                    </div>
-
-                    <a asp-controller="Inventory" asp-action="Index" class="btn admin-tile-btn">
-                        View Inventory
-                    </a>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-4">
-                <div class="admin-tile">
-                    <div class="admin-tile-content">
-                        <h3 class="admin-tile-title">Order Fulfilemnt</h3>
-
-                        <p class="admin-tile-text">
-                            Manage order statuses, fulfilment dates, orders received, and complected pantry orders.
-                        </p>
-                    </div>
-
-                    <a asp-controller="OrderFulfilments" asp-action="Index" class="btn admin-tile-btn">
-                        View Order Fulfilemnt
-                    </a>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-4">
-                <div class="admin-tile">
-                    <div class="admin-tile-content">
-                        <h3 class="admin-tile-title">Donors</h3>
-
-                        <p class="admin-tile-text">
-                            Record donor details, donation history, and contact information.
-                        </p>
-                    </div>
-
-                    <a href="http://localhost:5279/Donor" class="btn admin-tile-btn">
-                        View Donors
-                    </a>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-4">
-                <div class="admin-tile">
-                    <div class="admin-tile-content">
-                        <h3 class="admin-tile-title">Order History</h3>
-
-                        <p class="admin-tile-text">
-                            History of all past orders, including order details, dates, and totals.
-                        </p>
-                    </div>
-
-                    <a asp-controller="Order" asp-action="History" class="btn admin-tile-btn">
-                        View Orders
-                    </a>
-                </div>
-            </div>
-
+        <div class="admin-date-card">
+            <span>Today</span>
+            <strong>@DateTime.Today.ToString("dddd, MMMM d")</strong>
         </div>
     </section>
 
+    <section class="admin-work-section">
+        <div class="admin-section-heading">
+            <div>
+                <h2>Quick View</h2>
+            </div>
+            <p>Check below to see if anything needs attention.</p>
+        </div>
+
+        <div class="admin-work-grid">
+            <a asp-controller="OrderFulfilments" asp-action="Index" class="admin-queue-card admin-queue-orders">
+                <i class="bi bi-bag-check admin-queue-icon"></i>
+                <span class="admin-queue-content">
+                    <span class="admin-queue-label">New orders</span>
+                    <small>Waiting to be fulfilled</small>
+                </span>
+                <strong class="admin-queue-count">@Model.NewOrders</strong>
+                <i class="bi bi-arrow-right admin-queue-arrow"></i>
+            </a>
+
+            <a asp-controller="Student" asp-action="Index" class="admin-queue-card admin-queue-applications">
+                <i class="bi bi-file-earmark-person admin-queue-icon"></i>
+                <span class="admin-queue-content">
+                    <span class="admin-queue-label">Pending applications</span>
+                    <small>Waiting for an admin decision</small>
+                </span>
+                <strong class="admin-queue-count">@Model.PendingApplications</strong>
+                <i class="bi bi-arrow-right admin-queue-arrow"></i>
+            </a>
+
+            <a asp-controller="Admin" asp-action="Donations" class="admin-queue-card admin-queue-donations">
+                <i class="bi bi-gift admin-queue-icon"></i>
+                <span class="admin-queue-content">
+                    <span class="admin-queue-label">New donations</span>
+                    <small>Waiting for review</small>
+                </span>
+                <strong class="admin-queue-count">@Model.NewDonations</strong>
+                <i class="bi bi-arrow-right admin-queue-arrow"></i>
+            </a>
+        </div>
+    </section>
+
+    <section class="admin-data-grid">
+        <div class="admin-panel admin-panel-orders">
+            <div class="admin-panel-header">
+                <div>
+                    <span class="admin-panel-kicker">Orders</span>
+                    <h2 class="admin-panel-title mb-0">Recent student orders</h2>
+                </div>
+                <a asp-controller="OrderFulfilments" asp-action="Index" class="admin-text-link">
+                    View all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="admin-list">
+                @if (!Model.RecentOrders.Any())
+                {
+                    <div class="admin-empty-state">
+                        <i class="bi bi-bag"></i>
+                        <span>No student orders have been submitted yet.</span>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var order in Model.RecentOrders)
+                    {
+                        var statusClass = order.Status.Equals("Fulfilled", StringComparison.OrdinalIgnoreCase)
+                            ? "is-complete"
+                            : "is-pending";
+
+                        <a asp-controller="OrderFulfilments" asp-action="Index" asp-route-searchText="@order.OrderId"
+                           class="admin-list-row">
+                            <span class="admin-list-main">
+                                <strong>Order #@order.OrderId</strong>
+                                <small>@order.StudentEmail</small>
+                            </span>
+                            <span class="admin-list-meta">
+                                <span>@order.ItemCount items / @order.PointsUsed pts</span>
+                                <small>@order.SubmittedAt.ToString("MMM d, h:mm tt")</small>
+                            </span>
+                            <span class="admin-status @statusClass">@order.Status</span>
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="admin-panel admin-panel-applications">
+            <div class="admin-panel-header">
+                <div>
+                    <span class="admin-panel-kicker">Applications</span>
+                    <h2 class="admin-panel-title mb-0">Pending applications</h2>
+                </div>
+                <a asp-controller="Student" asp-action="Index" class="admin-text-link">
+                    View all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="admin-list">
+                @if (!Model.RecentApplications.Any())
+                {
+                    <div class="admin-empty-state">
+                        <i class="bi bi-check2-circle"></i>
+                        <span>There are no applications waiting for review.</span>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var application in Model.RecentApplications)
+                    {
+                        <a asp-controller="Student" asp-action="Details" asp-route-id="@application.ApplicationId"
+                           class="admin-list-row admin-list-row-compact">
+                            <span class="admin-list-main">
+                                <strong>@application.StudentName</strong>
+                                <small>Student ID @application.StudentId</small>
+                            </span>
+                            <span class="admin-list-meta">
+                                <span>Review needed</span>
+                                <small>@application.SubmittedAt.ToLocalTime().ToString("MMM d")</small>
+                            </span>
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="admin-panel admin-panel-donations">
+            <div class="admin-panel-header">
+                <div>
+                    <span class="admin-panel-kicker">Donations</span>
+                    <h2 class="admin-panel-title mb-0">Recent donations</h2>
+                </div>
+                <a asp-controller="Admin" asp-action="Donations" class="admin-text-link">
+                    View all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="admin-list">
+                @if (!Model.RecentDonations.Any())
+                {
+                    <div class="admin-empty-state">
+                        <i class="bi bi-gift"></i>
+                        <span>No donations have been recorded yet.</span>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var donation in Model.RecentDonations)
+                    {
+                        var donationStatusClass = donation.Status.Equals("Approved", StringComparison.OrdinalIgnoreCase)
+                            ? "is-complete"
+                            : donation.Status.Equals("Denied", StringComparison.OrdinalIgnoreCase)
+                                ? "is-denied"
+                                : "is-pending";
+
+                        <a asp-controller="Admin" asp-action="Donations" class="admin-list-row">
+                            <span class="admin-list-main">
+                                <strong>@donation.DonorName</strong>
+                                <small>@donation.ItemCount item types / @donation.TotalUnits total units</small>
+                            </span>
+                            <span class="admin-list-meta">
+                                <small>@donation.SubmittedAt.ToString("MMM d, yyyy")</small>
+                            </span>
+                            <span class="admin-status @donationStatusClass">@donation.Status</span>
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+    </section>
 </div>

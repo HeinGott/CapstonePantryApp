@@ -62,21 +62,28 @@ namespace Pantreats.Controllers
             var model = new AdminDashboardViewModel
             {
                 NewOrders = orders.Count(order =>
-                    order.OrderFulfilment == null ||
-                    !string.Equals(order.OrderFulfilment.OrderStatus, "Fulfilled", StringComparison.OrdinalIgnoreCase)),
+                    string.Equals(
+                        OrderFulfilment.NormalizeStatus(order.OrderFulfilment?.OrderStatus),
+                        OrderFulfilment.StatusOrderPlaced,
+                        StringComparison.OrdinalIgnoreCase)),
                 PendingApplications = latestApplications.Count(application =>
                     string.IsNullOrWhiteSpace(application.ApplicationStatus) ||
                     application.ApplicationStatus == ApplicationStatuses.Pending),
                 NewDonations = donations.Count(donation =>
                     string.Equals(donation.Status, "Pending", StringComparison.OrdinalIgnoreCase)),
                 RecentOrders = orders
+                    .Where(order =>
+                        string.Equals(
+                            OrderFulfilment.NormalizeStatus(order.OrderFulfilment?.OrderStatus),
+                            OrderFulfilment.StatusOrderPlaced,
+                            StringComparison.OrdinalIgnoreCase))
                     .Take(4)
                     .Select(order => new AdminDashboardOrderViewModel
                     {
                         OrderId = order.OrderId,
                         StudentEmail = order.Email,
                         SubmittedAt = order.OrderDate,
-                        Status = order.OrderFulfilment?.OrderStatus ?? "Submitted",
+                        Status = OrderFulfilment.NormalizeStatus(order.OrderFulfilment?.OrderStatus),
                         ItemCount = order.OrderItems.Sum(item => item.OrderQuantity),
                         PointsUsed = order.Total
                     })

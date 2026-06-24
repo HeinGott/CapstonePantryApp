@@ -36,7 +36,7 @@
                 <i class="bi bi-bag-check admin-queue-icon"></i>
                 <span class="admin-queue-content">
                     <span class="admin-queue-label">New orders</span>
-                    <small>Waiting to be fulfilled</small>
+                    <small>Still need admin action</small>
                 </span>
                 <strong class="admin-queue-count">@Model.NewOrders</strong>
                 <i class="bi bi-arrow-right admin-queue-arrow"></i>
@@ -81,18 +81,18 @@
                 {
                     <div class="admin-empty-state">
                         <i class="bi bi-bag"></i>
-                        <span>No student orders have been submitted yet.</span>
+                        <span>No student orders currently need admin action.</span>
                     </div>
                 }
                 else
                 {
                     @foreach (var order in Model.RecentOrders)
                     {
-                        var statusClass = order.Status.Equals("Fulfilled", StringComparison.OrdinalIgnoreCase)
+                        var statusClass = order.Status.Equals(Pantreats.Models.OrderFulfilment.StatusCompleted, StringComparison.OrdinalIgnoreCase)
                             ? "is-complete"
                             : "is-pending";
 
-                        <a asp-controller="OrderFulfilments" asp-action="Index" asp-route-searchText="@order.OrderId"
+                        <a asp-controller="Order" asp-action="Details" asp-route-id="@order.OrderId"
                            class="admin-list-row">
                             <span class="admin-list-main">
                                 <strong>Order #@order.OrderId</strong>

@@ -196,8 +196,8 @@ namespace Pantreats.Controllers
                 _context.OrderFulfilments.Add(new OrderFulfilment
                 {
                     OrderId = order.OrderId,
-                    FulfilmentDate = DateTime.Now,
-                    OrderStatus = "Waiting Pickup"
+                    FulfilmentDate = order.OrderDate,
+                    OrderStatus = OrderFulfilment.StatusOrderPlaced
                 });
             }
 

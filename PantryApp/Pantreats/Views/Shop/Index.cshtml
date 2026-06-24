@@ -210,6 +210,40 @@
         </div>
     </section>
 
+    <div class="modal fade shop-confirmation-modal"
+         id="checkoutConfirmationModal"
+         tabindex="-1"
+         aria-labelledby="checkoutConfirmationTitle"
+         aria-describedby="checkoutConfirmationMessage"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="shop-confirmation-icon" aria-hidden="true">
+                        <i class="bi bi-bag-check"></i>
+                    </div>
+                    <span class="shop-kicker">Pickup Order</span>
+                    <h2 class="shop-confirmation-title" id="checkoutConfirmationTitle">Confirm your order</h2>
+                    <p class="shop-confirmation-message" id="checkoutConfirmationMessage">
+                        Review your cart before placing this pickup order.
+                    </p>
+                    <div class="shop-confirmation-actions">
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">
+                            Keep shopping
+                        </button>
+                        <button type="button"
+                                class="btn shop-checkout-button"
+                                id="confirmCheckoutButton">
+                            Yes, place order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @if (!Model.Items.Any())
     {
         <div class="student-card text-center py-5">
@@ -351,6 +385,10 @@
             const cartTotal = document.getElementById('cartTotal');
             const cartStatus = document.getElementById('cartStatus');
             const checkoutButton = document.getElementById('checkoutButton');
+            const checkoutConfirmationElement = document.getElementById('checkoutConfirmationModal');
+            const checkoutConfirmationMessage = document.getElementById('checkoutConfirmationMessage');
+            const confirmCheckoutButton = document.getElementById('confirmCheckoutButton');
+            const checkoutConfirmation = bootstrap.Modal.getOrCreateInstance(checkoutConfirmationElement);
             const viewOrdersLink = document.getElementById('viewOrdersLink');
             const pagination = document.getElementById('shopPagination');
             const searchInput = document.getElementById('shopSearchInput');
@@ -364,6 +402,7 @@
             let searchTerm = '';
             let statusTimeoutId = null;
             let statusHideTimeoutId = null;
+            let isCheckingOut = false;
 
             document.querySelectorAll('.shop-add-button').forEach(button => {
                 button.addEventListener('click', () => addItem(button));
@@ -371,7 +410,8 @@
 
             cartToggleButton.addEventListener('click', toggleCart);
             cartCloseButton.addEventListener('click', closeCart);
-            checkoutButton.addEventListener('click', checkout);
+            checkoutButton.addEventListener('click', showCheckoutConfirmation);
+            confirmCheckoutButton.addEventListener('click', checkout);
             searchInput?.addEventListener('input', () => {
                 searchTerm = searchInput.value.trim().toLowerCase();
                 renderPage(1);
@@ -561,7 +601,7 @@
                 }
             }
 
-            async function checkout() {
+            function showCheckoutConfirmation() {
                 clearStatus();
                 viewOrdersLink.classList.add('d-none');
 
@@ -570,8 +610,26 @@
                     return;
                 }
 
+                const itemCount = getCartQuantity();
+                const itemLabel = itemCount === 1 ? 'item' : 'items';
+                const pointLabel = itemCount === 1 ? 'point' : 'points';
+                checkoutConfirmationMessage.textContent =
+                    `You’re about to place a pickup order for ${itemCount} ${itemLabel}, totaling ${itemCount} ${pointLabel}. Would you like to continue?`;
+                checkoutConfirmation.show();
+            }
+
+            async function checkout() {
+                if (isCheckingOut || cart.length === 0) {
+                    checkoutConfirmation.hide();
+                    return;
+                }
+
+                isCheckingOut = true;
+                confirmCheckoutButton.disabled = true;
+                confirmCheckoutButton.textContent = 'Placing...';
                 checkoutButton.disabled = true;
                 checkoutButton.textContent = 'Placing...';
+                checkoutConfirmation.hide();
 
                 try {
                     const checkedOutUPCs = cart.flatMap(item => Array(item.quantity).fill(item.upc));
@@ -600,6 +658,9 @@
                     setStatus(result.message, 'success');
                     viewOrdersLink.classList.remove('d-none');
                 } finally {
+                    isCheckingOut = false;
+                    confirmCheckoutButton.disabled = false;
+                    confirmCheckoutButton.textContent = 'Yes, place order';
                     checkoutButton.disabled = false;
                     checkoutButton.textContent = 'Place order';
                     renderCart();

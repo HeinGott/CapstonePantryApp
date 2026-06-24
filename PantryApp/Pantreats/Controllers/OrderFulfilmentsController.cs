@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Pantreats.Data;
 using Pantreats.Models;
 
 namespace Pantreats.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class OrderFulfilmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -16,33 +18,43 @@ namespace Pantreats.Controllers
 
         public async Task<IActionResult> Index(string? searchText, string? statusFilter)
         {
-            var fulfilment = await _context.OrderFulfilments
-            .Include(ful => ful.Order)
-            .ToListAsync();
+            var allFulfilments = await _context.OrderFulfilments
+                .AsNoTracking()
+                .Include(fulfilment => fulfilment.Order)
+                    .ThenInclude(order => order.OrderItems)
+                .ToListAsync();
+
+            var fulfilments = allFulfilments.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
-                fulfilment = fulfilment
-                    .Where(ful =>
-                        ful.OrderId.ToString().Contains(searchText) ||
-                        (ful.Order != null &&
-                         ful.Order.Email.Contains(searchText)))
-                    .ToList();
+                fulfilments = fulfilments.Where(fulfilment =>
+                    fulfilment.OrderId.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrWhiteSpace(fulfilment.Order?.Email) &&
+                     fulfilment.Order.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase)));
             }
 
             if (!string.IsNullOrWhiteSpace(statusFilter))
             {
-                fulfilment = fulfilment
-                    .Where(ful => ful.OrderStatus == statusFilter)
-                    .ToList();
+                fulfilments = fulfilments.Where(fulfilment =>
+                    string.Equals(OrderFulfilment.NormalizeStatus(fulfilment.OrderStatus), statusFilter, StringComparison.OrdinalIgnoreCase));
             }
+
+            var filteredFulfilments = fulfilments
+                .OrderBy(fulfilment => GetStatusRank(fulfilment.OrderStatus))
+                .ThenByDescending(fulfilment => fulfilment.Order?.OrderDate ?? DateTime.MinValue)
+                .ToList();
 
             var model = new OrderFulfilmentViewModel
             {
-                OrderFulfilments = fulfilment,
-                TotalOrders = fulfilment.Count,
-                WaitingPickupOrders = fulfilment.Count(ful => ful.OrderStatus == "Waiting Pickup"),
-                FulfilledOrders = fulfilment.Count(ful => ful.OrderStatus == "Fulfilled"),
+                OrderFulfilments = filteredFulfilments,
+                TotalOrders = allFulfilments.Count,
+                OrderPlacedCount = allFulfilments.Count(fulfilment =>
+                    string.Equals(OrderFulfilment.NormalizeStatus(fulfilment.OrderStatus), OrderFulfilment.StatusOrderPlaced, StringComparison.OrdinalIgnoreCase)),
+                ReadyForPickupCount = allFulfilments.Count(fulfilment =>
+                    string.Equals(OrderFulfilment.NormalizeStatus(fulfilment.OrderStatus), OrderFulfilment.StatusReadyForPickup, StringComparison.OrdinalIgnoreCase)),
+                CompletedCount = allFulfilments.Count(fulfilment =>
+                    string.Equals(OrderFulfilment.NormalizeStatus(fulfilment.OrderStatus), OrderFulfilment.StatusCompleted, StringComparison.OrdinalIgnoreCase)),
                 SearchText = searchText,
                 StatusFilter = statusFilter
             };
@@ -53,29 +65,33 @@ namespace Pantreats.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var fulfilment = await _context.OrderFulfilments
-                .FirstOrDefaultAsync(ful => ful.Id == id);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(fulfilment => fulfilment.Id == id);
 
             if (fulfilment == null)
             {
                 return NotFound();
             }
 
-            return View(fulfilment);
+            return RedirectToAction("Details", "Order", new { id = fulfilment.OrderId });
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(OrderFulfilment fulfilment)
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(OrderFulfilment fulfilment)
         {
-            if (ModelState.IsValid)
-            {
-                _context.OrderFulfilments.Update(fulfilment);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction("Index");
-            }
-
-            return View(fulfilment);
+            return RedirectToAction("Details", "Order", new { id = fulfilment.OrderId });
         }
 
+        private static int GetStatusRank(string? status)
+        {
+            return OrderFulfilment.NormalizeStatus(status) switch
+            {
+                OrderFulfilment.StatusOrderPlaced => 0,
+                OrderFulfilment.StatusReadyForPickup => 1,
+                OrderFulfilment.StatusCompleted => 2,
+                _ => 3
+            };
+        }
     }
 }

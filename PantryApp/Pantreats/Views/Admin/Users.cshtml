@@ -33,6 +33,32 @@
     }
 
     <div class="student-card">
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <input type="text"
+                       id="userSearchInput"
+                       class="form-control"
+                       placeholder="Search by email..." />
+            </div>
+
+            <div class="col-md-4">
+                <select id="roleFilter" class="form-select">
+                    <option value="">All Roles</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Students">Student</option>
+                    <option value="Volunteers">Volunteer</option>
+                    <option value="Donors">Donor</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="button" id="resetUserFilters" class="btn btn-outline-secondary w-100">
+                    Reset
+                </button>
+            </div>
+        </div>
+
         <table class="table student-table">
             <thead>
                 <tr>
@@ -46,6 +72,8 @@
                 @foreach (var user in Model)
                 {
                     <tr class="user-row"
+                        data-email="@user.Email.ToLower()"
+                        data-role="@user.RoleValue"
                         role="button"
                         tabindex="0"
                         onclick="window.location='@Url.Action("UserEdit", "Admin", new { id = user.UserId })'"
@@ -78,16 +106,44 @@
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+
             const toastElement = document.getElementById("adminStatusToast");
-            if (!toastElement) {
-                return;
+            if (toastElement) {
+                const toast = new bootstrap.Toast(toastElement, {
+                    delay: 3500
+                });
+
+                toast.show();
             }
 
-            const toast = new bootstrap.Toast(toastElement, {
-                delay: 3500
-            });
+            const userSearchInput = document.getElementById("userSearchInput");
+            const roleFilter = document.getElementById("roleFilter");
+            const resetUserFilters = document.getElementById("resetUserFilters");
+            const userRows = document.querySelectorAll(".user-row");
 
-            toast.show();
+            function filterUsers() {
+                const searchText = userSearchInput.value.toLowerCase();
+                const selectedRole = roleFilter.value;
+
+                userRows.forEach(function (row) {
+                    const email = row.getAttribute("data-email");
+                    const role = row.getAttribute("data-role");
+
+                    const matchesSearch = email.includes(searchText);
+                    const matchesRole = selectedRole === "" || role === selectedRole;
+
+                    row.style.display = matchesSearch && matchesRole ? "" : "none";
+                });
+            }
+
+            userSearchInput.addEventListener("input", filterUsers);
+            roleFilter.addEventListener("change", filterUsers);
+
+            resetUserFilters.addEventListener("click", function () {
+                userSearchInput.value = "";
+                roleFilter.value = "";
+                filterUsers();
+            });
         });
     </script>
 }

@@ -11,19 +11,6 @@ namespace Pantreats.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_Vendors",
-                table: "Vendors");
-
-            migrationBuilder.RenameTable(
-                name: "Vendors",
-                newName: "Donors");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_Donors",
-                table: "Donors",
-                column: "DonorID");
-
             migrationBuilder.CreateTable(
                 name: "Donations",
                 columns: table => new
@@ -74,19 +61,6 @@ namespace Pantreats.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Donations");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_Donors",
-                table: "Donors");
-
-            migrationBuilder.RenameTable(
-                name: "Donors",
-                newName: "Vendors");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_Vendors",
-                table: "Vendors",
-                column: "DonorID");
         }
     }
 }

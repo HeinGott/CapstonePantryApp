@@ -1,6 +1,10 @@
-﻿@inject SignInManager<IdentityUser> SignInManager
+﻿@using Pantreats.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+
+
 @{
-    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any(); //Claude used on line 2 and 3 to restore sidebar
 }
 <ul class="nav nav-pills flex-column">
     <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>

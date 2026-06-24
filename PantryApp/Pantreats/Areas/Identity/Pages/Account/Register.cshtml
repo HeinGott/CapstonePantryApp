@@ -4,18 +4,23 @@
     ViewData["Title"] = "Register";
 }
 
-<div class="container py-5">
+<div class="container pt-1 py-5">
     <div class="row justify-content-center">
         <div class="col-md-7 col-lg-5">
             <div class="student-card p-4 p-md-5">
-                <h1 class="text-center mb-3">
-                    <img src="/images/SCC-Logo.png" alt="SCC Logo" style="width:380px; height:90px;" />
-                </h1>
+                <div class="text-center mb-4">
+                    <img src="/images/SCC-Logo.png"
+                         alt="SCC Logo"
+                         style="max-width:100%; width:380px; height:auto;" />
+                </div>                
 
                 @if (Model.ShowRoleChooser)
                 {
-                    <div class="text-center">
-                        <h2 class="mb-2">Register as</h2>
+                    <div class="text-center mb-4">
+                        <h2 class="mb-2">Create Account</h2>
+                    </div>
+
+                    <div class="text-center">                        
                         <p class="student-page-subtitle mb-4">Choose the kind of account you need before we start the signup flow.</p>
 
                         <div class="d-grid gap-3">
@@ -23,8 +28,10 @@
                             <a asp-page="./Register" asp-route-accountType="donor" class="btn btn-outline-primary btn-lg">Donor</a>
                         </div>
 
-                        <div class="mt-4">
-                            <a asp-page="./Login">Already have an account? Sign in</a>
+                        <div class="text-center mt-4">
+                            <a asp-page="./Login">
+                                Already have an account? Sign in
+                            </a>
                         </div>
                     </div>
                 }
@@ -34,12 +41,11 @@
                         <h2 class="text-center mb-2">
                             @(Model.IsStudentRegistration ? "Create your student account" : "Create your donor account")
                         </h2>
-                        <p class="text-center student-page-subtitle mb-4">
+                        <p class="text-center student-page-subtitle mb-5">
                             @(Model.IsStudentRegistration
                                 ? "You'll create your login first, then complete the student application."
                                 : "We'll set up your donor login and role in one step.")
                         </p>
-                        <hr />                        
 
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>                        
 
@@ -49,13 +55,7 @@
                                 <label asp-for="Input.FullName" class="form-label">Full Name</label>
                                 <input asp-for="Input.FullName" class="form-control" placeholder="Enter your full name" />
                                 <span asp-validation-for="Input.FullName" class="text-danger"></span>
-                            </div>
-
-                            <div class="mb-3">
-                                <label asp-for="Input.PhoneNumber" class="form-label">Phone Number</label>
-                                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="(864) 555-1234" />
-                                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
-                            </div>
+                            </div>                           
                         }
 
                         <div class="mb-3">
@@ -110,6 +110,7 @@
                         </div>
                     }
                 }
+
             </div>
         </div>
     </div>

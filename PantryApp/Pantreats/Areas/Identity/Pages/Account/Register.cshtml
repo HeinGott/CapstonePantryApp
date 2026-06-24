@@ -101,12 +101,33 @@
                     @if (Model.IsStudentRegistration && Model.ExternalLogins.Any())
                     {
                         <div class="text-center mt-4">
-                            <p class="mb-3 fs-5">Or continue with Microsoft</p>
-                            <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" asp-route-accountType="student" method="post">
-                                <button type="submit" class="btn p-0 border-0 bg-transparent" name="provider" value="Microsoft" title="Register with Microsoft">
-                                    <img src="~/images/microsoftLoginIcon.svg" asp-append-version="true" alt="Continue with Microsoft" style="height:44px; width:auto;" />
-                                </button>
+
+                            <form asp-page="./ExternalLogin"
+                                  asp-route-returnUrl="@Model.ReturnUrl"
+                                  method="post">
+
+                                @foreach (var provider in Model.ExternalLogins)
+                                {
+                                    if (provider.Name == "Microsoft")
+                                    {
+                                        <button type="submit"
+                                                name="provider"
+                                                value="@provider.Name"
+                                                class="btn d-flex align-items-center gap-2 mx-auto"
+                                                title="Log in with Microsoft">
+
+                                            <img src="~/images/microsoftLoginIcon.svg"
+                                                 asp-append-version="true"
+                                                 alt="Microsoft"
+                                                 style="height:50px; width:auto;" />
+
+                                            <span class="fs-5">Continue with Microsoft</span>
+                                        </button>
+                                    }
+                                }
+
                             </form>
+
                         </div>
                     }
                 }

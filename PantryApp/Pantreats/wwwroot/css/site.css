@@ -891,6 +891,11 @@ a:hover {
         background: #edf6e6;
     }
 
+    .admin-status.is-ready {
+        color: #0f5d7a;
+        background: #e8f6fb;
+    }
+
     .admin-status.is-denied {
         color: #b42318;
         background: #fff0f0;
@@ -1647,9 +1652,15 @@ span.flatpickr-weekday {
     transition: background-color 0.18s ease;
 }
 
-    .order-row:hover td {
+.order-row:hover td {
         background-color: var(--pantreats-blue-soft);
     }
+
+.order-history .admin-status {
+    display: inline-flex;
+    align-items: center;
+}
+
 .order-pagination {
     display: flex;
     justify-content: center;
@@ -1718,48 +1729,212 @@ span.flatpickr-weekday {
         color: var(--pantreats-blue);
     }
 
-.order-details-header-card {
-    background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 2px 4px var(--pantreats-blue);
-    padding: 1.5rem;
+.order-details-overview {
+    padding: 0.25rem 0 0;
     margin-bottom: 1.5rem;
 }
 
 .order-details-title {
     color: var(--pantreats-blue);
-    font-weight: 700;
-    margin-bottom: 0.25rem;
+    font-weight: 800;
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    line-height: 1;
+    margin-bottom: 0.35rem;
+}
+
+.order-details-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
 }
 
 .order-details-subtitle {
-    color: #6b7280;
-    margin-bottom: 1.25rem;
+    color: #64748b;
+    font-size: 1rem;
+    margin-bottom: 0;
 }
 
-.order-details-info-grid {
-    display: flex;
-    flex-wrap: wrap;
+.order-details-student-section {
+    margin-top: 1.35rem;
+    padding-top: 0.2rem;
+}
+
+.order-details-section-title {
+    color: var(--pantreats-blue);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.9rem;
+}
+
+.order-details-info-list {
+    margin: 0;
+}
+
+.order-details-info-row {
+    display: grid;
+    grid-template-columns: 155px 1fr;
     gap: 1rem;
+    padding: 0.78rem 0;
+    border-top: 1px solid #e2e8f0;
 }
 
-.info-card {
-    flex: 1 1 200px;
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 1rem;
+.order-details-info-row:first-child {
+    border-top: none;
 }
 
-.info-card-label {
-    color: #6b7280;
-    font-size: 0.85rem;
-    margin-bottom: 0.25rem;
+.order-details-info-row dt {
+    color: #64748b;
+    font-weight: 600;
+    margin: 0;
 }
 
-.info-card-value {
+.order-details-info-row dd {
     color: #111827;
     font-weight: 600;
+    margin: 0;
+}
+
+.order-fulfilment-panel {
+    margin-top: 1.4rem;
+    padding-top: 1.15rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.order-fulfilment-summary {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.order-fulfilment-summary > div {
+    min-width: 180px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+}
+
+.order-fulfilment-label {
+    display: block;
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+}
+
+.order-fulfilment-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+.order-fulfilment-complete-note {
+    color: var(--pantreats-green);
+    font-weight: 700;
+}
+
+.student-order-status-panel {
+    margin-top: 1.25rem;
+    padding: 1rem 1.1rem;
+    background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+}
+
+.student-order-status-message {
+    margin-bottom: 0.9rem;
+    color: #334155;
+    font-weight: 600;
+}
+
+.student-order-timeline {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+
+.student-order-timeline-step {
+    padding: 0.9rem 1rem;
+    background: #ffffff;
+    border: 1px solid #dbe6f1;
+    border-radius: 14px;
+}
+
+.student-order-timeline-step.is-complete,
+.student-order-timeline-step.is-active {
+    border-color: #cfe4d6;
+    background: #f5fbf4;
+}
+
+.student-order-step-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.student-order-timeline-step strong {
+    color: var(--pantreats-blue);
+    font-size: 0.95rem;
+}
+
+@media (max-width: 767.98px) {
+    .order-details-heading {
+        margin-bottom: 1rem;
+    }
+
+    .order-details-info-row {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+    }
+
+    .order-details-student-section,
+    .order-fulfilment-panel {
+        padding: 1rem;
+    }
+
+    .order-fulfilment-actions {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .student-order-timeline {
+        grid-template-columns: 1fr;
+    }
+}
+
+.order-items-card {
+    background: #ffffff;
+    border: 1px solid rgba(16, 47, 97, 0.08);
+    border-radius: 24px;
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+    padding: 1rem 1rem 0.6rem;
+}
+
+.order-items-card .table-responsive {
+    margin-top: 0.3rem;
+}
+
+.order-items-card .table thead th {
+    color: var(--pantreats-blue);
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    border-bottom-width: 2px;
+}
+
+.order-items-card .table tbody td {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    vertical-align: middle;
 }
 
 .order-items-title {
@@ -1861,6 +2036,18 @@ span.flatpickr-weekday {
     padding: 1rem;
 }
 
+.fulfilment-stat-card h5 {
+    color: var(--pantreats-blue);
+    margin-bottom: 0.6rem;
+    font-weight: 700;
+}
+
+.fulfilment-stat-card h2 {
+    color: var(--pantreats-green);
+    margin: 0;
+    font-size: 2rem;
+}
+
 .fulfilment-stat-card span {
     color: var(--pantreats-blue);
     display: block;
@@ -1888,6 +2075,17 @@ span.flatpickr-weekday {
 
 .fulfilment-row:hover td{
     background-color: #f3f4f6
+}
+
+.fulfilment-order-link {
+    color: var(--pantreats-blue);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.fulfilment-order-link:hover {
+    color: var(--pantreats-blue-dark);
+    text-decoration: underline;
 }
 
 .fulfilment-actions {
@@ -2685,6 +2883,60 @@ span.flatpickr-weekday {
     width: auto !important;
 }
 
+.shop-confirmation-modal .modal-dialog {
+    width: min(430px, calc(100vw - 2rem));
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.shop-confirmation-modal .modal-content {
+    overflow: hidden;
+    border: 1px solid var(--pantreats-border);
+    border-radius: 18px;
+    box-shadow: 0 24px 70px rgba(16, 47, 97, 0.24);
+}
+
+.shop-confirmation-modal .modal-body {
+    padding: 2rem;
+    text-align: center;
+}
+
+.shop-confirmation-icon {
+    display: inline-flex;
+    width: 64px;
+    height: 64px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    border-radius: 20px;
+    background: #e8f1df;
+    color: var(--pantreats-green-dark);
+    font-size: 1.75rem;
+}
+
+.shop-confirmation-title {
+    margin-bottom: 0.75rem;
+    color: var(--pantreats-blue);
+    font-size: 1.45rem;
+    font-weight: 800;
+}
+
+.shop-confirmation-message {
+    margin-bottom: 1.5rem;
+    color: #687384;
+    line-height: 1.6;
+}
+
+.shop-confirmation-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.shop-confirmation-actions .btn {
+    min-width: 145px;
+}
+
 @media (max-width: 575.98px) {
     .shop-cart-panel {
         top: 4.75rem;
@@ -2704,6 +2956,18 @@ span.flatpickr-weekday {
 
     .shop-cart-panel-footer .btn {
         width: 100% !important;
+    }
+
+    .shop-confirmation-modal .modal-body {
+        padding: 1.5rem;
+    }
+
+    .shop-confirmation-actions {
+        flex-direction: column-reverse;
+    }
+
+    .shop-confirmation-actions .btn {
+        width: 100%;
     }
 }
 

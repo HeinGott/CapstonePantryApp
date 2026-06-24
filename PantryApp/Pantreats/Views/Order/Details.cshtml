@@ -1,12 +1,35 @@
-﻿@model Pantreats.Models.Order
+@model Pantreats.Models.Order
 
 @{
     ViewData["Title"] = "Order Details";
+    var fulfilment = Model.OrderFulfilment;
+    var currentStatus = Pantreats.Models.OrderFulfilment.NormalizeStatus(fulfilment?.OrderStatus);
+    var isOrderPlaced = string.Equals(currentStatus, Pantreats.Models.OrderFulfilment.StatusOrderPlaced, StringComparison.OrdinalIgnoreCase);
+    var isReadyForPickup = string.Equals(currentStatus, Pantreats.Models.OrderFulfilment.StatusReadyForPickup, StringComparison.OrdinalIgnoreCase);
+    var isCompleted = string.Equals(currentStatus, Pantreats.Models.OrderFulfilment.StatusCompleted, StringComparison.OrdinalIgnoreCase);
+    var readyDateText = isOrderPlaced ? "Not packed yet" : fulfilment?.FulfilmentDate.ToString("MM/dd/yyyy") ?? "Not packed yet";
+    var completedDateText = fulfilment?.DateReceived?.ToString("MM/dd/yyyy") ?? "Not completed";
+    var studentName = ViewBag.StudentName as string;
+    var studentPhone = ViewBag.StudentPhone as string;
+    var displayName = !string.IsNullOrWhiteSpace(studentName) ? studentName : "Not provided";
+    var displayPhone = !string.IsNullOrWhiteSpace(studentPhone) ? studentPhone : "Not provided";
 }
 
 <div class="order-details py-4">
 
-    <a asp-action="History" class="back-button">← Back to Order History</a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-controller="OrderFulfilments" asp-action="Index" class="back-button">&larr; Back to Order Fulfilment</a>
+    }
+    else
+    {
+        <a asp-action="History" class="back-button">&larr; Back to Order History</a>
+    }
+
+    @if (TempData["StatusMessage"] != null)
+    {
+        <div class="alert alert-success mt-3">@TempData["StatusMessage"]</div>
+    }
 
     @if (TempData["AddItemError"] != null)
     {
@@ -15,46 +38,130 @@
 
     @if (User.IsInRole("Admin"))
     {
-        <div class="order-details-header-card">
-            <h1 class="order-details-title">Order #@Model.OrderId</h1>
-            <p class="order-details-subtitle">Placed on @Model.OrderDate.ToString("MM/dd/yyyy")</p>
+        <section class="order-details-overview">
+            <div class="order-details-heading">
+                <div>
+                    <h1 class="order-details-title">Order @Model.OrderId</h1>
+                    <p class="order-details-subtitle">Placed on @Model.OrderDate.ToString("MM/dd/yyyy")</p>
+                </div>
+                <span class="admin-status @(isCompleted ? "is-complete" : isReadyForPickup ? "is-ready" : "is-pending")">
+                    @currentStatus
+                </span>
+            </div>
 
-            <div class="order-details-info-grid">
-                <div class="info-card">
-                    <div class="info-card-label">User ID</div>
-                    <div class="info-card-value">@Model.UserId</div>
+            <div class="order-details-student-section">
+                <h2 class="order-details-section-title">Student details</h2>
+
+                <dl class="order-details-info-list">
+                    <div class="order-details-info-row">
+                        <dt>Name</dt>
+                        <dd>@displayName</dd>
+                    </div>
+                    <div class="order-details-info-row">
+                        <dt>Email</dt>
+                        <dd>@Model.Email</dd>
+                    </div>
+                    <div class="order-details-info-row">
+                        <dt>Phone Number</dt>
+                        <dd>@displayPhone</dd>
+                    </div>
+                    <div class="order-details-info-row">
+                        <dt>Total Points</dt>
+                        <dd>@Model.Total</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <div class="order-fulfilment-panel">
+                <div class="order-fulfilment-summary">
+                    <div>
+                        <span class="order-fulfilment-label">Ready for pickup</span>
+                        <strong>@readyDateText</strong>
+                    </div>
+                    <div>
+                        <span class="order-fulfilment-label">Completed</span>
+                        <strong>@completedDateText</strong>
+                    </div>
                 </div>
-                <div class="info-card">
-                    <div class="info-card-label">Email</div>
-                    <div class="info-card-value">@Model.Email</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-card-label">Phone</div>
-                    <div class="info-card-value">@Model.PhoneNum</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-card-label">Total Points</div>
-                    <div class="info-card-value">@Model.Total</div>
+
+                <div class="order-fulfilment-actions">
+                    @if (isOrderPlaced)
+                    {
+                        <form asp-action="MarkReadyForPickup" asp-route-id="@Model.OrderId" method="post">
+                            <button type="submit" class="inventory-edit-btn">Mark Ready for Pickup</button>
+                        </form>
+                    }
+
+                    @if (isReadyForPickup)
+                    {
+                        <form asp-action="MarkCompleted" asp-route-id="@Model.OrderId" method="post">
+                            <button type="submit" class="inventory-edit-btn">Mark Completed</button>
+                        </form>
+                    }
+
+                    @if (isCompleted)
+                    {
+                        <span class="order-fulfilment-complete-note">This order is fully completed.</span>
+                    }
                 </div>
             </div>
-        </div>
+        </section>
     }
     else
     {
-        <div class="order-details-header-card">
-            <h1 class="order-details-title">Order #@Model.OrderId</h1>
-            <p class="order-details-subtitle">Placed on @Model.OrderDate.ToString("MM/dd/yyyy")</p>
-        </div>
+        <section class="order-details-overview">
+            <div class="order-details-heading">
+                <div>
+                    <h1 class="order-details-title">Order @Model.OrderId</h1>
+                    <p class="order-details-subtitle">Placed on @Model.OrderDate.ToString("MM/dd/yyyy")</p>
+                </div>
+                <span class="admin-status @(isCompleted ? "is-complete" : isReadyForPickup ? "is-ready" : "is-pending")">
+                    @currentStatus
+                </span>
+            </div>
+
+            <div class="student-order-status-panel">
+                <p class="student-order-status-message">
+                    @if (isCompleted)
+                    {
+                        <span>Your order has been completed and picked up.</span>
+                    }
+                    else if (isReadyForPickup)
+                    {
+                        <span>Your order is ready for pickup.</span>
+                    }
+                    else
+                    {
+                        <span>We have your order and we're getting it ready.</span>
+                    }
+                </p>
+
+                <div class="student-order-timeline">
+                    <div class="student-order-timeline-step is-complete">
+                        <span class="student-order-step-label">Order placed</span>
+                        <strong>@Model.OrderDate.ToString("MM/dd/yyyy")</strong>
+                    </div>
+                    <div class="student-order-timeline-step @(isReadyForPickup || isCompleted ? "is-active" : string.Empty)">
+                        <span class="student-order-step-label">Ready for pickup</span>
+                        <strong>@readyDateText</strong>
+                    </div>
+                    <div class="student-order-timeline-step @(isCompleted ? "is-active" : string.Empty)">
+                        <span class="student-order-step-label">Completed</span>
+                        <strong>@completedDateText</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
     }
 
-    <div class="order-card">
+    <div class="order-card order-items-card">
         <div class="order-items-header">
             <div>
                 <h2 class="order-items-title">Items</h2>
                 <p class="order-items-subtitle">Items included in this order.</p>
             </div>
 
-            @if (User.IsInRole("Admin"))
+            @if (User.IsInRole("Admin") && !isCompleted)
             {
                 <button type="button" id="openAddItem" class="inventory-edit-btn">Add Item</button>
             }
@@ -87,10 +194,13 @@
                             @if (User.IsInRole("Admin"))
                             {
                                 <td>
-                                    <form asp-action="DeleteItem" asp-route-id="@item.OrderItemId" method="post"
-                                          onsubmit="return confirm('Remove this item from the order?');">
-                                        <button type="submit" class="inventory-delete-btn">Delete</button>
-                                    </form>
+                                    @if (!isCompleted)
+                                    {
+                                        <form asp-action="DeleteItem" asp-route-id="@item.OrderItemId" method="post"
+                                              onsubmit="return confirm('Remove this item from the order?');">
+                                            <button type="submit" class="inventory-delete-btn">Delete</button>
+                                        </form>
+                                    }
                                 </td>
                             }
                         </tr>
@@ -99,7 +209,8 @@
             </table>
         </div>
     </div>
-    @if (User.IsInRole("Admin"))
+
+    @if (User.IsInRole("Admin") && !isCompleted)
     {
         var inventoryItems = ViewBag.InventoryItems as List<Pantreats.Models.Inventory> ?? new List<Pantreats.Models.Inventory>();
 
@@ -220,7 +331,6 @@
             openBtn.addEventListener('click', () => overlay.classList.add('open'));
             closeBtn.addEventListener('click', () => overlay.classList.remove('open'));
 
-            // click the dark backdrop (but not the modal box) to close
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) overlay.classList.remove('open');
             });
@@ -228,7 +338,7 @@
 
         function askQuantity(form, available) {
             const input = prompt("How many do you want to add? (in stock: " + available + ")", "1");
-            if (input === null) return false; // admin hit Cancel
+            if (input === null) return false;
 
             const qty = parseInt(input, 10);
             if (isNaN(qty) || qty < 1) {
@@ -241,7 +351,7 @@
             }
 
             form.querySelector('input[name="quantity"]').value = qty;
-            return true; // let the form submit
+            return true;
         }
 
         const addiSearch = document.getElementById('addItemSearch');
@@ -309,12 +419,12 @@
 
         function goToAddItemPage() {
             const val = parseInt(document.getElementById('addItemPageInput').value, 10);
-            if (val >= 1 && val <= addItemTotalPages()) addItemCurrentPage = val; // invalid -> ignored
+            if (val >= 1 && val <= addItemTotalPages()) addItemCurrentPage = val;
             renderAddItem();
         }
 
         function filterAddItemTable() {
-            addItemCurrentPage = 1; // searching jumps back to page 1
+            addItemCurrentPage = 1;
             renderAddItem();
         }
 
@@ -335,7 +445,7 @@
         }
 
         if (addItemAllRows.length > 0) {
-            renderAddItem(); // paginate on load so only 20 ever show
+            renderAddItem();
         }
     </script>
 }

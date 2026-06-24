@@ -23,15 +23,27 @@
                 <tr>
                     <th>Order Id</th>
                     <th>Date</th>
+                    <th>Status</th>
                     <th>Total Points</th>
                 </tr>
             </thead>
             <tbody id="orderRows">
                 @foreach (var order in Model)
                 {
+                    var orderStatus = Pantreats.Models.OrderFulfilment.NormalizeStatus(order.OrderFulfilment?.OrderStatus);
+                    var statusClass = orderStatus switch
+                    {
+                        Pantreats.Models.OrderFulfilment.StatusCompleted => "is-complete",
+                        Pantreats.Models.OrderFulfilment.StatusReadyForPickup => "is-ready",
+                        _ => "is-pending"
+                    };
+
                     <tr class="order-row" onclick="goToOrder(@order.OrderId)">
                         <td>@order.OrderId</td>
                         <td>@order.OrderDate.ToString("yyyy/MM/dd")</td>
+                        <td>
+                            <span class="admin-status @statusClass">@orderStatus</span>
+                        </td>
                         <td>@order.Total</td>
                     </tr>
                 }

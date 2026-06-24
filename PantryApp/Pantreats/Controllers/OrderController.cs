@@ -27,18 +27,19 @@ namespace Pantreats.Controllers
             }
 
             IQueryable<Order> query = _context.Orders
-                .Include(o => o.OrderItems);
+                .Include(order => order.OrderItems)
+                .Include(order => order.OrderFulfilment);
 
             if (!User.IsInRole("Admin"))
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity!.Name;
 
-                query = query.Where(o => o.UserId == userId || o.UserId == email || o.Email == email);
+                query = query.Where(order => order.UserId == userId || order.UserId == email || order.Email == email);
             }
 
             var orders = query
-                .OrderByDescending(o => o.OrderDate)
+                .OrderByDescending(order => order.OrderDate)
                 .ToList();
 
             return View(orders);
@@ -53,8 +54,9 @@ namespace Pantreats.Controllers
             }
 
             var order = _context.Orders
-                .Include(o => o.OrderItems)
-                .FirstOrDefault(o => o.OrderId == id);
+                .Include(currentOrder => currentOrder.OrderItems)
+                .Include(currentOrder => currentOrder.OrderFulfilment)
+                .FirstOrDefault(currentOrder => currentOrder.OrderId == id);
 
             if (order == null)
             {
@@ -74,8 +76,22 @@ namespace Pantreats.Controllers
 
             if (User.IsInRole("Admin"))
             {
+                var studentApplication = _context.UserApplications
+                    .AsNoTracking()
+                    .Where(application => application.UserId == order.UserId)
+                    .OrderByDescending(application => application.RegistrationDate)
+                    .ThenByDescending(application => application.ApplicationId)
+                    .FirstOrDefault();
+
+                ViewBag.StudentName = BuildFullName(
+                    studentApplication?.FirstName,
+                    studentApplication?.MiddleName,
+                    studentApplication?.LastName);
+                ViewBag.StudentPhone = !string.IsNullOrWhiteSpace(order.PhoneNum) && !string.Equals(order.PhoneNum, "Not Provided", StringComparison.OrdinalIgnoreCase)
+                    ? order.PhoneNum
+                    : studentApplication?.PhoneNum;
                 ViewBag.InventoryItems = _context.Inventory
-                    .OrderBy(i => i.ItemName)
+                    .OrderBy(inventoryItem => inventoryItem.ItemName)
                     .ToList();
             }
 
@@ -85,9 +101,63 @@ namespace Pantreats.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
+        public IActionResult MarkReadyForPickup(int id)
+        {
+            var order = _context.Orders
+                .Include(currentOrder => currentOrder.OrderFulfilment)
+                .FirstOrDefault(currentOrder => currentOrder.OrderId == id);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            var fulfilment = GetOrCreateFulfilment(order);
+            fulfilment.OrderStatus = OrderFulfilment.StatusReadyForPickup;
+            fulfilment.FulfilmentDate = DateTime.Now;
+            fulfilment.DateReceived = null;
+
+            _context.SaveChanges();
+
+            TempData["StatusMessage"] = $"Order #{order.OrderId} is now ready for pickup.";
+            return RedirectToAction("Details", new { id });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public IActionResult MarkCompleted(int id)
+        {
+            var order = _context.Orders
+                .Include(currentOrder => currentOrder.OrderFulfilment)
+                .FirstOrDefault(currentOrder => currentOrder.OrderId == id);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            var fulfilment = GetOrCreateFulfilment(order);
+            if (string.Equals(OrderFulfilment.NormalizeStatus(fulfilment.OrderStatus), OrderFulfilment.StatusOrderPlaced, StringComparison.OrdinalIgnoreCase))
+            {
+                fulfilment.FulfilmentDate = DateTime.Now;
+            }
+
+            fulfilment.OrderStatus = OrderFulfilment.StatusCompleted;
+            fulfilment.DateReceived = DateTime.Now;
+
+            _context.SaveChanges();
+
+            TempData["StatusMessage"] = $"Order #{order.OrderId} has been marked completed.";
+            return RedirectToAction("Details", new { id });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
         public IActionResult DeleteItem(int id)
         {
-            var item = _context.OrderItems.FirstOrDefault(i => i.OrderItemId == id);
+            var item = _context.OrderItems.FirstOrDefault(currentItem => currentItem.OrderItemId == id);
             if (item == null)
             {
                 return NotFound();
@@ -98,8 +168,8 @@ namespace Pantreats.Controllers
             if (item.InventoryUPC != null)
             {
                 var inventory = item.InventoryItemId.HasValue
-                    ? _context.Inventory.FirstOrDefault(inv => inv.ItemId == item.InventoryItemId.Value)
-                    : _context.Inventory.FirstOrDefault(inv => inv.UPC == item.InventoryUPC);
+                    ? _context.Inventory.FirstOrDefault(currentInventory => currentInventory.ItemId == item.InventoryItemId.Value)
+                    : _context.Inventory.FirstOrDefault(currentInventory => currentInventory.UPC == item.InventoryUPC);
                 if (inventory != null)
                 {
                     inventory.Quantity += item.OrderQuantity;
@@ -109,14 +179,14 @@ namespace Pantreats.Controllers
             _context.OrderItems.Remove(item);
 
             var order = _context.Orders
-                .Include(o => o.OrderItems)
-                .FirstOrDefault(o => o.OrderId == orderId);
+                .Include(currentOrder => currentOrder.OrderItems)
+                .FirstOrDefault(currentOrder => currentOrder.OrderId == orderId);
 
             if (order != null)
             {
                 order.Total = order.OrderItems
-                    .Where(i => i.OrderItemId != id)
-                    .Sum(i => i.Points * i.OrderQuantity);
+                    .Where(currentItem => currentItem.OrderItemId != id)
+                    .Sum(currentItem => currentItem.Points * currentItem.OrderQuantity);
             }
 
             _context.SaveChanges();
@@ -130,15 +200,15 @@ namespace Pantreats.Controllers
         public IActionResult AddItem(int id, string upc, int quantity)
         {
             var order = _context.Orders
-                .Include(o => o.OrderItems)
-                .FirstOrDefault(o => o.OrderId == id);
+                .Include(currentOrder => currentOrder.OrderItems)
+                .FirstOrDefault(currentOrder => currentOrder.OrderId == id);
 
             if (order == null)
             {
                 return NotFound();
             }
 
-            var inventory = _context.Inventory.FirstOrDefault(inv => inv.UPC == upc);
+            var inventory = _context.Inventory.FirstOrDefault(currentInventory => currentInventory.UPC == upc);
             if (inventory == null)
             {
                 return NotFound();
@@ -162,11 +232,38 @@ namespace Pantreats.Controllers
 
             order.OrderItems.Add(item);
             inventory.Quantity -= quantity;
-            order.Total = order.OrderItems.Sum(i => i.Points * i.OrderQuantity);
+            order.Total = order.OrderItems.Sum(currentItem => currentItem.Points * currentItem.OrderQuantity);
 
             _context.SaveChanges();
 
             return RedirectToAction("Details", new { id });
+        }
+
+        private OrderFulfilment GetOrCreateFulfilment(Order order)
+        {
+            if (order.OrderFulfilment != null)
+            {
+                return order.OrderFulfilment;
+            }
+
+            var fulfilment = new OrderFulfilment
+            {
+                OrderId = order.OrderId,
+                FulfilmentDate = order.OrderDate,
+                OrderStatus = OrderFulfilment.StatusOrderPlaced
+            };
+
+            order.OrderFulfilment = fulfilment;
+            _context.OrderFulfilments.Add(fulfilment);
+            return fulfilment;
+        }
+
+        private static string BuildFullName(string? firstName, string? middleName, string? lastName)
+        {
+            var parts = new[] { firstName, middleName, lastName }
+                .Where(namePart => !string.IsNullOrWhiteSpace(namePart));
+
+            return string.Join(" ", parts);
         }
 
         private IActionResult? EnsureApprovedStudentAccess()
@@ -205,7 +302,7 @@ namespace Pantreats.Controllers
             var sent = await _emailService.SendOrderConfirmationAsync(
                 "jakegmain@gmail.com", 999, "https://localhost/Order/Details/999");
 
-            return Content(sent ? "Sent — check your email." : "Send failed — check the Output window.");
+            return Content(sent ? "Sent - check your email." : "Send failed - check the Output window.");
         }
     }
 }

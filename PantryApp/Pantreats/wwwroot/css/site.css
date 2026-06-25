@@ -3198,3 +3198,127 @@ span.flatpickr-weekday {
         text-align: left;
     }
 }
+
+
+/* DONOR PAGES */
+.donor-page {
+    padding: 1rem;
+}
+
+.donor-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    flex-wrap: wrap;
+}
+
+.donor-page-title {
+    color: var(--pantreats-blue);
+    font-weight: 700;
+}
+
+.donor-page-subtitle {
+    color: var(--pantreats-green);
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.donor-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px var(--pantreats-blue);
+    padding: 1rem;
+}
+
+/* Dashboard Statistic Cards */
+
+.donor-stat-card h5 {
+    color: var(--pantreats-blue);
+    margin-bottom: .6rem;
+    font-weight: 700;
+}
+
+.donor-stat-card h2 {
+    color: var(--pantreats-green);
+    margin: 0;
+    font-size: 2rem;
+}
+
+/* Donation Table */
+
+.donor-table thead th {
+    color: var(--pantreats-blue);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: .05em;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.donor-table tbody td {
+    vertical-align: middle;
+}
+
+.donor-row {
+    cursor: pointer;
+    transition: background-color .18s ease;
+}
+
+    .donor-row:hover td {
+        background-color: var(--pantreats-blue-soft);
+    }
+
+/* Buttons */
+
+.donor-primary-btn {
+    background-color: var(--pantreats-blue);
+    border: 1px solid var(--pantreats-blue);
+    color: white;
+    font-weight: 600;
+    border-radius: 999px;
+}
+
+    .donor-primary-btn:hover {
+        background-color: var(--pantreats-blue-dark) !important;
+        border-color: var(--pantreats-blue-dark) !important;
+        color: white !important;
+    }
+
+.donor-secondary-btn {
+    background: white;
+    color: var(--pantreats-blue);
+    border: 1px solid rgba(16,47,97,.18);
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+    .donor-secondary-btn:hover {
+        background: #f3f4f6;
+        color: var(--pantreats-blue);
+    }
+
+/* Status Badge */
+
+.donor-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: .85rem;
+    font-weight: 700;
+}
+
+    .donor-status.pending {
+        background: #fff5d9;
+        color: #9a6700;
+    }
+
+    .donor-status.approved {
+        background: #edf6e6;
+        color: var(--pantreats-green-dark);
+    }
+
+    .donor-status.denied {
+        background: #fff0f0;
+        color: #b42318;
+    }

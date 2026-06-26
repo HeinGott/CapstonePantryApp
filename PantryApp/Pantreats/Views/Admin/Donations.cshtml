@@ -1,79 +1,96 @@
 ﻿@model List<Pantreats.Models.Donation>
 
 @{
+
     ViewData["Title"] = "Donation Approval";
+
 }
 
 <div class="student-page py-4">
-
     <div class="student-page-header mb-4">
         <div>
-            <h1 class="student-page-title mb-1">Donation Approval</h1>
-            <p class="student-page-subtitle mb-0">
-                Review and approve donor-submitted donations.
-            </p>
-        </div>
+            <h1 class="student-page-title mb-1">Donation Approval</h1><p class="student-page-subtitle mb-0">
+            Review and approve donor-submitted donations.
+
+        </p>
     </div>
+</div><div class="student-card">
+<table class="table student-table align-middle">
+    <thead><tr><th>Date</th><th>Donor</th><th>Items</th><th>Status</th><th>Comments</th><th>Actions</th><th>Address</th></tr></thead>
+    <tbody>
+        @foreach (var donation in Model)
 
-    <div class="student-card">
-        <table class="table student-table align-middle">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Donor</th>
-                    <th>Items</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+        {
 
-            <tbody>
-                @foreach (var donation in Model)
-                {
-                    <tr>
-                        <td>@donation.DonationDate.ToShortDateString()</td>
+            <tr>
+                <td>@donation.DonationDate.ToShortDateString()</td>
+                <td>
+                    @donation.Donor?.Name
 
-                        <td>
-                            @donation.Donor?.Name
-                        </td>
+                </td>
+                <td>
+                    @foreach (var item in donation.DonationItems)
 
-                        <td>
-                            @foreach (var item in donation.DonationItems)
-                            {
-                                <div>@item.ItemName - Qty: @item.Quantity</div>
-                            }
-                        </td>
+                    {
 
-                        <td>@donation.Status</td>
+                        <div>@item.ItemName - Qty: @item.Quantity</div>
+                    }
 
-                        <td class="d-flex gap-2">
+                </td>
+                <td>@donation.Status</td>
+                <td>
+                    @if (!string.IsNullOrWhiteSpace(donation.Comment))
 
-                            @if (donation.Status == "Pending")
-                            {
-                                <form asp-controller="Admin"
-                                      asp-action="ApproveDonation"
-                                      asp-route-id="@donation.DonationId"
-                                      method="post">
-                                    <button type="submit" class="inventory-edit-btn">
-                                        Approve
-                                    </button>
-                                </form>
+                    {
 
-                                <form asp-controller="Admin"
-                                      asp-action="DenyDonation"
-                                      asp-route-id="@donation.DonationId"
-                                      method="post">
-                                    <button type="submit" class="inventory-delete-btn">
-                                        Deny
-                                    </button>
-                                </form>
-                            }
+                        @donation.Comment
 
-                        </td>
-                    </tr>
+                    }
+
+                    else
+                    {
+
+                        <span class="text-muted">No comments</span>
+                    }
+
+                </td>
+                <td class="d-flex gap-2">
+                    @if (donation.Status == "Pending")
+
+                    {
+
+                        <a asp-controller="Admin" asp-action="ProcessDonation" asp-route-id="@donation.DonationId" class="inventory-edit-btn">
+                            Process Donation
+
+                        </a><form asp-controller="Admin" asp-action="DenyDonation" asp-route-id="@donation.DonationId" method="post">
+                        <button type="submit" class="inventory-delete-btn">
+                            Deny
+
+                        </button>
+                    </form>
                 }
-            </tbody>
-        </table>
-    </div>
 
+            </td>
+
+            <td>
+                @if (!string.IsNullOrWhiteSpace(donation.Address))
+
+                {
+
+                    @donation.Address
+
+                }
+
+                else
+                {
+
+                    <span class="text-muted">No address</span>
+                }
+
+            </td>
+        </tr>
+    }
+
+</tbody>        </table>
+</div>
 </div>

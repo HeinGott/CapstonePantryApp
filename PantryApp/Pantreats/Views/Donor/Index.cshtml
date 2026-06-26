@@ -26,28 +26,47 @@
     <div class="student-card">
 
         <div class="table-responsive">
+
             <table class="table student-table align-middle mb-0" id="donorTable">
 
                 <thead>
                     <tr>
                         <th onclick="sortTable('donorTable', 0, this)">Donor Name</th>
                         <th onclick="sortTable('donorTable', 1, this)">Phone Number</th>
-                        <th onclick="sortTable('donorTable', 2, this)">Address</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     @foreach (var donor in Model)
                     {
-                        <tr class="student-row" onclick="goToDonor(@donor.DonorID)">
-                            <td>@donor.Name</td>
-                            <td>@(donor.PhoneNumber ?? "not added")</td>
-                            <td>@(donor.Address ?? "not added")</td>
+                        <tr class="student-row">
+
+                            <td>
+                                <strong>@donor.Name</strong>
+                            </td>
+
+                            <td>
+                                @(string.IsNullOrWhiteSpace(donor.PhoneNumber)
+                                    ? "Not added"
+                                    : donor.PhoneNumber)
+                            </td>
+
+                            <td>
+                                <a asp-controller="Donor"
+                                   asp-action="Details"
+                                   asp-route-id="@donor.DonorID"
+                                   class="inventory-edit-btn">
+                                    View
+                                </a>
+                            </td>
+
                         </tr>
                     }
                 </tbody>
 
             </table>
+
         </div>
 
     </div>

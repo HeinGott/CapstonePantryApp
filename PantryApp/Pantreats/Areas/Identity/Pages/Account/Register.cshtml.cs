@@ -81,6 +81,9 @@ namespace Pantreats.Areas.Identity.Pages.Account
 
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+
+            [Display(Name = "Address")]
+            public string Address { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null, string accountType = null)

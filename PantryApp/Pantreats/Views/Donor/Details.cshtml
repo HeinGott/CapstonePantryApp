@@ -41,11 +41,6 @@
                 <strong>@(Model.Email ?? "not added")</strong>
             </div>
 
-            <div class="student-profile-item">
-                <span>Address</span>
-                <strong>@(Model.Address ?? "not added")</strong>
-            </div>
-
         </div>
 
     </div>
@@ -81,11 +76,28 @@
                 </thead>
 
                 <tbody>
-                    <tr>
-                        <td colspan="3" class="text-muted text-center py-4">
-                            No donations yet.
-                        </td>
-                    </tr>
+                    @if (Model.Donations != null && Model.Donations.Any())
+                    {
+                        @foreach (var donation in Model.Donations)
+                        {
+                            foreach (var item in donation.DonationItems)
+                            {
+                                <tr>
+                                    <td>@donation.DonationDate.ToShortDateString()</td>
+                                    <td>@item.ItemName</td>
+                                    <td>@item.Quantity</td>
+                                </tr>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-muted text-center py-4">
+                                No donations yet.
+                            </td>
+                        </tr>
+                    }
                 </tbody>
 
             </table>

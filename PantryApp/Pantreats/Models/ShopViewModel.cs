@@ -22,7 +22,6 @@ namespace Pantreats.Models
         public string Subcategory { get; set; } = string.Empty;
         public string UnitSize { get; set; } = string.Empty;
         public int Quantity { get; set; }
-        public int Points { get; set; }
         public string ImageName { get; set; } = string.Empty;
     }
 

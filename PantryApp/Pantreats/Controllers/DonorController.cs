@@ -1,10 +1,9 @@
-﻿using DocumentFormat.OpenXml.ExtendedProperties;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Pantreats.Data;
 using Pantreats.Models;
-using static Pantreats.Areas.Identity.Pages.Account.RegisterModel;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Pantreats.Controllers
 {
@@ -13,6 +12,7 @@ namespace Pantreats.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
+
         public DonorController(ApplicationDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signManager)
         {
             _context = context;
@@ -20,12 +20,12 @@ namespace Pantreats.Controllers
             _signInManager = signManager;
         }
 
-        // show all Donors
+        // shows all donors
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
-            var Donor = await _context.Donors.ToListAsync();
-
-            return View(Donor);
+            var donor = await _context.Donors.ToListAsync();
+            return View(donor);
         }
 
         // show one donor
@@ -34,10 +34,7 @@ namespace Pantreats.Controllers
             var donor = await _context.Donors
                 .FirstOrDefaultAsync(v => v.DonorID == id);
 
-            if (donor == null)
-            {
-                return NotFound();
-            }
+            if (donor == null) return NotFound();
 
             return View(donor);
         }
@@ -48,7 +45,7 @@ namespace Pantreats.Controllers
             return View();
         }
 
-        // save new donor to database
+        // save new donor
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Donor donor)
@@ -57,10 +54,8 @@ namespace Pantreats.Controllers
             {
                 _context.Donors.Add(donor);
                 await _context.SaveChangesAsync();
-
                 return RedirectToAction(nameof(Index));
             }
-
             return View(donor);
         }
 
@@ -68,12 +63,7 @@ namespace Pantreats.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var donor = await _context.Donors.FindAsync(id);
-
-            if (donor == null)
-            {
-                return NotFound();
-            }
-
+            if (donor == null) return NotFound();
             return View(donor);
         }
 
@@ -82,45 +72,41 @@ namespace Pantreats.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Donor donor)
         {
-            if (id != donor.DonorID)
-            {
-                return NotFound();
-            }
+            if (id != donor.DonorID) return NotFound();
 
             if (ModelState.IsValid)
             {
                 _context.Update(donor);
                 await _context.SaveChangesAsync();
-
                 return RedirectToAction(nameof(Details), new { id = donor.DonorID });
             }
-
             return View(donor);
         }
 
-        // delete donor 
+        // delete donor
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             var donor = await _context.Donors.FindAsync(id);
-
-            if (donor == null)
-            {
-                return NotFound();
-            }
+            if (donor == null) return NotFound();
 
             _context.Donors.Remove(donor);
             await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(Index));
         }
 
+        // register page
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        // save new registration
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(Donor model, string Password)
         {
-            //Registers user for donor
             if (ModelState.IsValid)
             {
                 var user = new IdentityUser { UserName = model.Email, Email = model.Email };
@@ -128,9 +114,8 @@ namespace Pantreats.Controllers
 
                 if (result.Succeeded)
                 {
-                    //Assign donor role here
                     await _userManager.AddToRoleAsync(user, "Donors");
-                    // Save Donor to donor table
+
                     var donor = new Donor
                     {
                         Name = model.Name,
@@ -138,15 +123,12 @@ namespace Pantreats.Controllers
                         PhoneNumber = model.PhoneNumber,
                         Address = model.Address,
                         Notes = model.Notes,
-                        UserId = user.Id 
+                        UserId = user.Id
                     };
-                    //Adds user to donor Table
+
                     _context.Donors.Add(donor);
                     await _context.SaveChangesAsync();
 
-                    //return RedirectToAction("Login", "Donor");
-                    //This redirects you to the default button press to confirm your account
-                    //Need to add real emailing feature to register your account
                     return RedirectToPage("/Account/RegisterConfirmation", new { area = "Identity", email = model.Email });
                 }
 
@@ -158,26 +140,19 @@ namespace Pantreats.Controllers
             return View(model);
         }
 
-        public IActionResult Register() //add this to show the registration page
-        {
-            return View();
-        }
-
+        // login page
         public IActionResult Login()
         {
             return View();
         }
 
+        // handle login
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string Email, string Password, bool RememberMe)
         {
             var result = await _signInManager.PasswordSignInAsync(
-                Email,
-                Password,
-                RememberMe,
-                lockoutOnFailure: false
-            );
+                Email, Password, RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
@@ -188,17 +163,23 @@ namespace Pantreats.Controllers
             return View();
         }
 
-        //created a dashboard for donors to see their donation history and stats
+        // donor dashboard
+        [Authorize(Roles = "Donors")]
         public IActionResult Dashboard()
         {
             var userId = _userManager.GetUserId(User);
-
-            var donor = _context.Donors
-                .FirstOrDefault(d => d.UserId == userId);
+            var donor = _context.Donors.FirstOrDefault(d => d.UserId == userId);
 
             if (donor == null)
             {
-                return RedirectToAction("Login");
+                return View(new DonorDashboardViewModel
+                {
+                    DonorName = User.Identity?.Name ?? "Donor",
+                    TotalDonations = 0,
+                    TotalItemsDonated = 0,
+                    LastDonationDate = null,
+                    Donations = new List<Donation>()
+                });
             }
 
             var donations = _context.Donations
@@ -207,44 +188,35 @@ namespace Pantreats.Controllers
                 .OrderByDescending(d => d.DonationDate)
                 .ToList();
 
-            var model = new DonorDashboardViewModel
+            return View(new DonorDashboardViewModel
             {
                 DonorName = donor.Name,
                 TotalDonations = donations.Count,
-                TotalItemsDonated = donations
-                    .SelectMany(d => d.DonationItems)
-                    .Sum(i => i.Quantity),
-                LastDonationDate = donations
-                    .FirstOrDefault()?.DonationDate,
+                TotalItemsDonated = donations.SelectMany(d => d.DonationItems).Sum(i => i.Quantity),
+                LastDonationDate = donations.FirstOrDefault()?.DonationDate,
                 Donations = donations
-            };
-
-            return View(model);
+            });
         }
 
+        // show create donation page
         public IActionResult CreateDonation()
         {
             return View();
         }
 
-        //THESE METHODS ARE ONLY FOR TESTING PURPOSES 
-        public IActionResult DonationSubmitted()
-        {
-            return View();
-        }
-
+        // Creates a new donation request from the donor and stores the selected items.
+        // save donation
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateDonation(string[] selectedItems, Dictionary<string, int> quantities)
+        public IActionResult CreateDonation(List<DonationItemInput> items)
         {
             var userId = _userManager.GetUserId(User);
-
             var donor = _context.Donors.FirstOrDefault(d => d.UserId == userId);
 
-            if (donor == null)
-            {
-                return RedirectToAction("Dashboard");
-            }
+            if (donor == null) return RedirectToAction("Dashboard");
+
+            var selected = items.Where(i => i.Selected).ToList();
+            if (!selected.Any()) return RedirectToAction("CreateDonation");
 
             var donation = new Donation
             {
@@ -254,16 +226,12 @@ namespace Pantreats.Controllers
                 DonationItems = new List<DonationItem>()
             };
 
-            foreach (var itemName in selectedItems)
+            foreach (var item in selected)
             {
-                var quantity = quantities.ContainsKey(itemName)
-                    ? quantities[itemName]
-                    : 1;
-
                 donation.DonationItems.Add(new DonationItem
                 {
-                    ItemName = itemName,
-                    Quantity = quantity
+                    ItemName = item.Name,
+                    Quantity = item.Quantity
                 });
             }
 
@@ -271,6 +239,12 @@ namespace Pantreats.Controllers
             _context.SaveChanges();
 
             return RedirectToAction("DonationSubmitted");
+        }
+
+        // donation submitted confirmation
+        public IActionResult DonationSubmitted()
+        {
+            return View();
         }
     }
 }

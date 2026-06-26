@@ -1,99 +1,53 @@
-﻿@*
-    This is the view for creating a new donation.
-*@
-@{
+﻿@{
     ViewData["Title"] = "Create Donation";
+    Layout = "_Layout";
 }
 
-<h1>Make a Donation</h1>
+<div class="donor-page">
+    <div class="donor-page-header">
+        <div>
+            <h1 class="donor-page-title">Make a Donation</h1>
+            <p class="donor-page-subtitle">Select the items and quantities you would like to donate.</p>
+        </div>
+        <a asp-controller="Donor" asp-action="Dashboard" class="btn donor-secondary-btn">Back to Dashboard</a>
+    </div>
 
-<form asp-controller="Donor" asp-action="CreateDonation" method="post">
-    @Html.AntiForgeryToken()
+    <div class="donor-card">
+        <form asp-controller="Donor" asp-action="CreateDonation" method="post">
+            @Html.AntiForgeryToken()
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Donate</th>
-                <th>Category</th>
-                <th>Quantity</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><input type="checkbox" name="selectedItems" value="Canned Goods" /></td>
-                <td>Canned Goods</td>
-                <td><input type="number" name="quantities[Canned Goods]" min="1" value="1" class="form-control" /></td>
-            </tr>
+            <div class="table-responsive">
+                <table class="table donor-table">
+                    <thead>
+                        <tr>
+                            <th>Donate</th>
+                            <th>Category</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var items = new[] { "Canned Goods", "Produce", "Meat", "Bread & Bakery",
+                                                "Rice & Pasta", "Dairy Products", "Frozen Foods",
+                                                "Snacks", "Beverages", "Hygiene Products",
+                                                "Baby Supplies", "Pet Food" };
+                        }
+                        @for (int i = 0; i < items.Length; i++)
+                        {
+                            <input type="hidden" name="items[@i].Name" value="@items[i]" />
+                            <tr class="donor-row">
+                                <td><input type="checkbox" name="items[@i].Selected" value="true" /></td>
+                                <td>@items[i]</td>
+                                <td><input type="number" name="items[@i].Quantity" min="1" value="1" class="form-control" /></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
-            <tr>
-                <td><input type="checkbox" name="selectedItems" value="Produce" /></td>
-                <td>Produce</td>
-                <td><input type="number" name="quantities[Produce]" min="1" value="1" class="form-control" /></td>
-            </tr>
-
-            <tr>
-                <td><input type="checkbox" name="selectedItems" value="Meat" /></td>
-                <td>Meat</td>
-                <td><input type="number" name="quantities[Meat]" min="1" value="1" class="form-control" /></td>
-            </tr>
-
-            <tr>
-                <td><input type="checkbox" name="selectedItems" value="Bread & Bakery" /></td>
-                <td>Bread & Bakery</td>
-                <td><input type="number" name="quantities[Bread & Bakery]" min="1" value="1" class="form-control" /></td>
-            </tr>
-
-            <tr>
-                <td><input type="checkbox" name="selectedItems" value="Rice & Pasta" /></td>
-                <td>Rice & Pasta</td>
-                <td><input type="number" name="quantities[Rice & Pasta]" min="1" value="1" class="form-control" /></td>
-            </tr>
-
-            <tr>
-                <td><input type="checkbox" name="selectedItems" value="Dairy Products" /></td>
-                <td>Dairy Products</td>
-                <td><input type="number" name="quantities[Dairy Products]" min="1" value="1" class="form-control" /></td>
-            </tr>
-
-            <tr>
-                <td><input type="checkbox" name="selectedItems" value="Frozen Foods" /></td>
-                <td>Frozen Foods</td>
-                <td><input type="number" name="quantities[Frozen Foods]" min="1" value="1" class="form-control" /></td>
-            </tr>
-
-            <tr>
-                <td><input type="checkbox" name="selectedItems" value="Snacks" /></td>
-                <td>Snacks</td>
-                <td><input type="number" name="quantities[Snacks]" min="1" value="1" class="form-control" /></td>
-            </tr>
-
-            <tr>
-                <td><input type="checkbox" name="selectedItems" value="Beverages" /></td>
-                <td>Beverages</td>
-                <td><input type="number" name="quantities[Beverages]" min="1" value="1" class="form-control" /></td>
-            </tr>
-
-            <tr>
-                <td><input type="checkbox" name="selectedItems" value="Hygiene Products" /></td>
-                <td>Hygiene Products</td>
-                <td><input type="number" name="quantities[Hygiene Products]" min="1" value="1" class="form-control" /></td>
-            </tr>
-
-            <tr>
-                <td><input type="checkbox" name="selectedItems" value="Baby Supplies" /></td>
-                <td>Baby Supplies</td>
-                <td><input type="number" name="quantities[Baby Supplies]" min="1" value="1" class="form-control" /></td>
-            </tr>
-
-            <tr>
-                <td><input type="checkbox" name="selectedItems" value="Pet Food" /></td>
-                <td>Pet Food</td>
-                <td><input type="number" name="quantities[Pet Food]" min="1" value="1" class="form-control" /></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <button type="submit" class="btn btn-primary">
-        Submit Donation
-    </button>
-</form>
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn donor-primary-btn">Submit Donation</button>
+            </div>
+        </form>
+    </div>
+</div>

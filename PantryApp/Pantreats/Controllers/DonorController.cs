@@ -5,6 +5,7 @@ using Pantreats.Data;
 using Pantreats.Models;
 using Microsoft.AspNetCore.Authorization;
 
+
 namespace Pantreats.Controllers
 {
     public class DonorController : Controller
@@ -28,17 +29,6 @@ namespace Pantreats.Controllers
             return View(donor);
         }
 
-        // show one donor
-        public async Task<IActionResult> Details(int id)
-        {
-            var donor = await _context.Donors
-                .FirstOrDefaultAsync(v => v.DonorID == id);
-
-            if (donor == null) return NotFound();
-
-            return View(donor);
-        }
-
         // show add donor page
         public IActionResult Create()
         {
@@ -56,6 +46,27 @@ namespace Pantreats.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            return View(donor);
+        }
+
+        // show one donor
+        public async Task<IActionResult> Details(int id)
+        {
+            var donor = await _context.Donors
+                .FirstOrDefaultAsync(d => d.DonorID == id);
+
+            if (donor == null)
+            {
+                return NotFound();
+            }
+
+            donor.Donations = await _context.Donations
+                .Include(d => d.DonationItems)
+                .Where(d => d.DonorId == donor.DonorID)
+                .OrderByDescending(d => d.DonationDate)
+                .ToListAsync();
+
             return View(donor);
         }
 
@@ -121,8 +132,6 @@ namespace Pantreats.Controllers
                         Name = model.Name,
                         Email = model.Email,
                         PhoneNumber = model.PhoneNumber,
-                        Address = model.Address,
-                        Notes = model.Notes,
                         UserId = user.Id
                     };
 
@@ -208,7 +217,7 @@ namespace Pantreats.Controllers
         // save donation
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateDonation(List<DonationItemInput> items)
+        public IActionResult CreateDonation(List<DonationItemInput> items, string? comment, string? address)
         {
             var userId = _userManager.GetUserId(User);
             var donor = _context.Donors.FirstOrDefault(d => d.UserId == userId);
@@ -223,6 +232,8 @@ namespace Pantreats.Controllers
                 DonorId = donor.DonorID,
                 DonationDate = DateTime.Now,
                 Status = "Pending",
+                Address = address,
+                Comment = comment,
                 DonationItems = new List<DonationItem>()
             };
 

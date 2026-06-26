@@ -18,8 +18,7 @@ namespace Pantreats.Controllers
             ["Admin"] = "Admin",
             ["Students"] = "Student",
             ["Volunteers"] = "Volunteer",
-            ["Donors"] = "Donor",
-            ["Kiosk"] = "Kiosk"
+            ["Donors"] = "Donor"
         };
 
         private readonly ApplicationDbContext _context;
@@ -39,7 +38,6 @@ namespace Pantreats.Controllers
                 .AsNoTracking()
                 .Include(order => order.OrderItems)
                 .Include(order => order.OrderFulfilment)
-                .Where(order => string.IsNullOrWhiteSpace(order.OrderSource) || order.OrderSource != Order.SourceKiosk)
                 .OrderByDescending(order => order.OrderDate)
                 .ToListAsync();
 
@@ -177,7 +175,7 @@ namespace Pantreats.Controllers
         {
             if (!AllowedRoles.ContainsKey(model.Role))
             {
-                ModelState.AddModelError(nameof(model.Role), "Select admin, student, volunteer, donor, or kiosk.");
+                ModelState.AddModelError(nameof(model.Role), "Select admin, student, volunteer, or donor.");
             }
 
             if (!ModelState.IsValid)
@@ -449,7 +447,6 @@ namespace Pantreats.Controllers
                 "Student" or "Students" => "Students",
                 "Volunteer" or "Volunteers" => "Volunteers",
                 "Donor" or "Donors" or "Vendor" or "Vendors" => "Donors",
-                "Kiosk" => "Kiosk",
                 _ => string.Empty
             };
         }

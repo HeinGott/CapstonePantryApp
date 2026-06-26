@@ -88,7 +88,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<CheckoutService>();
 
 // add razor pages for identity pages
 builder.Services.AddRazorPages();
@@ -105,7 +104,7 @@ using (var scope = app.Services.CreateScope())
     var env = services.GetRequiredService<IWebHostEnvironment>();
 
     // list of roles for your app
-    string[] roles = { "Admin", "Donors", "Volunteers", "Students", "Kiosk" };
+    string[] roles = { "Admin", "Donors", "Volunteers", "Students" };
 
     foreach (var role in roles)
     {

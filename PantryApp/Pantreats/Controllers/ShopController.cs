@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using System.Security.Claims;
-using Pantreats.Services;
 
 namespace Pantreats.Controllers
 {
@@ -10,12 +9,10 @@ namespace Pantreats.Controllers
     {
         private const int PageSize = 20;
         private readonly ApplicationDbContext _context;
-        private readonly CheckoutService _checkoutService;
 
-        public ShopController(ApplicationDbContext context, CheckoutService checkoutService)
+        public ShopController(ApplicationDbContext context)
         {
             _context = context;
-            _checkoutService = checkoutService;
         }
 
         [HttpGet("")]
@@ -49,7 +46,6 @@ namespace Pantreats.Controllers
                     Subcategory = i.Subcategory,
                     UnitSize = i.UnitSize,
                     Quantity = i.Quantity,
-                    Points = i.Points,
                     ImageName = BuildImageName(i.ItemName)
                 })
                 .ToListAsync();
@@ -94,7 +90,6 @@ namespace Pantreats.Controllers
                     Subcategory = i.Subcategory,
                     UnitSize = i.UnitSize,
                     Quantity = i.Quantity,
-                    Points = i.Points,
                     ImageName = BuildImageName(i.ItemName)
                 })
                 .FirstOrDefaultAsync();
@@ -134,32 +129,86 @@ namespace Pantreats.Controllers
             var selectedUPCs = request?.UPCs?
                 .Where(upc => !string.IsNullOrWhiteSpace(upc))
                 .ToList() ?? new List<string>();
+            var requestedItems = selectedUPCs
+                .GroupBy(upc => upc)
+                .ToDictionary(group => group.Key, group => group.Count());
+            var distinctUPCs = requestedItems.Keys.ToList();
 
             if (!selectedUPCs.Any())
             {
                 return BadRequest(new { success = false, message = "Add at least one item first." });
             }
 
-            var result = await _checkoutService.CreateOrderAsync(new CheckoutRequest
-            {
-                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? string.Empty,
-                Email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name ?? string.Empty,
-                PhoneNumber = "Not Provided",
-                OrderSource = Order.SourceOnline,
-                CompleteImmediately = false,
-                UPCs = selectedUPCs
-            });
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            if (!result.Succeeded)
+            var inventoryItems = await _context.Inventory
+                .Where(i => distinctUPCs.Contains(i.UPC))
+                .ToListAsync();
+
+            if (inventoryItems.Count != distinctUPCs.Count)
             {
-                return BadRequest(new { success = false, message = result.Message });
+                return BadRequest(new { success = false, message = "One of those items is no longer available." });
             }
+
+            var unavailableItem = inventoryItems.FirstOrDefault(i => i.Quantity < requestedItems[i.UPC]);
+            if (unavailableItem != null)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = $"Only {unavailableItem.Quantity} {unavailableItem.ItemName} {(unavailableItem.Quantity == 1 ? "is" : "are")} available right now."
+                });
+            }
+
+            Order? order = null;
+
+            if (inventoryItems.Any())
+            {
+                order = new Order
+                {
+                    UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? "Anonymous",
+                    Email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name ?? "Anonymous",
+                    PhoneNum = "Not Provided",
+                    OrderDate = DateTime.Now,
+                    Total = selectedUPCs.Count
+                };
+
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync();
+
+                foreach (var inventoryItem in inventoryItems)
+                {
+                    var orderQuantity = requestedItems[inventoryItem.UPC];
+                    inventoryItem.Quantity -= orderQuantity;
+
+                    _context.OrderItems.Add(new OrderItem
+                    {
+                        OrderId = order.OrderId,
+                        InventoryItemId = inventoryItem.ItemId,
+                        InventoryUPC = inventoryItem.UPC,
+                        ItemName = inventoryItem.ItemName,
+                        Category = inventoryItem.Category,
+                        OrderQuantity = orderQuantity,
+                        Points = orderQuantity
+                    });
+                }
+
+                _context.OrderFulfilments.Add(new OrderFulfilment
+                {
+                    OrderId = order.OrderId,
+                    FulfilmentDate = order.OrderDate,
+                    OrderStatus = OrderFulfilment.StatusOrderPlaced
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return Ok(new
             {
                 success = true,
-                orderId = result.OrderId,
-                message = $"Order #{result.OrderId} was placed. We'll get it ready for pickup."
+                orderId = order?.OrderId,
+                message = $"Order #{order?.OrderId} was placed. We'll get it ready for pickup."
             });
         }
 

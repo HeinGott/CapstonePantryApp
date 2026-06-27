@@ -29,6 +29,20 @@ namespace Pantreats.Services
                 return CheckoutResult.Failure("Add at least one item first.");
             }
 
+            if (request.OrderSource != Order.SourceKiosk)
+            {
+                var lastOrder = await _context.Orders
+                    .Where(o => o.UserId == request.UserId &&
+                                o.OrderSource != Order.SourceKiosk)
+                    .OrderByDescending(o => o.OrderDate)
+                    .FirstOrDefaultAsync();
+
+                if (lastOrder != null && lastOrder.OrderDate > DateTime.Now.AddDays(-2))
+                {
+                    return CheckoutResult.Failure("You can only place one online order every 2 days. Please try again later.");
+                }
+            }
+
             var requestedItems = selectedUPCs
                 .GroupBy(upc => upc, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(group => group.Key, group => group.Count(), StringComparer.OrdinalIgnoreCase);

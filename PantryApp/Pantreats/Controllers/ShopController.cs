@@ -140,9 +140,28 @@ namespace Pantreats.Controllers
                 return BadRequest(new { success = false, message = "Add at least one item first." });
             }
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? string.Empty;
+
+            if (!User.IsInRole("Admin") && !User.IsInRole("Kiosk"))
+            {
+                var lastOnlineOrder = await _context.Orders
+                    .Where(o => o.UserId == userId && o.OrderSource == Order.SourceOnline)
+                    .OrderByDescending(o => o.OrderDate)
+                    .FirstOrDefaultAsync();
+
+                if (lastOnlineOrder != null && lastOnlineOrder.OrderDate > DateTime.Now.AddDays(-2))
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "You can only place one online order every 2 days. Please try again later."
+                    });
+                }
+            }
+
             var result = await _checkoutService.CreateOrderAsync(new CheckoutRequest
             {
-                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? string.Empty,
+                UserId = userId,
                 Email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name ?? string.Empty,
                 PhoneNumber = "Not Provided",
                 OrderSource = Order.SourceOnline,

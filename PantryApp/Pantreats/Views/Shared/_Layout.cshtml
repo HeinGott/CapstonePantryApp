@@ -15,6 +15,7 @@
 <body>
     @{
         var hideNavbar = ViewData["HideNavbar"] as bool? ?? false;
+        var hideFooter = ViewData["HideFooter"] as bool? ?? false;
         var fullWidth = ViewData["FullWidth"] as bool? ?? false;
         var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var hasApprovedStudentAccess = false;
@@ -55,6 +56,9 @@
                                 {
                                     <li class="nav-item">
                                         <a class="nav-link pantreats-nav-link" asp-controller="Admin" asp-action="Index">Dashboard</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link pantreats-nav-link" asp-controller="Kiosk" asp-action="Index">Kiosk</a>
                                     </li>
 
                                     <li class="nav-item">
@@ -145,11 +149,19 @@
                                     }
                                 }
 
+                                @if (User.IsInRole("Kiosk"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link pantreats-nav-link" asp-controller="Kiosk" asp-action="Index">Kiosk</a>
+                                    </li>
+                                }
+
                                 @if (User.Identity?.IsAuthenticated == true &&
                                     !User.IsInRole("Admin") &&
                                     !User.IsInRole("Students") &&
                                     !User.IsInRole("Volunteers") &&
-                                    !User.IsInRole("Donors"))
+                                    !User.IsInRole("Donors") &&
+                                    !User.IsInRole("Kiosk"))
                                 {
                                     <li class="nav-item">
                                         <a class="nav-link pantreats-nav-link" asp-controller="Student" asp-action="Status">Application</a>
@@ -211,12 +223,15 @@
             }
         </div>
 
-        <footer class="pantreats-footer">
-            <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <span>&copy; 2026 - PanTreats</span>
-                <a asp-controller="Home" asp-action="Privacy" class="pantreats-footer-link">Privacy</a>
-            </div>
-        </footer>
+        @if (!hideFooter)
+        {
+            <footer class="pantreats-footer">
+                <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span>&copy; 2026 - PanTreats</span>
+                    <a asp-controller="Home" asp-action="Privacy" class="pantreats-footer-link">Privacy</a>
+                </div>
+            </footer>
+        }
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

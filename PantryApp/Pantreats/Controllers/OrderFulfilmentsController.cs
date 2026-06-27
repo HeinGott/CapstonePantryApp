@@ -22,6 +22,9 @@ namespace Pantreats.Controllers
                 .AsNoTracking()
                 .Include(fulfilment => fulfilment.Order)
                     .ThenInclude(order => order.OrderItems)
+                .Where(fulfilment => fulfilment.Order == null ||
+                                     string.IsNullOrWhiteSpace(fulfilment.Order.OrderSource) ||
+                                     fulfilment.Order.OrderSource != Order.SourceKiosk)
                 .ToListAsync();
 
             var fulfilments = allFulfilments.AsEnumerable();

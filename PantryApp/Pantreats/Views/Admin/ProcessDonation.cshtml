@@ -1,0 +1,107 @@
+@model Pantreats.Models.Donation
+
+@{
+    ViewData["Title"] = "Process Donation";
+}
+
+<div class="student-page py-4">
+    <a asp-action="Donations" class="back-button">&larr; Back to Donation Approval</a>
+
+    <div class="student-page-header mb-4">
+        <div>
+            <h1 class="student-page-title mb-1">Process Donation</h1>
+            <p class="student-page-subtitle mb-0">
+                Review the donation details before approving or denying it.
+            </p>
+        </div>
+    </div>
+
+    <section class="order-details-overview mb-4">
+        <div class="order-details-heading">
+            <div>
+                <h2 class="order-details-title mb-1">Donation #@Model.DonationId</h2>
+                <p class="order-details-subtitle mb-0">Submitted on @Model.DonationDate.ToString("MM/dd/yyyy")</p>
+            </div>
+            <span class="admin-status @(Model.Status == "Approved" ? "is-complete" : Model.Status == "Denied" ? "is-pending" : "is-ready")">
+                @Model.Status
+            </span>
+        </div>
+
+        <div class="order-details-student-section">
+            <h2 class="order-details-section-title">Donor details</h2>
+            <dl class="order-details-info-list">
+                <div class="order-details-info-row">
+                    <dt>Name</dt>
+                    <dd>@(Model.Donor?.Name ?? "Not provided")</dd>
+                </div>
+                <div class="order-details-info-row">
+                    <dt>Email</dt>
+                    <dd>@(Model.Donor?.Email ?? "Not provided")</dd>
+                </div>
+                <div class="order-details-info-row">
+                    <dt>Phone Number</dt>
+                    <dd>@(Model.Donor?.PhoneNumber ?? "Not provided")</dd>
+                </div>
+                <div class="order-details-info-row">
+                    <dt>Address</dt>
+                    <dd>@(string.IsNullOrWhiteSpace(Model.Address) ? Model.Donor?.Address ?? "Not provided" : Model.Address)</dd>
+                </div>
+                <div class="order-details-info-row">
+                    <dt>Comments</dt>
+                    <dd>@(string.IsNullOrWhiteSpace(Model.Comment) ? "No comments" : Model.Comment)</dd>
+                </div>
+            </dl>
+        </div>
+    </section>
+
+    <div class="student-card">
+        <div class="order-items-header">
+            <div>
+                <h2 class="order-items-title">Donation Items</h2>
+                <p class="order-items-subtitle">Items included in this donation.</p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table order-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.DonationItems.Any())
+                    {
+                        @foreach (var item in Model.DonationItems)
+                        {
+                            <tr>
+                                <td>@item.ItemName</td>
+                                <td>@item.Quantity</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="2" class="text-muted">No donation items were submitted.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (Model.Status == "Pending")
+    {
+        <div class="d-flex gap-2 mt-4">
+            <form asp-action="ApproveDonation" asp-route-id="@Model.DonationId" method="post">
+                <button type="submit" class="inventory-edit-btn">Approve Donation</button>
+            </form>
+
+            <form asp-action="DenyDonation" asp-route-id="@Model.DonationId" method="post">
+                <button type="submit" class="inventory-delete-btn">Deny Donation</button>
+            </form>
+        </div>
+    }
+</div>

@@ -15,7 +15,7 @@ namespace Pantreats.Data
                 await roleManager.CreateAsync(new IdentityRole("Admin"));
             }
 
-           
+
             var adminEmail = "admin@admin.com";
             var adminPassword = "Admin_123";
 
@@ -134,7 +134,35 @@ namespace Pantreats.Data
             }
         }
 
-        
+        public static async Task SeedKioskAsync(IServiceProvider serviceProvider)
+        {
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+            if (!await roleManager.RoleExistsAsync("Kiosk"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("Kiosk"));
+            }
+
+            var kioskEmail = "kiosk@kiosk.com";
+            var kioskPassword = "Kiosk_123";
+
+            var kioskUser = await userManager.FindByEmailAsync(kioskEmail);
+            if (kioskUser == null)
+            {
+                kioskUser = new IdentityUser
+                {
+                    UserName = kioskEmail,
+                    Email = kioskEmail,
+                    EmailConfirmed = true
+                };
+
+                await userManager.CreateAsync(kioskUser, kioskPassword);
+                await userManager.AddToRoleAsync(kioskUser, "Kiosk");
+            }
+        }
+
+
         public static void SeedInventory(ApplicationDbContext context, IWebHostEnvironment env)
         {
             if (context.Inventory.AsNoTracking().Any()) //check if inventory table is empty -nick
@@ -196,9 +224,9 @@ namespace Pantreats.Data
             {
             "Great Value", "Food Lion", "Publix", "Del Monte",
             "Campbell", "Lidl", "Laura Lynn", "Swanson",
-            "Bush's", "Kirkland", "Crest", "Colgate", "Founders", 
+            "Bush's", "Kirkland", "Crest", "Colgate", "Founders",
             "Lakeside", "Happy Harvest", "Cheeze-It", "Nature Valley",
-            "Clover Valley", "Armor", "Green Giant", "Progresso", "Swanson", 
+            "Clover Valley", "Armor", "Green Giant", "Progresso", "Swanson",
             "Crider", "Maruchan", "Marie Callender's", "American Beauty",
             "Goya", "Dakota's Pride", "Barilla", "Northern Catch",
             "IGA", "Mothers Maid", "Nutter Butter", "Teddy Grahams",
@@ -285,7 +313,7 @@ namespace Pantreats.Data
 
         private static string GetUnitSize(string name) //looks for a number and oz in item name. defaults to standard if no oz in name -nick
         {
-            var match = Regex.Match(name, @"\d+(\.\d+)?\s?oz"); 
+            var match = Regex.Match(name, @"\d+(\.\d+)?\s?oz");
             return match.Success ? match.Value : "Standard";
         }
 

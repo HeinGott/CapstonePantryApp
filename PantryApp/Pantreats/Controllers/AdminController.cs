@@ -18,7 +18,8 @@ namespace Pantreats.Controllers
             ["Admin"] = "Admin",
             ["Students"] = "Student",
             ["Volunteers"] = "Volunteer",
-            ["Donors"] = "Donor"
+            ["Donors"] = "Donor",
+            ["Kiosk"] = "Kiosk"
         };
 
         private readonly ApplicationDbContext _context;
@@ -38,6 +39,7 @@ namespace Pantreats.Controllers
                 .AsNoTracking()
                 .Include(order => order.OrderItems)
                 .Include(order => order.OrderFulfilment)
+                .Where(order => string.IsNullOrWhiteSpace(order.OrderSource) || order.OrderSource != Order.SourceKiosk)
                 .OrderByDescending(order => order.OrderDate)
                 .ToListAsync();
 
@@ -175,7 +177,7 @@ namespace Pantreats.Controllers
         {
             if (!AllowedRoles.ContainsKey(model.Role))
             {
-                ModelState.AddModelError(nameof(model.Role), "Select admin, student, volunteer, or donor.");
+                ModelState.AddModelError(nameof(model.Role), "Select admin, student, volunteer, donor, or kiosk.");
             }
 
             if (!ModelState.IsValid)
@@ -397,6 +399,21 @@ namespace Pantreats.Controllers
             return View(donations);
         }
 
+        public IActionResult ProcessDonation(int id)
+        {
+            var donation = _context.Donations
+                .Include(d => d.DonationItems)
+                .Include(d => d.Donor)
+                .FirstOrDefault(d => d.DonationId == id);
+
+            if (donation == null)
+            {
+                return NotFound();
+            }
+
+            return View(donation);
+        }
+
         // Approve Donations - Trevor
         [HttpPost]
         public IActionResult ApproveDonation(int id)
@@ -447,6 +464,7 @@ namespace Pantreats.Controllers
                 "Student" or "Students" => "Students",
                 "Volunteer" or "Volunteers" => "Volunteers",
                 "Donor" or "Donors" or "Vendor" or "Vendors" => "Donors",
+                "Kiosk" => "Kiosk",
                 _ => string.Empty
             };
         }

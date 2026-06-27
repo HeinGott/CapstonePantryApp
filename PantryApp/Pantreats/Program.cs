@@ -86,6 +86,7 @@ builder.Services.AddControllersWithViews();
 
 //the email service
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<CheckoutService>();
 
 builder.Services.AddHttpClient();
 
@@ -104,7 +105,7 @@ using (var scope = app.Services.CreateScope())
     var env = services.GetRequiredService<IWebHostEnvironment>();
 
     // list of roles for your app
-    string[] roles = { "Admin", "Donors", "Volunteers", "Students" };
+    string[] roles = { "Admin", "Donors", "Volunteers", "Students", "Kiosk" };
 
     foreach (var role in roles)
     {
@@ -121,6 +122,7 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedDonorAsync(services);
     await DbSeeder.SeedStudentAsync(services);
     await DbSeeder.SeedVolunteerAsync(services);
+    await DbSeeder.SeedKioskAsync(services);
 
     using (var dbScope = app.Services.CreateScope())
     {

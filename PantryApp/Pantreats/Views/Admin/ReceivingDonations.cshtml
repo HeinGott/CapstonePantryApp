@@ -1,0 +1,242 @@
+@model Pantreats.Models.ReceivingDonationViewModel
+
+@{
+    ViewData["Title"] = "Receiving Donations";
+}
+
+<div class="donor-page py-4">
+
+    <div class="donor-page-header mb-4">
+        <div>
+            <h1 class="donor-page-title mb-1">Receiving Donations</h1>
+            <p class="donor-page-subtitle mb-0">
+                Record an incoming donation for a registered donor or a walk-in donor.
+            </p>
+        </div>
+    </div>
+
+    <form asp-controller="Admin" asp-action="ReceivingDonations" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="student-card mb-4">
+            <div class="student-history-header mb-3">
+                <div>
+                    <h2 class="student-section-title mb-1">Donor Information</h2>
+                    <p class="student-page-subtitle mb-0">
+                        Choose an existing donor or add a manual donor for this received donation.
+                    </p>
+                </div>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="receiving-donor-mode mb-4">
+                <label class="receiving-mode-card">
+                    <input type="radio"
+                           name="DonorMode"
+                           value="existing"
+                           class="receiving-mode-input"
+                           checked="@(Model.DonorMode != "manual" ? "checked" : null)" />
+                    <span class="receiving-mode-content">
+                        <strong>Registered Donor</strong>
+                        <span>Select from donors who already registered.</span>
+                    </span>
+                </label>
+
+                <label class="receiving-mode-card">
+                    <input type="radio"
+                           name="DonorMode"
+                           value="manual"
+                           class="receiving-mode-input"
+                           checked="@(Model.DonorMode == "manual" ? "checked" : null)" />
+                    <span class="receiving-mode-content">
+                        <strong>Manual Donor</strong>
+                        <span>Use this for a donor without an account.</span>
+                    </span>
+                </label>
+            </div>
+
+            <div id="existingDonorSection" class="receiving-donor-section">
+                <div class="mb-3">
+                    <label asp-for="SelectedDonorId" class="form-label">Registered donor</label>
+                    <select asp-for="SelectedDonorId" class="form-select">
+                        <option value="">Select a donor</option>
+                        @foreach (var donor in Model.RegisteredDonors)
+                        {
+                            <option value="@donor.DonorId">
+                                @donor.Name
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="SelectedDonorId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div id="manualDonorSection" class="receiving-donor-section">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="ManualName" class="form-label">Donor name</label>
+                        <input asp-for="ManualName" class="form-control" />
+                        <span asp-validation-for="ManualName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ManualPhoneNumber" class="form-label">Phone number</label>
+                        <input asp-for="ManualPhoneNumber" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ManualEmail" class="form-label">Email</label>
+                        <input asp-for="ManualEmail" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ManualAddress" class="form-label">Address</label>
+                        <input asp-for="ManualAddress" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="student-card">
+            <div class="student-history-header mb-3">
+                <div>
+                    <h2 class="student-section-title mb-1">Donation Items</h2>
+                    <p class="student-page-subtitle mb-0">
+                        Add the items included in this received donation.
+                    </p>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table student-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Donate</th>
+                            <th>Category</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Items.Count; i++)
+                        {
+                            <tr class="student-row">
+                                <td>
+                                    <input asp-for="Items[@i].Selected" class="form-check-input" />
+                                    <input asp-for="Items[@i].Name" type="hidden" />
+                                </td>
+                                <td>
+                                    <strong>@Model.Items[i].Name</strong>
+                                </td>
+                                <td>
+                                    <input asp-for="Items[@i].Quantity" min="1" class="form-control" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <span asp-validation-for="Items" class="text-danger d-block mt-3"></span>
+
+            <div class="row g-3 mt-1">
+                <div class="col-12">
+                    <label asp-for="DonationAddress" class="form-label">Donation address</label>
+                    <input asp-for="DonationAddress"
+                           class="form-control"
+                           placeholder="Pickup or drop-off address for this donation" />
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Comment" class="form-label">Comment</label>
+                    <textarea asp-for="Comment"
+                              class="form-control"
+                              rows="4"
+                              placeholder="Leave any notes about this donation"></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-end">
+                <button type="submit" class="inventory-edit-btn">
+                    Save Received Donation
+                </button>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+@section Styles {
+    <style>
+        .receiving-donor-mode {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+
+        .receiving-mode-card {
+            display: block;
+            cursor: pointer;
+        }
+
+        .receiving-mode-input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .receiving-mode-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            padding: 1rem 1.1rem;
+            border: 1px solid #d7e2f1;
+            border-radius: 1rem;
+            background: #f8fbff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+
+        .receiving-mode-content strong {
+            color: #183b73;
+        }
+
+        .receiving-mode-content span {
+            color: #59739c;
+        }
+
+        .receiving-mode-input:checked + .receiving-mode-content {
+            border-color: #79aa32;
+            background: #f4faea;
+            box-shadow: 0 0 0 3px rgba(121, 170, 50, 0.15);
+        }
+
+        .receiving-donor-section {
+            display: none;
+        }
+
+        .receiving-donor-section.is-active {
+            display: block;
+        }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function syncDonorModeSections() {
+            const selectedMode = document.querySelector('input[name="DonorMode"]:checked')?.value ?? "existing";
+            const existingSection = document.getElementById("existingDonorSection");
+            const manualSection = document.getElementById("manualDonorSection");
+
+            existingSection.classList.toggle("is-active", selectedMode === "existing");
+            manualSection.classList.toggle("is-active", selectedMode === "manual");
+        }
+
+        document.querySelectorAll('input[name="DonorMode"]').forEach(function (input) {
+            input.addEventListener("change", syncDonorModeSections);
+        });
+
+        syncDonorModeSections();
+    </script>
+}

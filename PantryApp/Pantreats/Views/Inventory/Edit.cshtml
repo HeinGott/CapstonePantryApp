@@ -12,85 +12,102 @@
         </div>
     </div>
 
-    <div class="student-card">
+    <div class="student-card edit-inventory-card">
         <form asp-controller="Inventory" asp-action="Edit" method="post" enctype="multipart/form-data">
             <input type="hidden" asp-for="ItemId" />
 
-            <div class="mb-3">
-                <label class="form-label">Current Image</label><br />
+            <div class="edit-inventory-layout">
+                
+                <div class="edit-image-panel">
+                    <label class="form-label">Current Image</label>
 
-                <img src="@Url.Action("GetImage", "Inventory", new { itemId = Model.ItemId })"
-                     style="max-width:200px; border-radius:8px;"
-                     onerror="this.style.display='none'" />
-            </div>
+                    <div class="current-image-box">
+                        <img src="@Url.Action("GetImage", "Inventory", new { itemId = Model.ItemId })"
+                             alt="Current item image"
+                             onerror="this.style.display='none'; this.parentElement.classList.add('no-image');" />
 
-            <div class="mb-3">
-                <label class="form-label">UPC</label>
-                <input asp-for="UPC" class="form-control" />
-                <span asp-validation-for="UPC" class="text-danger"></span>
-            </div>
+                        <span class="no-image-text">No image assigned</span>
+                    </div>
 
-            <div class="mb-3">
-                <label asp-for="ItemName" class="form-label">Item Name</label>
-                <input asp-for="ItemName" class="form-control" />
-            </div>
+                    <div class="mt-3">
+                        <label class="form-label">Update Image URL</label>
+                        <input type="text"
+                               name="imageUrl"
+                               class="form-control"
+                               placeholder="Paste image URL here" />
+                    </div>
 
-            <div class="mb-3">
-                <label asp-for="BrandName" class="form-label">Brand</label>
-                <input asp-for="BrandName" class="form-control" />
-            </div>
+                    <div class="mt-3">
+                        <label class="form-label">Upload New Image</label>
+                        <input type="file"
+                               name="imageFile"
+                               class="form-control" />
+                    </div>
+                </div>
+                
+                <div class="edit-fields-panel">
 
-            <div class="mb-3">
-                <label asp-for="Category" class="form-label">Category</label>
-                <input asp-for="Category" class="form-control" />
-            </div>
+                    <div class="edit-form-grid">
 
-            <div class="mb-3">
-                <label asp-for="Subcategory" class="form-label">Subcategory</label>
-                <input asp-for="Subcategory" class="form-control" />
-            </div>
+                        <div class="mb-3">
+                            <label class="form-label">UPC</label>
+                            <input asp-for="UPC" class="form-control" />
+                            <span asp-validation-for="UPC" class="text-danger"></span>
+                        </div>
 
-            <div class="mb-3">
-                <label asp-for="GenderUse" class="form-label">Use</label>
-                <input asp-for="GenderUse" class="form-control" />
-            </div>
+                        <div class="mb-3">
+                            <label asp-for="ItemName" class="form-label">Item Name</label>
+                            <input asp-for="ItemName" class="form-control" />
+                        </div>
 
-            <div class="mb-3">
-                <label asp-for="UnitSize" class="form-label">Unit Size</label>
-                <input asp-for="UnitSize" class="form-control" />
-            </div>
+                        <div class="mb-3">
+                            <label asp-for="BrandName" class="form-label">Brand</label>
+                            <input asp-for="BrandName" class="form-control" />
+                        </div>
 
-            <div class="mb-3">
-                <label asp-for="Quantity" class="form-label">Quantity</label>
-                <input asp-for="Quantity" class="form-control" type="number" />
-            </div>
+                        <div class="mb-3">
+                            <label asp-for="Category" class="form-label">Category</label>
+                            <input asp-for="Category" class="form-control" />
+                        </div>
 
-            <div class="mb-3">
-                <label asp-for="Points" class="form-label">Points</label>
-                <input asp-for="Points" class="form-control" type="number" />
-            </div>
+                        <div class="mb-3">
+                            <label asp-for="Subcategory" class="form-label">Subcategory</label>
+                            <input asp-for="Subcategory" class="form-control" />
+                        </div>
 
-            <div class="mb-3">
-                <label class="form-label">Update Image (Optional)</label>
+                        <div class="mb-3">
+                            <label asp-for="GenderUse" class="form-label">Use</label>
+                            <input asp-for="GenderUse" class="form-control" />
+                        </div>
 
-                <input type="text"
-                       name="imageUrl"
-                       class="form-control mb-2"
-                       placeholder="Paste image URL here" />
+                        <div class="mb-3">
+                            <label asp-for="UnitSize" class="form-label">Unit Size</label>
+                            <input asp-for="UnitSize" class="form-control" />
+                        </div>
 
-                <input type="file"
-                       name="imageFile"
-                       class="form-control" />
-            </div>
+                        <div class="mb-3">
+                            <label asp-for="Quantity" class="form-label">Quantity</label>
+                            <input asp-for="Quantity" class="form-control" type="number" />
+                        </div>
 
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn inventory-edit-btn">
-                    Save Changes
-                </button>
+                        <div class="mb-3">
+                            <label asp-for="Points" class="form-label">Points</label>
+                            <input asp-for="Points" class="form-control" type="number" />
+                        </div>
 
-                <a asp-controller="Inventory" asp-action="Index" class="btn btn-secondary">
-                    Cancel
-                </a>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-2">
+                        <button type="submit" class="btn inventory-edit-btn">
+                            Save Changes
+                        </button>
+
+                        <a asp-controller="Inventory" asp-action="Index" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                    </div>
+
+                </div>
             </div>
         </form>
     </div>

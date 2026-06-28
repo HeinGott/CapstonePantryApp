@@ -174,10 +174,9 @@ namespace Pantreats.Controllers
 
         // donor dashboard
         [Authorize(Roles = "Donors")]
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
-            var userId = _userManager.GetUserId(User);
-            var donor = _context.Donors.FirstOrDefault(d => d.UserId == userId);
+            var donor = await ResolveCurrentDonorAsync();
 
             if (donor == null)
             {
@@ -191,11 +190,11 @@ namespace Pantreats.Controllers
                 });
             }
 
-            var donations = _context.Donations
+            var donations = await _context.Donations
                 .Include(d => d.DonationItems)
                 .Where(d => d.DonorId == donor.DonorID)
                 .OrderByDescending(d => d.DonationDate)
-                .ToList();
+                .ToListAsync();
 
             return View(new DonorDashboardViewModel
             {
@@ -208,6 +207,7 @@ namespace Pantreats.Controllers
         }
 
         // show create donation page
+        [Authorize(Roles = "Donors")]
         public IActionResult CreateDonation()
         {
             return View();
@@ -215,12 +215,12 @@ namespace Pantreats.Controllers
 
         // Creates a new donation request from the donor and stores the selected items.
         // save donation
+        [Authorize(Roles = "Donors")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateDonation(List<DonationItemInput> items, string? comment, string? address)
+        public async Task<IActionResult> CreateDonation(List<DonationItemInput> items, string? comment, string? address)
         {
-            var userId = _userManager.GetUserId(User);
-            var donor = _context.Donors.FirstOrDefault(d => d.UserId == userId);
+            var donor = await ResolveCurrentDonorAsync();
 
             if (donor == null) return RedirectToAction("Dashboard");
 
@@ -247,7 +247,7 @@ namespace Pantreats.Controllers
             }
 
             _context.Donations.Add(donation);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("DonationSubmitted");
         }
@@ -256,6 +256,71 @@ namespace Pantreats.Controllers
         public IActionResult DonationSubmitted()
         {
             return View();
+        }
+
+        private async Task<Donor?> ResolveCurrentDonorAsync()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return null;
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return null;
+            }
+
+            var donor = await _context.Donors.FirstOrDefaultAsync(d => d.UserId == userId);
+
+            if (donor == null && !string.IsNullOrWhiteSpace(user.Email))
+            {
+                donor = await _context.Donors.FirstOrDefaultAsync(d => d.Email == user.Email);
+            }
+
+            if (donor == null)
+            {
+                donor = new Donor
+                {
+                    UserId = userId,
+                    Email = user.Email,
+                    Name = string.IsNullOrWhiteSpace(user.UserName) ? user.Email ?? "Donor" : user.UserName,
+                    PhoneNumber = user.PhoneNumber
+                };
+
+                _context.Donors.Add(donor);
+                await _context.SaveChangesAsync();
+                return donor;
+            }
+
+            var shouldSave = false;
+
+            if (string.IsNullOrWhiteSpace(donor.UserId))
+            {
+                donor.UserId = userId;
+                shouldSave = true;
+            }
+
+            if (string.IsNullOrWhiteSpace(donor.Email) && !string.IsNullOrWhiteSpace(user.Email))
+            {
+                donor.Email = user.Email;
+                shouldSave = true;
+            }
+
+            if (string.IsNullOrWhiteSpace(donor.PhoneNumber) && !string.IsNullOrWhiteSpace(user.PhoneNumber))
+            {
+                donor.PhoneNumber = user.PhoneNumber;
+                shouldSave = true;
+            }
+
+            if (shouldSave)
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            return donor;
         }
     }
 }

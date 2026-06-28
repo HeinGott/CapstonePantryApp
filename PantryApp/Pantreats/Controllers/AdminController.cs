@@ -414,6 +414,104 @@ namespace Pantreats.Controllers
             return View(donation);
         }
 
+        public async Task<IActionResult> ReceivingDonations()
+        {
+            var model = await BuildReceivingDonationViewModelAsync();
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReceivingDonations(ReceivingDonationViewModel model)
+        {
+            var donorMode = string.Equals(model.DonorMode, "manual", StringComparison.OrdinalIgnoreCase)
+                ? "manual"
+                : "existing";
+
+            model.DonorMode = donorMode;
+
+            if (donorMode == "existing")
+            {
+                if (!model.SelectedDonorId.HasValue)
+                {
+                    ModelState.AddModelError(nameof(model.SelectedDonorId), "Select a registered donor.");
+                }
+            }
+            else if (string.IsNullOrWhiteSpace(model.ManualName))
+            {
+                ModelState.AddModelError(nameof(model.ManualName), "Enter a name for the donor.");
+            }
+
+            var selectedItems = (model.Items ?? new List<DonationItemInput>())
+                .Where(item => item.Selected && item.Quantity > 0)
+                .ToList();
+
+            if (!selectedItems.Any())
+            {
+                ModelState.AddModelError(nameof(model.Items), "Select at least one donated item.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var hydratedModel = await BuildReceivingDonationViewModelAsync(model);
+                return View(hydratedModel);
+            }
+
+            Donor donor;
+
+            if (donorMode == "existing")
+            {
+                donor = await _context.Donors
+                    .FirstOrDefaultAsync(existingDonor =>
+                        existingDonor.DonorID == model.SelectedDonorId)
+                    ?? null!;
+
+                if (donor == null)
+                {
+                    ModelState.AddModelError(nameof(model.SelectedDonorId), "Select a valid registered donor.");
+                    var hydratedModel = await BuildReceivingDonationViewModelAsync(model);
+                    return View(hydratedModel);
+                }
+            }
+            else
+            {
+                donor = new Donor
+                {
+                    Name = model.ManualName!.Trim(),
+                    PhoneNumber = string.IsNullOrWhiteSpace(model.ManualPhoneNumber) ? null : model.ManualPhoneNumber.Trim(),
+                    Email = string.IsNullOrWhiteSpace(model.ManualEmail) ? null : model.ManualEmail.Trim(),
+                    Address = string.IsNullOrWhiteSpace(model.ManualAddress) ? null : model.ManualAddress.Trim()
+                };
+
+                _context.Donors.Add(donor);
+                await _context.SaveChangesAsync();
+            }
+
+            var donation = new Donation
+            {
+                DonorId = donor.DonorID,
+                DonationDate = DateTime.Now,
+                Status = "Received",
+                Address = string.IsNullOrWhiteSpace(model.DonationAddress) ? donor.Address : model.DonationAddress.Trim(),
+                Comment = string.IsNullOrWhiteSpace(model.Comment) ? null : model.Comment.Trim(),
+                DonationItems = selectedItems
+                    .Select(item => new DonationItem
+                    {
+                        ItemName = item.Name,
+                        Quantity = item.Quantity
+                    })
+                    .ToList()
+            };
+
+            _context.Donations.Add(donation);
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = $"Received donation saved for {donor.Name}.";
+            TempData["StatusType"] = "success";
+
+            return RedirectToAction("Details", "Donor", new { id = donor.DonorID });
+        }
+
         // Approve Donations - Trevor
         [HttpPost]
         public IActionResult ApproveDonation(int id)
@@ -482,6 +580,57 @@ namespace Pantreats.Controllers
         {
             return string.Join(" ", new[] { firstName, middleName, lastName }
                 .Where(namePart => !string.IsNullOrWhiteSpace(namePart)));
+        }
+
+        private async Task<ReceivingDonationViewModel> BuildReceivingDonationViewModelAsync(ReceivingDonationViewModel? model = null)
+        {
+            model ??= new ReceivingDonationViewModel();
+
+            if (model.Items == null || model.Items.Count == 0)
+            {
+                model.Items = BuildDonationItemInputs();
+            }
+
+            model.RegisteredDonors = await _context.Donors
+                .AsNoTracking()
+                .OrderBy(donor => donor.Name)
+                .Select(donor => new AdminDonorOptionViewModel
+                {
+                    DonorId = donor.DonorID,
+                    Name = donor.Name,
+                    Email = donor.Email,
+                    PhoneNumber = donor.PhoneNumber
+                })
+                .ToListAsync();
+
+            return model;
+        }
+
+        private static List<DonationItemInput> BuildDonationItemInputs()
+        {
+            var itemNames = new[]
+            {
+                "Canned Goods",
+                "Produce",
+                "Meat",
+                "Bread & Bakery",
+                "Rice & Pasta",
+                "Dairy Products",
+                "Frozen Foods",
+                "Snacks",
+                "Beverages",
+                "Hygiene Products",
+                "Baby Supplies",
+                "Pet Food"
+            };
+
+            return itemNames
+                .Select(itemName => new DonationItemInput
+                {
+                    Name = itemName,
+                    Quantity = 1
+                })
+                .ToList();
         }
 
         private static void PopulateRoleOptions(UserEditViewModel model)

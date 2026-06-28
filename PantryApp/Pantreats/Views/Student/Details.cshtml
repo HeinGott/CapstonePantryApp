@@ -19,7 +19,7 @@
             <div>
                 <p class="student-review-eyebrow mb-2">Application Review</p>
                 <h1 class="student-details-title mb-1">@Model.FullName</h1>
-                <p class="student-details-subtitle mb-0">Student ID Number: @Model.StudentId</p>
+                <p class="student-details-subtitle mb-1">Student ID: @Model.StudentId</p>
             </div>
 
             <div class="student-review-status-wrap">
@@ -65,6 +65,10 @@
             <div class="student-fact-row">
                 <span>Email</span>
                 <strong>@(string.IsNullOrWhiteSpace(Model.Email) ? "Not available" : Model.Email)</strong>
+            </div>
+            <div class="student-fact-row">
+                <span>Student ID</span>
+                <strong>@Model.StudentId</strong>
             </div>
             <div class="student-fact-row">
                 <span>Phone number</span>

@@ -295,14 +295,5 @@ namespace Pantreats.Controllers
             TempData["ApplicationAccessMessage"] = "Your student application still needs approval before order access is unlocked.";
             return RedirectToAction("Status", "Student");
         }
-
-        [AllowAnonymous]
-        public async Task<IActionResult> TestEmail()
-        {
-            var sent = await _emailService.SendOrderConfirmationAsync(
-                "jakegmain@gmail.com", 999, "https://localhost/Order/Details/999");
-
-            return Content(sent ? "Sent - check your email." : "Send failed - check the Output window.");
-        }
     }
 }

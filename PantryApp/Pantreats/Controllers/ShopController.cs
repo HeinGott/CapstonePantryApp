@@ -11,11 +11,13 @@ namespace Pantreats.Controllers
         private const int PageSize = 20;
         private readonly ApplicationDbContext _context;
         private readonly CheckoutService _checkoutService;
+        private readonly IEmailService _emailService;
 
-        public ShopController(ApplicationDbContext context, CheckoutService checkoutService)
+        public ShopController(ApplicationDbContext context, CheckoutService checkoutService, IEmailService emailService)
         {
             _context = context;
             _checkoutService = checkoutService;
+            _emailService = emailService;
         }
 
         [HttpGet("")]
@@ -172,6 +174,13 @@ namespace Pantreats.Controllers
             if (!result.Succeeded)
             {
                 return BadRequest(new { success = false, message = result.Message });
+            }
+
+            var confirmationEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+            if (!string.IsNullOrWhiteSpace(confirmationEmail) && result.OrderId.HasValue)
+            {
+                var orderUrl = Url.Action("Details", "Order", new { id = result.OrderId.Value }, Request.Scheme) ?? string.Empty;
+                await _emailService.SendOrderConfirmationAsync(confirmationEmail, result.OrderId.Value, orderUrl);
             }
 
             return Ok(new

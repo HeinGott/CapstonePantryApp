@@ -15,12 +15,6 @@
             </p>
         </div>
 
-        <div class="donor-actions">
-            <a asp-controller="Donor" asp-action="Create" class="btn btn-primary">
-                Add Donor
-            </a>
-        </div>
-
     </div>
 
     <div class="student-card">
@@ -33,14 +27,18 @@
                     <tr>
                         <th onclick="sortTable('donorTable', 0, this)">Donor Name</th>
                         <th onclick="sortTable('donorTable', 1, this)">Phone Number</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     @foreach (var donor in Model)
                     {
-                        <tr class="student-row">
+                        <tr class="student-row"
+                            onclick="goToDonor(@donor.DonorID)"
+                            onkeydown="handleDonorRowKeydown(event, @donor.DonorID)"
+                            tabindex="0"
+                            role="link"
+                            style="cursor: pointer;">
 
                             <td>
                                 <strong>@donor.Name</strong>
@@ -50,15 +48,6 @@
                                 @(string.IsNullOrWhiteSpace(donor.PhoneNumber)
                                     ? "Not added"
                                     : donor.PhoneNumber)
-                            </td>
-
-                            <td>
-                                <a asp-controller="Donor"
-                                   asp-action="Details"
-                                   asp-route-id="@donor.DonorID"
-                                   class="inventory-edit-btn">
-                                    View
-                                </a>
                             </td>
 
                         </tr>
@@ -77,6 +66,13 @@
     <script>
         function goToDonor(id) {
             window.location.href = '/Donor/Details/' + id;
+        }
+
+        function handleDonorRowKeydown(event, id) {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                goToDonor(id);
+            }
         }
 
         function sortTable(tableId, columnNumber, header) {

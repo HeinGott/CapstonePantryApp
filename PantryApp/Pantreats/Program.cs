@@ -130,6 +130,7 @@ using (var scope = app.Services.CreateScope())
         await PrepareDatabaseAsync(dbContext);
         //DbSeeder.ClearInventory(dbContext); this clears the inventory table if not commented out 
         DbSeeder.SeedInventory(dbContext, env);
+        DbSeeder.SeedInventoryImages(dbContext, env);
     }
 
 }

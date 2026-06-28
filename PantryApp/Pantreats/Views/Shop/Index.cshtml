@@ -324,8 +324,12 @@
                     <div class="shop-item-image">
                         <img src="~/images/items/@(item.ImageName).png"
                              alt="@item.ItemName"
+                             class="shop-item-image-small"
+                             onmouseover="previewImage(this.src)"
+                             onmouseout="hidePreview()"
+                             onclick="showImage(this.src)"
                              data-fallback-src="@Url.Action("GetImage", "Inventory", new { itemId = item.ItemId })"
-                             onerror="if (!this.dataset.retried) { this.dataset.retried = 'true'; this.src = this.dataset.fallbackSrc; } else { this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none'); }" />
+                             onerror="if (!this.dataset.retried) { this.dataset.retried='true'; this.src=this.dataset.fallbackSrc; } else { this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none'); }" />
                         <div class="shop-image-fallback d-none">
                             <i class="bi bi-bag-heart"></i>
                         </div>
@@ -362,6 +366,14 @@
         <nav aria-label="Shop page navigation" class="shop-pagination" id="shopPagination"></nav>
     }
 
+</div>
+
+<div id="imagePreview" class="image-preview">
+    <img id="previewImage" src="" />
+</div>
+
+<div id="imagePopup" class="image-popup" onclick="closeImage()">
+    <img id="popupImage" src="" />
 </div>
 
 @section Scripts {
@@ -885,6 +897,24 @@
                     .replaceAll('"', '&quot;')
                     .replaceAll("'", '&#039;');
             }
+        window.previewImage = function(src) {
+            document.getElementById("previewImage").src = src;
+            document.getElementById("imagePreview").style.display = "block";
+        }
+
+        window.hidePreview = function() {
+            document.getElementById("imagePreview").style.display = "none";
+        }
+
+        window.showImage = function(src) {
+            document.getElementById("popupImage").src = src;
+            document.getElementById("imagePopup").classList.add("show");
+        }
+
+        window.closeImage = function() {
+            document.getElementById("imagePopup").classList.remove("show");
+        }
+
         })();
     </script>
 }

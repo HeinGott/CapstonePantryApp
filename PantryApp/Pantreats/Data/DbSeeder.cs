@@ -210,6 +210,53 @@ namespace Pantreats.Data
 
         }
 
+        public static void SeedInventoryImages(ApplicationDbContext context, IWebHostEnvironment env)
+        {
+            if (context.InventoryImages.Any())
+                return;
+
+            var folderPath = Path.Combine(env.WebRootPath, "images", "items");
+
+            if (!Directory.Exists(folderPath))
+                return;
+
+            var imageFiles = Directory.GetFiles(folderPath);
+
+            foreach (var file in imageFiles)
+            {
+                var fileName = Path.GetFileNameWithoutExtension(file);
+
+                var item = context.Inventory
+                    .FirstOrDefault(i => i.UPC == fileName);
+
+                if (item == null)
+                    continue;
+
+                var extension = Path.GetExtension(file).ToLower();
+
+                //Switch to for any picture in file
+                var contentType = extension switch
+                {
+                    ".png" => "image/png",
+                    ".jpg" => "image/jpeg",
+                    ".jpeg" => "image/jpeg",
+                    ".webp" => "image/webp",
+                    _ => "image/jpeg"
+                };
+
+                var imageBytes = File.ReadAllBytes(file);
+
+                context.InventoryImages.Add(new InventoryImage
+                {
+                    InventoryItemId = item.ItemId,
+                    ImageData = imageBytes,
+                    ContentType = contentType
+                });
+            }
+
+            context.SaveChanges();
+        }
+
         //helper methods that search for keywords in the names of each item-nick
         private static string GetCategory(string name)
         {

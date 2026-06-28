@@ -3349,6 +3349,7 @@ span.flatpickr-weekday {
     .edit-inventory-layout {
         grid-template-columns: 1fr;
     }
+}
 
     .edit-image-panel {
         border-right: none;

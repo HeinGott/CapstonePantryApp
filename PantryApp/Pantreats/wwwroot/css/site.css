@@ -2154,6 +2154,10 @@ span.flatpickr-weekday {
     opacity: 1;
 }
 
+.inventory-page-header .student-page-title {
+    color: #102f61;    
+}
+
 .inventory-page-header {
     flex-direction: column;
     align-items: stretch;

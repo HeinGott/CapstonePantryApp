@@ -3349,7 +3349,7 @@ span.flatpickr-weekday {
     .edit-inventory-layout {
         grid-template-columns: 1fr;
     }
-}
+
 
     .edit-image-panel {
         border-right: none;
@@ -3361,7 +3361,7 @@ span.flatpickr-weekday {
     .edit-form-grid {
         grid-template-columns: 1fr;
     }
-
+}
     .shop-item-image-small {
         width: 70px;
         height: 70px;
@@ -3382,6 +3382,12 @@ span.flatpickr-weekday {
         box-shadow: 0 5px 15px rgba(0,0,0,.3);
         z-index: 9998;
     }
+
+.no-image-text {
+    display: none;
+    color: #6b7280;
+    font-size: 0.95rem;
+}
 
         .image-preview img {
             width: 100%;
@@ -3439,7 +3445,8 @@ span.flatpickr-weekday {
             transform: rotate(0deg);
         }
     }
-image-popup {
+
+.image-popup {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,.8);
@@ -3599,3 +3606,40 @@ image-popup {
     font-size: .9rem;
     font-weight: 600;
 }
+
+
+    .edit-inventory-card {
+    padding: 24px;
+}
+
+.edit-inventory-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+.edit-image-panel {
+    border-right: 1px solid #e5e7eb;
+    padding-right: 24px;
+}
+
+.current-image-box {
+    width: 100%;
+    min-height: 220px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+    .current-image-box img {
+        width: 100%;
+        max-height: 240px;
+        object-fit: contain;
+        display: block;
+    }

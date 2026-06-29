@@ -52,6 +52,16 @@
                 <i class="bi bi-arrow-right admin-queue-arrow"></i>
             </a>
 
+            <a asp-controller="Volunteer" asp-action="Index" class="admin-queue-card admin-queue-applications">
+                <i class="bi bi-people admin-queue-icon"></i>
+                <span class="admin-queue-content">
+                    <span class="admin-queue-label">Pending volunteers</span>
+                    <small>Waiting for an admin decision</small>
+                </span>
+                <strong class="admin-queue-count">@Model.PendingVolunteerApplications</strong>
+                <i class="bi bi-arrow-right admin-queue-arrow"></i>
+            </a>
+
             <a asp-controller="Admin" asp-action="Donations" class="admin-queue-card admin-queue-donations">
                 <i class="bi bi-gift admin-queue-icon"></i>
                 <span class="admin-queue-content">

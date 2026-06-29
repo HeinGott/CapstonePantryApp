@@ -3439,3 +3439,57 @@ span.flatpickr-weekday {
             transform: rotate(0deg);
         }
     }
+/* Volunteer dashboard — schedule grid */
+.volunteer-schedule {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.volunteer-schedule-head,
+.volunteer-schedule-row {
+    display: grid;
+    grid-template-columns: 70px 1fr 1fr;
+    gap: 6px;
+    align-items: center;
+}
+
+.volunteer-schedule-head {
+    margin-bottom: 2px;
+}
+
+.volunteer-schedule-corner {
+    /* empty cell above the day labels */
+}
+
+.volunteer-schedule-col {
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--pantreats-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.volunteer-schedule-day {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.volunteer-schedule-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+    color: transparent;
+    font-weight: 700;
+}
+
+    .volunteer-schedule-cell.is-on {
+        background: var(--pantreats-blue);
+        border-color: var(--pantreats-blue);
+        color: #ffffff;
+    }

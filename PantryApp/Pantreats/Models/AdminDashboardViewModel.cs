@@ -4,6 +4,7 @@ namespace Pantreats.Models
     {
         public int NewOrders { get; set; }
         public int PendingApplications { get; set; }
+        public int PendingVolunteerApplications { get; set; }
         public int NewDonations { get; set; }
         public List<AdminDashboardOrderViewModel> RecentOrders { get; set; } = new();
         public List<AdminDashboardApplicationViewModel> RecentApplications { get; set; } = new();

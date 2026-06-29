@@ -42,5 +42,11 @@ namespace Pantreats.Models
 
         // Auto-stamp when the application was submitted
         public DateTime SubmittedDate { get; set; } = DateTime.Now;
+
+        //Approval Status
+        public string ApplicationStatus { get; set; } = ApplicationStatuses.Pending;
+        public DateTime? ReviewedAt { get; set; }
+        public string? ReviewedByUserId { get; set; }
+        public string? ReviewNotes { get; set; }
     }
 }

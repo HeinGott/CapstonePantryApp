@@ -1,0 +1,152 @@
+﻿@model Pantreats.Models.VolunteerDashboardViewModel
+
+@{
+    ViewData["Title"] = "Volunteer Dashboard";
+    ViewData["FullWidth"] = true;
+    var volunteerName = User.Identity?.Name ?? "Volunteer";
+    var displayName = volunteerName.Contains('@') ? volunteerName.Split('@')[0] : volunteerName;
+
+    var scheduleRows = new[]
+    {
+        ("Mon", Model.MonMorning, Model.MonAfternoon),
+        ("Tue", Model.TueMorning, Model.TueAfternoon),
+        ("Wed", Model.WedMorning, Model.WedAfternoon),
+        ("Thu", Model.ThuMorning, Model.ThuAfternoon),
+        ("Fri", Model.FriMorning, Model.FriAfternoon),
+        ("Sat", Model.SatMorning, Model.SatAfternoon),
+        ("Sun", Model.SunMorning, Model.SunAfternoon)
+    };
+}
+
+<div class="admin-dashboard">
+    <section class="admin-hero">
+        <div class="admin-hero-copy">
+            <span class="admin-eyebrow">Volunteer Dashboard</span>
+            <h1 class="admin-page-title mb-2">Hello, @displayName</h1>
+            <p class="admin-page-subtitle mb-0">
+                Help orders move and keep track of when you're scheduled to volunteer.
+            </p>
+        </div>
+
+        <div class="admin-date-card">
+            <span>Today</span>
+            <strong>@DateTime.Today.ToString("dddd, MMMM d")</strong>
+        </div>
+    </section>
+
+    <section class="admin-work-section">
+        <div class="admin-section-heading">
+            <div>
+                <h2>Quick View</h2>
+            </div>
+            <p>Check below to see if anything needs attention.</p>
+        </div>
+
+        <div class="admin-work-grid">
+            <a asp-controller="OrderFulfilments" asp-action="Index" class="admin-queue-card admin-queue-orders">
+                <i class="bi bi-bag-check admin-queue-icon"></i>
+                <span class="admin-queue-content">
+                    <span class="admin-queue-label">New orders</span>
+                    <small>Still need to be filled</small>
+                </span>
+                <strong class="admin-queue-count">@Model.NewOrders</strong>
+                <i class="bi bi-arrow-right admin-queue-arrow"></i>
+            </a>
+
+            <a asp-controller="Volunteer" asp-action="Dashboard" class="admin-queue-card admin-queue-applications">
+                <i class="bi bi-calendar-week admin-queue-icon"></i>
+                <span class="admin-queue-content">
+                    <span class="admin-queue-label">Schedule</span>
+                    <small>View your volunteer schedule</small>
+                </span>
+                <i class="bi bi-arrow-right admin-queue-arrow"></i>
+            </a>
+        </div>
+    </section>
+
+    <section class="admin-data-grid">
+        <div class="admin-panel admin-panel-orders">
+            <div class="admin-panel-header">
+                <div>
+                    <span class="admin-panel-kicker">Orders</span>
+                    <h2 class="admin-panel-title mb-0">Recent orders</h2>
+                </div>
+                <a asp-controller="OrderFulfilments" asp-action="Index" class="admin-text-link">
+                    View all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="admin-list">
+                @if (!Model.RecentOrders.Any())
+                {
+                    <div class="admin-empty-state">
+                        <i class="bi bi-bag"></i>
+                        <span>No orders currently need to be filled.</span>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var order in Model.RecentOrders)
+                    {
+                        var statusClass = order.Status.Equals(Pantreats.Models.OrderFulfilment.StatusCompleted, StringComparison.OrdinalIgnoreCase)
+                            ? "is-complete"
+                            : "is-pending";
+
+                        <a asp-controller="OrderFulfilments" asp-action="Index"
+                               class="admin-list-row">
+                            <span class="admin-list-main">
+                                <strong>Order #@order.OrderId</strong>
+                                <small>@order.StudentEmail</small>
+                            </span>
+                            <span class="admin-list-meta">
+                                <span>@order.ItemCount items / @order.PointsUsed pts</span>
+                                <small>@order.SubmittedAt.ToString("MMM d, h:mm tt")</small>
+                            </span>
+                            <span class="admin-status @statusClass">@order.Status</span>
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="admin-panel">
+            <div class="admin-panel-header">
+                <div>
+                    <span class="admin-panel-kicker">Availability</span>
+                    <h2 class="admin-panel-title mb-0">Your schedule</h2>
+                </div>
+            </div>
+
+            @if (!Model.HasSchedule)
+            {
+                <div class="admin-empty-state">
+                    <i class="bi bi-calendar-x"></i>
+                    <span>No schedule on file yet.</span>
+                </div>
+            }
+            else
+            {
+                <div class="volunteer-schedule">
+                    <div class="volunteer-schedule-head">
+                        <span class="volunteer-schedule-corner"></span>
+                        <span class="volunteer-schedule-col">AM</span>
+                        <span class="volunteer-schedule-col">PM</span>
+                    </div>
+
+                    @foreach (var (day, morning, afternoon) in scheduleRows)
+                    {
+                        <div class="volunteer-schedule-row">
+                            <span class="volunteer-schedule-day">@day</span>
+                            <span class="volunteer-schedule-cell @(morning ? "is-on" : "")">
+                                @(morning ? "✓" : "")
+                            </span>
+                            <span class="volunteer-schedule-cell @(afternoon ? "is-on" : "")">
+                                @(afternoon ? "✓" : "")
+                            </span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+</div>

@@ -322,16 +322,26 @@
                          data-brand-name="@item.BrandName"
                          data-unit-size="@item.UnitSize">
                     <div class="shop-item-image">
-                        <img src="~/images/items/@(item.ImageName).png"
+                        <img src="~/images/items/@(item.ImageName).webp"
                              alt="@item.ItemName"
                              class="shop-item-image-small"
+                             loading="lazy"
+                             width="300"
+                             height="300"
+                             data-name="@item.ItemName"
+                             data-brand="@item.BrandName"
+                             data-category="@item.Subcategory"
+                             data-size="@item.UnitSize"
+                             data-points="@item.Points"
+                             data-stock="@item.Quantity"
                              onmouseover="previewImage(this.src)"
                              onmouseout="hidePreview()"
-                             onclick="showImage(this.src)"
+                             onclick="showImage(this)"
                              data-fallback-src="@Url.Action("GetImage", "Inventory", new { itemId = item.ItemId })"
                              onerror="if (!this.dataset.retried) { this.dataset.retried='true'; this.src=this.dataset.fallbackSrc; } else { this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none'); }" />
                         <div class="shop-image-fallback d-none">
-                            <i class="bi bi-bag-heart"></i>
+                            <img src="~/images/pantreatsLogo.png" alt="Pantreats" class="fallback-logo" />
+                            <p>Photo Coming Soon</p>
                         </div>
                     </div>
 
@@ -373,7 +383,47 @@
 </div>
 
 <div id="imagePopup" class="image-popup" onclick="closeImage()">
-    <img id="popupImage" src="" />
+
+    <div class="popup-content" onclick="event.stopPropagation()">
+
+        <button type="button" id="popupPrev" class="popup-arrow popup-prev" onclick="previousItem()">
+            &#10094;
+        </button>
+
+        <button type="button" id="popupNext" class="popup-arrow popup-next" onclick="nextItem()">
+            &#10095;
+        </button>
+
+        <img id="popupImage" src="" alt="Pantry Item" />
+
+        <div class="popup-info">
+
+            <div class="popup-category" id="popupCategory"></div>
+
+            <h2 class="popup-title" id="popupName"></h2>
+
+            <p class="popup-brand" id="popupBrand"></p>
+
+            <p class="popup-size" id="popupSize"></p>
+
+            <div class="popup-details">
+
+                <div class="popup-detail">
+                    <strong>Points</strong>
+                    <span id="popupPoints"></span>
+                </div>
+
+                <div class="popup-detail">
+                    <strong>Available</strong>
+                    <span id="popupStock"></span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
 @section Scripts {
@@ -385,8 +435,10 @@
             const cartOpenKey = 'pantreats-shop-cart-open';
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
             const shopPage = document.querySelector('.shop-page');
-            const pageSize = Number(shopPage.dataset.pageSize || 20);
+            const pageSize = 12;
             const itemCards = Array.from(document.querySelectorAll('[data-shop-item]'));
+            let currentIndex = 0;
+            let visibleImages = [];
             const totalPages = Math.max(1, Math.ceil(itemCards.length / pageSize));
             const cartPanel = document.getElementById('shopCartPanel');
             const cartToggleButton = document.getElementById('cartToggleButton');
@@ -486,6 +538,8 @@
                 const totalFilteredPages = getTotalPages(filteredCount);
                 emptyResults?.classList.toggle('d-none', filteredCount !== 0);
                 pagination.classList.toggle('d-none', totalFilteredPages <= 1 || filteredCount === 0);
+                visibleImages = Array.from(document.querySelectorAll(".shop-item-image-small"))
+                .filter(img => !img.closest("[data-shop-item]").classList.contains("d-none"));
                 renderPagination();
             }
 
@@ -905,10 +959,73 @@
         window.hidePreview = function() {
             document.getElementById("imagePreview").style.display = "none";
         }
+        
+        window.showImage = function(img){
+            currentIndex = visibleImages.indexOf(img);
 
-        window.showImage = function(src) {
-            document.getElementById("popupImage").src = src;
+            document.getElementById("popupImage").src = img.src;
+
+            document.getElementById("popupName").textContent =
+                img.dataset.name;
+
+            document.getElementById("popupBrand").textContent =
+                img.dataset.brand;
+
+            document.getElementById("popupCategory").textContent =
+                img.dataset.category;
+
+            document.getElementById("popupSize").textContent =
+                img.dataset.size;
+
+            document.getElementById("popupPoints").textContent =
+                img.dataset.points;
+
+            document.getElementById("popupStock").textContent =
+                img.dataset.stock;
+
             document.getElementById("imagePopup").classList.add("show");
+
+            updatePopupArrows();
+        }
+
+        window.nextItem = function () {
+
+            do {
+                currentIndex++;
+            } while (
+                currentIndex < visibleImages.length &&
+                visibleImages[currentIndex].classList.contains("d-none")
+            );
+
+            if (currentIndex >= visibleImages.length) {
+                currentIndex = visibleImages.length - 1;
+                return;
+            }
+
+            showImage(visibleImages[currentIndex]);
+        }
+        window.previousItem = function () {
+
+            do {
+                currentIndex--;
+            } while (
+                currentIndex >= 0 &&
+                visibleImages[currentIndex].classList.contains("d-none")
+            );
+
+            if (currentIndex < 0) {
+                currentIndex = 0;
+                return;
+            }
+
+            showImage(visibleImages[currentIndex]);
+        }
+        function updatePopupArrows() {
+            document.getElementById("popupPrev").style.display =
+                currentIndex === 0 ? "none" : "flex";
+
+            document.getElementById("popupNext").style.display =
+                currentIndex === visibleImages.length - 1 ? "none" : "flex";
         }
 
         window.closeImage = function() {

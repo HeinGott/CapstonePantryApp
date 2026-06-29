@@ -8,7 +8,7 @@ namespace Pantreats.Controllers
     [Route("shop")]
     public class ShopController : Controller
     {
-        private const int PageSize = 20;
+        private const int PageSize = 12;
         private readonly ApplicationDbContext _context;
         private readonly CheckoutService _checkoutService;
         private readonly IEmailService _emailService;

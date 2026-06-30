@@ -54,6 +54,17 @@ namespace Pantreats.Controllers
                 .Select(group => group.First())
                 .ToList();
 
+            var volunteerApplications = await _context.VolunteerApplications
+                .AsNoTracking()
+                .OrderByDescending(application => application.SubmittedDate)
+                .ThenByDescending(application => application.VolunteerApplicationId)
+                .ToListAsync();
+
+            var latestVolunteerApplications = volunteerApplications
+                .GroupBy(application => application.UserId)
+                .Select(group => group.First())
+                .ToList();
+
             var donations = await _context.Donations
                 .AsNoTracking()
                 .Include(donation => donation.Donor)
@@ -69,6 +80,9 @@ namespace Pantreats.Controllers
                         OrderFulfilment.StatusOrderPlaced,
                         StringComparison.OrdinalIgnoreCase)),
                 PendingApplications = latestApplications.Count(application =>
+                    string.IsNullOrWhiteSpace(application.ApplicationStatus) ||
+                    application.ApplicationStatus == ApplicationStatuses.Pending),
+                PendingVolunteerApplications = latestVolunteerApplications.Count(application =>
                     string.IsNullOrWhiteSpace(application.ApplicationStatus) ||
                     application.ApplicationStatus == ApplicationStatuses.Pending),
                 NewDonations = donations.Count(donation =>

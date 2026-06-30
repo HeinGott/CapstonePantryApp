@@ -4,7 +4,7 @@ using Pantreats.Services;
 
 namespace Pantreats.Controllers
 {
-    [Authorize(Roles = "Admin,Students")]
+    [Authorize(Roles = "Admin,Students,Volunteers")]
     [Route("shop")]
     public class ShopController : Controller
     {
@@ -204,6 +204,10 @@ namespace Pantreats.Controllers
         private async Task<IActionResult?> EnsureApprovedStudentAccessAsync()
         {
             if (User.IsInRole("Admin"))
+            {
+                return null;
+            }
+            if (User.IsInRole("Volunteers"))
             {
                 return null;
             }

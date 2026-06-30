@@ -6,7 +6,7 @@ using Pantreats.Models;
 
 namespace Pantreats.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Volunteers")]
     public class OrderFulfilmentsController : Controller
     {
         private readonly ApplicationDbContext _context;

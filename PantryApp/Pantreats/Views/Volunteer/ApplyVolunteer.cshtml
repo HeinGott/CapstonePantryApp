@@ -19,7 +19,8 @@
             <!-- Validation Summary -->
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            <form asp-controller="Surveys" asp-action="VolunteerApplicationForm" method="post">
+            <form asp-controller="Volunteer" asp-action="VolunteerApplicationForm" method="post">
+                @Html.AntiForgeryToken()
 
                 <!-- Basic Info -->
                 <h5 class="mb-3" style="color: var(--pantreats-blue);">Basic Information</h5>

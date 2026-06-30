@@ -44,6 +44,8 @@ namespace Pantreats.Models
 
         public bool IsActive { get; set; }
 
+        public bool IsVolunteer { get; set; }
+
         public string Campus { get; set; }
 
         public string ApplicationStatus { get; set; } = ApplicationStatuses.Pending;

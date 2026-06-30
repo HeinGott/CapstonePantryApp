@@ -1,0 +1,127 @@
+﻿@model Pantreats.Models.VolunteerAdminIndexViewModel
+
+@{
+    ViewData["Title"] = "Volunteers";
+}
+
+<div class="student-page py-4">
+    <div class="student-page-header mb-4">
+        <div>
+            <h1 class="student-page-title mb-1">Volunteers</h1>
+            <p class="student-page-subtitle mb-0">
+                Review pending volunteer applications and manage approved volunteers.
+            </p>
+        </div>
+    </div>
+
+    <div class="student-card mb-4">
+        <div class="student-history-header mb-3">
+            <div>
+                <h2 class="student-section-title mb-1">Pending Applicants</h2>
+                <p class="student-page-subtitle mb-0">
+                    These applications still need an admin decision.
+                </p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table student-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Year</th>
+                        <th>Email</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.PendingApplications.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-muted">No pending applications right now.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var application in Model.PendingApplications)
+                        {
+                            <tr class="student-row"
+                                role="button"
+                                tabindex="0"
+                                onclick="goToVolunteerDetails(@application.VolunteerApplicationId)"
+                                onkeydown="openVolunteerDetailsFromKey(event, @application.VolunteerApplicationId)">
+                                <td>@application.FullName</td>
+                                <td>@application.Year</td>
+                                <td>@application.Email</td>
+                                <td>@application.SubmittedAt.ToLocalTime().ToString("MM/dd/yyyy")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="student-card">
+        <div class="student-history-header mb-3">
+            <div>
+                <h2 class="student-section-title mb-1">Approved Volunteers</h2>
+                <p class="student-page-subtitle mb-0">
+                    Active volunteers helping run the pantry.
+                </p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table student-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Year</th>
+                        <th>Email</th>
+                        <th>Approved Record</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.ApprovedVolunteers.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-muted">No approved volunteers yet.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var volunteer in Model.ApprovedVolunteers)
+                        {
+                            <tr class="student-row"
+                                role="button"
+                                tabindex="0"
+                                onclick="goToVolunteerDetails(@volunteer.VolunteerApplicationId)"
+                                onkeydown="openVolunteerDetailsFromKey(event, @volunteer.VolunteerApplicationId)">
+                                <td>@volunteer.FullName</td>
+                                <td>@volunteer.Year</td>
+                                <td>@volunteer.Email</td>
+                                <td>@volunteer.SubmittedAt.ToLocalTime().ToString("MM/dd/yyyy")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function goToVolunteerDetails(id) {
+            window.location.href = '/Volunteer/Details/' + id;
+        }
+
+        function openVolunteerDetailsFromKey(event, id) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                goToVolunteerDetails(id);
+            }
+        }
+    </script>
+}

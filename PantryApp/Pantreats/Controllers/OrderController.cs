@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace Pantreats.Controllers
 {
-    [Authorize(Roles = "Admin,Students")]
+    [Authorize(Roles = "Admin,Students,Volunteers")]
     public class OrderController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -269,6 +269,11 @@ namespace Pantreats.Controllers
         private IActionResult? EnsureApprovedStudentAccess()
         {
             if (User.IsInRole("Admin"))
+            {
+                return null;
+            }
+
+            if (User.IsInRole("Volunteers"))
             {
                 return null;
             }

@@ -1,0 +1,183 @@
+﻿@model Pantreats.Models.Recipe
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<a asp-controller="Recipe" asp-action="Index" class="btn btn-outline-secondary mb-3">
+    Back to Recipes
+</a>
+
+<div id="recipeToPrint" class="student-card">
+
+    @if (!User.IsInRole("Admin"))
+    {
+        <section class="text-center py-5 mb-5">
+
+            <h1 class="display-4 fw-bold mb-4"
+                style="color: var(--pantreats-blue);">
+                Pantry to Plate
+            </h1>
+
+            <h3 class="fw-bold mb-4"
+                style="color: var(--pantreats-green);">
+                From Our Pantry to Your Plate Delicious Meals Are Waiting!
+            </h3>
+
+            <p class="fs-5 mx-auto mb-4"
+               style="max-width: 1050px; line-height: 1.9;">
+                At <strong>PanTreats</strong>, we believe every person deserves access to
+                nutritious, affordable, and delicious meals. <strong>Pantry to Plate</strong>
+                was created to inspire meal ideas using ingredients commonly available through
+                our campus pantry, helping you turn simple pantry items into satisfying meals.
+            </p>
+
+            <p class="fs-5 mx-auto mb-4"
+               style="max-width: 1050px; line-height: 1.9;">
+                Because our inventory changes regularly, ingredients availability may vary.
+                Refrigerated, frozen, dairy, and other perishable products are stocked in
+                limited quantities and may not always be available during your visit.
+            </p>
+
+            <p class="fs-5 mx-auto mb-4"
+               style="max-width: 1050px; line-height: 1.9;">
+                If you'd like to prepare one of these recipes, let our pantry staff know
+                when you arrive to pick up your order. We'll gladly help you locate the
+                available ingredients and recommend substitutions whenever possible.
+            </p>
+
+            <h4 class="fw-bold mt-5"
+                style="color: var(--pantreats-green);">
+                We hope you discover a new favorite recipe and enjoy every meal with PanTreats!
+            </h4>
+
+        </section>
+    }
+    <h1>@Model.Title</h1>
+
+    <img src="@(string.IsNullOrWhiteSpace(Model.ImagePath)
+                          ? "/images/pantreatsLogo.png"
+                          : Model.ImagePath)"
+         alt="@Model.Title"
+         class="recipe-image mb-4" />
+
+    @if (!string.IsNullOrWhiteSpace(Model.Description))
+    {
+        <p>@Model.Description</p>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.DietaryTags))
+    {
+        <p><strong>Dietary Tags:</strong> @Model.DietaryTags</p>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.MealType))
+    {
+        <p><strong>Meal Type:</strong> @Model.MealType</p>
+    }
+
+    <h3>Ingredients</h3>
+
+    @if (Model.Ingredients.Any())
+    {
+        <ul>
+            @foreach (var ingredient in Model.Ingredients)
+            {
+                <li class="mb-2">
+                    @ingredient.Quantity @ingredient.Unit
+                    @(ingredient.InventoryItem?.ItemName ?? ingredient.CustomIngredientName)
+
+                    @if (!string.IsNullOrWhiteSpace(ingredient.SubstituteIngredientName))
+                    {
+                        <span class="text-muted">
+                            (Substitute: @ingredient.SubstituteIngredientName)
+                        </span>
+                    }
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p class="text-muted">No ingredients have been added yet.</p>
+    }
+
+    <h3>Instructions</h3>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Instructions))
+    {
+        <p style="white-space: pre-wrap;">@Model.Instructions</p>
+    }
+    else
+    {
+        <p class="text-muted">No instructions have been added yet.</p>
+    }
+</div>
+
+@if (User.IsInRole("Admin"))
+{
+    <div class="student-card mt-4">
+        <h4>Admin Tools</h4>
+
+        <div class="mb-3 d-flex gap-2 flex-wrap">
+            <a asp-controller="Recipe"
+               asp-action="Edit"
+               asp-route-id="@Model.RecipeId"
+               class="btn btn-primary">
+                Edit Recipe
+            </a>
+
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    onclick="window.print()">
+                Print Recipe
+            </button>
+
+            <a asp-controller="Recipe"
+               asp-action="AddIngredient"
+               asp-route-id="@Model.RecipeId"
+               class="btn btn-outline-primary">
+                Add Ingredient
+            </a>
+
+            <form asp-controller="Recipe"
+                  asp-action="Delete"
+                  asp-route-id="@Model.RecipeId"
+                  method="post"
+                  class="d-inline"
+                  onsubmit="return confirm('Delete this recipe?');">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="btn btn-outline-danger">
+                    Delete Recipe
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+}
+
+<style>
+    @@media print {
+        body * {
+            visibility: hidden;
+        }
+
+        #recipeToPrint,
+        #recipeToPrint * {
+            visibility: visible;
+        }
+
+        #recipeToPrint {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            box-shadow: none;
+            border: none;
+        }
+    }
+</style>

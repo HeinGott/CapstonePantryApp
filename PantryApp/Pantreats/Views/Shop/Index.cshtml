@@ -313,7 +313,7 @@
             {
                 var isOutOfStock = item.Quantity <= 0;
 
-                <article class="shop-item-card"
+                <article class="shop-item-card" @(isOutOfStock ? "out-of-stock" : "")"
                          data-shop-item
                          data-upc="@item.UPC"
                          data-stock="@item.Quantity"
@@ -324,7 +324,7 @@
                     <div class="shop-item-image">
                         <img src="~/images/items/@(item.ImageName).webp"
                              alt="@item.ItemName"
-                             class="shop-item-image-small"
+                             class="shop-item-image-small @(isOutOfStock ? "shop-item-unavailable" : "")"
                              loading="lazy"
                              width="300"
                              height="300"
@@ -361,7 +361,7 @@
                                 class="btn shop-add-button"
                                 data-upc="@item.UPC"
                                 @(isOutOfStock ? "disabled" : "")>
-                            @(isOutOfStock ? "Unavailable" : "Add to cart")
+                            @(isOutOfStock ? "Currently Unavailable" : "Add to cart")
                         </button>
                     </div>
                 </article>
@@ -395,6 +395,11 @@
         </button>
 
         <img id="popupImage" src="" alt="Pantry Item" />
+
+        <p id="popupUnavailable" class="popup-unavailable-message d-none">
+            This item is currently unavailable.<br>
+            Please see pantry staff for assistance.
+        </p>
 
         <div class="popup-info">
 
@@ -984,6 +989,17 @@
                 img.dataset.stock;
 
             document.getElementById("imagePopup").classList.add("show");
+
+        const popupImage = document.getElementById("popupImage");
+        const unavailableMessage = document.getElementById("popupUnavailable");
+
+        if (Number(img.dataset.stock) <= 0) {
+            popupImage.classList.add("popup-unavailable");
+            unavailableMessage.classList.remove("d-none");
+        } else {
+            popupImage.classList.remove("popup-unavailable");
+            unavailableMessage.classList.add("d-none");
+        }
 
             updatePopupArrows();
         }

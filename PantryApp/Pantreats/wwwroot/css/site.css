@@ -3643,3 +3643,60 @@ span.flatpickr-weekday {
         object-fit: contain;
         display: block;
     }
+
+.shop-add-button:disabled {
+    background-color: #bfc5ca;
+    border-color: #bfc5ca;
+    color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+    .shop-add-button:disabled:hover {
+        background-color: #bfc5ca;
+        border-color: #bfc5ca;
+        transform: none;
+    }
+
+.popup-unavailable {
+    filter: grayscale(100%);
+    opacity: .45;
+}
+
+.popup-unavailable-message {
+    margin-top: 15px;
+    text-align: center;
+    color: #842029;
+    background: #f8d7da;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-weight: 600;
+}
+{
+    filter: grayscale(100%);
+    opacity: .45;
+}
+
+.shop-item-card:has(.item-out-of-stock) {
+    background: #f8f9fa;
+}
+
+.shop-item-card.out-of-stock {
+    opacity: .85;
+}
+
+.shop-item-unavailable {
+    filter: grayscale(100%);
+    opacity: .45;
+}
+
+.recipe-image {
+    width: 100%;
+    max-width: 900px;
+    height: auto;
+    display: block;
+    margin: 0 auto 1.5rem auto;
+    border-radius: 12px;
+    object-fit: contain;
+    box-shadow: 0 4px 10px rgba(0,0,0,.1);
+}

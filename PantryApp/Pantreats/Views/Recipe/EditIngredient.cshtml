@@ -1,0 +1,74 @@
+﻿@model Pantreats.Models.RecipeIngredient
+
+@{
+    ViewData["Title"] = "Edit Ingredient";
+    var inventoryItems = ViewBag.InventoryItems as List<Pantreats.Models.Inventory>;
+}
+
+<div class="student-page-header mb-4">
+    <div>
+        <h1 class="student-page-title">Edit Ingredient</h1>
+        <p class="student-page-subtitle">Update this recipe ingredient.</p>
+    </div>
+</div>
+
+<div class="student-card">
+    <form asp-controller="Recipe"
+          asp-action="EditIngredient"
+          asp-route-id="@Model.RecipeIngredientId"
+          method="post">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="RecipeIngredientId" />
+        <input type="hidden" asp-for="RecipeId" />
+
+        <div class="mb-3">
+            <label asp-for="InventoryItemId" class="form-label">Inventory Item</label>
+
+            <select asp-for="InventoryItemId" class="form-control">
+                <option value="">-- Non-inventory item --</option>
+
+                @foreach (var item in inventoryItems ?? new())
+                {
+                    if (item.ItemId == Model.InventoryItemId)
+                    {
+                        <option value="@item.ItemId" selected>
+                            @item.ItemName
+                        </option>
+                    }
+                    else
+                    {
+                        <option value="@item.ItemId">
+                            @item.ItemName
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CustomIngredientName" class="form-label">Custom Ingredient Name</label>
+            <input asp-for="CustomIngredientName" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Quantity" class="form-label">Quantity</label>
+            <input asp-for="Quantity" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Unit" class="form-label">Unit</label>
+            <input asp-for="Unit" class="form-control" />
+        </div>
+
+        <input type="submit" value="Save Changes" class="btn btn-primary" />
+
+        <a asp-controller="Recipe"
+           asp-action="Details"
+           asp-route-id="@Model.RecipeId"
+           class="btn btn-outline-secondary">
+            Cancel
+        </a>
+    </form>
+</div>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pantreats.Data;
 
@@ -11,9 +12,11 @@ using Pantreats.Data;
 namespace Pantreats.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260629181325_AddRecipesPantryToPlate")]
+    partial class AddRecipesPantryToPlate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -524,25 +527,6 @@ namespace Pantreats.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Instructions")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDairyFree")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsGlutenFree")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsNutFree")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsVegan")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsVegetarian")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MealType")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
@@ -565,9 +549,6 @@ namespace Pantreats.Data.Migrations
                     b.Property<string>("CustomIngredientName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImportedIngredientName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("InventoryItemId")
                         .HasColumnType("int");
 
@@ -576,9 +557,6 @@ namespace Pantreats.Data.Migrations
 
                     b.Property<int>("RecipeId")
                         .HasColumnType("int");
-
-                    b.Property<string>("SubstituteIngredientName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Unit")
                         .HasColumnType("nvarchar(max)");

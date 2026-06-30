@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pantreats.Data;
 
@@ -11,9 +12,11 @@ using Pantreats.Data;
 namespace Pantreats.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260630033538_UpdatingClasses")]
+    partial class UpdatingClasses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -565,9 +568,6 @@ namespace Pantreats.Data.Migrations
                     b.Property<string>("CustomIngredientName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImportedIngredientName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("InventoryItemId")
                         .HasColumnType("int");
 
@@ -662,9 +662,6 @@ namespace Pantreats.Data.Migrations
                     b.Property<bool>("IsInterestedInWIC")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsVolunteer")
-                        .HasColumnType("bit");
-
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -713,10 +710,6 @@ namespace Pantreats.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VolunteerApplicationId"));
 
-                    b.Property<string>("ApplicationStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -756,15 +749,6 @@ namespace Pantreats.Data.Migrations
 
                     b.Property<string>("ReasonForVolunteering")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReviewNotes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ReviewedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ReviewedByUserId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("SatAfternoon")

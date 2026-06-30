@@ -1,0 +1,193 @@
+﻿@model Pantreats.Models.RecipeIndexViewModel
+
+@{
+    ViewData["Title"] = "Recipes";
+}
+
+<div class="student-page-header mb-4 d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <div>
+        <h1 class="student-page-title">Recipes</h1>
+        <p class="student-page-subtitle">Browse meal ideas using pantry items.</p>
+    </div>
+
+    @if (Model.IsAdmin)
+    {
+        <div class="d-flex gap-2">
+            <a asp-controller="Recipe"
+               asp-action="Create"
+               class="btn btn-primary">
+                Add Recipe
+            </a>
+
+            <a asp-controller="Recipe"
+               asp-action="Import"
+               class="btn btn-outline-primary">
+                Import Recipe
+            </a>
+        </div>
+    }
+</div>
+
+<div class="student-card mb-4">
+
+    <form asp-controller="Recipe"
+          asp-action="Index"
+          method="get"
+          class="mb-4">
+
+        <label class="form-label">Search Recipes</label>
+
+        <div class="input-group">
+            <input type="text"
+                   name="search"
+                   class="form-control"
+                   placeholder="Search by recipe name, ingredient, or instruction..." />
+
+            <button type="submit" class="btn btn-primary">
+                Search
+            </button>
+        </div>
+    </form>
+
+    <h5>Dietary Filters</h5>
+
+    <div class="d-flex gap-2 flex-wrap mb-3">
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           class="btn @(string.IsNullOrWhiteSpace(Model.SelectedDiet) ? "btn-success" : "btn-outline-success")">
+            All
+        </a>
+
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           asp-route-diet="Dairy-Free"
+           class="btn @(Model.SelectedDiet == "Dairy-Free" ? "btn-success" : "btn-outline-success")">
+            Dairy Free
+        </a>
+
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           asp-route-diet="Gluten-Free"
+           class="btn @(Model.SelectedDiet == "Gluten-Free" ? "btn-success" : "btn-outline-success")">
+            Gluten Free
+        </a>
+
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           asp-route-diet="Vegetarian"
+           class="btn @(Model.SelectedDiet == "Vegetarian" ? "btn-success" : "btn-outline-success")">
+            Vegetarian
+        </a>
+
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           asp-route-diet="Vegan"
+           class="btn @(Model.SelectedDiet == "Vegan" ? "btn-success" : "btn-outline-success")">
+            Vegan
+        </a>
+
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           asp-route-diet="Nut-Free"
+           class="btn @(Model.SelectedDiet == "Nut-Free" ? "btn-success" : "btn-outline-success")">
+            Nut Free
+        </a>
+    </div>
+
+    <h5>Meal Type</h5>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            All Meals
+        </a>
+
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           asp-route-mealType="Breakfast"
+           class="btn btn-outline-primary">
+            Breakfast
+        </a>
+
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           asp-route-mealType="Lunch"
+           class="btn btn-outline-primary">
+            Lunch
+        </a>
+
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           asp-route-mealType="Dinner"
+           class="btn btn-outline-primary">
+            Dinner
+        </a>
+
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           asp-route-mealType="Snack"
+           class="btn btn-outline-primary">
+            Snack
+        </a>
+
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           asp-route-mealType="Dessert"
+           class="btn btn-outline-primary">
+            Dessert
+        </a>
+
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           asp-route-mealType="Beverage"
+           class="btn btn-outline-primary">
+            Beverage
+        </a>
+    </div>
+</div>
+
+@if (!Model.Recipes.Any())
+{
+    <div class="student-card text-center">
+        <h2>No recipes yet</h2>
+        <p class="text-muted mb-0">Recipes will appear here once they are added.</p>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var recipe in Model.Recipes)
+        {
+            <div class="col-md-4">
+                <div class="student-card h-100">
+                    <img src="@(string.IsNullOrWhiteSpace(recipe.ImagePath)
+                                 ? "/images/pantreatsLogo.png"
+                                 : recipe.ImagePath)"
+                         alt="@recipe.Title"
+                         class="img-fluid rounded mb-3"
+                         style="height:180px; width:100%; object-fit:cover;" />
+                    <h3>@recipe.Title</h3>
+                    <p>@recipe.Description</p>
+
+                    @if (!string.IsNullOrWhiteSpace(recipe.DietaryTags))
+                    {
+                        <p class="text-muted">@recipe.DietaryTags</p>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(recipe.MealType))
+                    {
+                        <p><strong>Meal Type:</strong> @recipe.MealType</p>
+                    }
+
+                    <a asp-controller="Recipe"
+                       asp-action="Details"
+                       asp-route-id="@recipe.RecipeId"
+                       class="btn btn-outline-primary">
+                        View Recipe
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+}

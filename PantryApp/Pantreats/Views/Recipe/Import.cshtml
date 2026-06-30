@@ -1,0 +1,95 @@
+﻿@{
+    ViewData["Title"] = "Import Recipe";
+}
+
+<div class="student-page-header mb-4">
+    <div>
+        <h1 class="student-page-title">Import Recipe</h1>
+        <p class="student-page-subtitle">
+            Upload a recipe file to automatically fill in the recipe form.
+        </p>
+    </div>
+</div>
+
+<div class="student-card">
+
+    <form asp-controller="Recipe"
+          asp-action="Import"
+          method="post"
+          enctype="multipart/form-data">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label class="form-label">
+                Recipe File
+            </label>
+
+            <input type="file"
+                   name="recipeFile"
+                   class="form-control"
+                   accept=".txt,.docx" />
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary">
+            Import Recipe
+        </button>
+
+        <a asp-controller="Recipe"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Cancel
+        </a>
+
+    </form>
+
+    <div class="student-card mt-4">
+        <h3>Recipe Import Guide</h3>
+
+        <p>
+            Pantreats can import recipe files to help speed up recipe creation.
+            For the best results, organize your recipe using the format below.
+        </p>
+
+        <div class="alert alert-info">
+            <pre class="mb-0">
+                Title:
+                Grandma's Chicken Soup
+
+                Description:
+                A hearty homemade chicken soup.
+
+                Meal Type:
+                Dinner
+
+                Ingredients:
+                2 cups Chicken
+                1 cup Carrots
+                2 cups Chicken Broth
+                1 tsp Salt
+
+                Instructions:
+                1. Cook the chicken.
+                2. Add vegetables.
+                3. Pour in broth.
+                4. Simmer for 30 minutes.
+                5. Serve warm.
+</pre>
+        </div>
+
+        <h5>Tips</h5>
+
+        <ul class="mb-0">
+            <li>Include clear headings: Title, Description, Meal Type, Ingredients, and Instructions.</li>
+            <li>List one ingredient per line.</li>
+            <li>Keep quantities with the ingredient, like 2 cups flour.</li>
+            <li>Review the imported recipe before saving.</li>
+            <li>Upload recipe images separately on the recipe form.</li>
+            <li><strong>Supported files:TXT and DOCX.</strong> </li>
+        </ul>
+    </div>
+
+</div>

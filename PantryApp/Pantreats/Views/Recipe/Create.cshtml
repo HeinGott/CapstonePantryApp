@@ -1,0 +1,448 @@
+﻿@model Pantreats.Models.RecipeEditorViewModel
+
+@{
+    ViewData["Title"] = "Add Recipe";
+
+    var excludedCategories = new[]
+    {
+        "Oral Care",
+        "Personal Care",
+        "Hygiene",
+        "Household",
+        "Cleaning Supplies",
+        "Baby Care",
+        "Pet Supplies"
+    };
+}
+
+<div class="student-page-header mb-4">
+    <div>
+        <h1 class="student-page-title">Add Recipe</h1>
+        <p class="student-page-subtitle">
+            Create a recipe, upload files, and add ingredients all at once.
+        </p>
+    </div>
+</div>
+
+<div class="student-card">
+    <form asp-controller="Recipe"
+          asp-action="Create"
+          method="post"
+          enctype="multipart/form-data">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <h4>Recipe Information</h4>
+
+        <div class="mb-3">
+            <label asp-for="Recipe.Title" class="form-label">Recipe Title</label>
+            <input asp-for="Recipe.Title" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Recipe.MealType" class="form-label">Meal Type</label>
+
+            <select asp-for="Recipe.MealType" class="form-control">
+                <option value="">-- Select Meal Type --</option>
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+                <option value="Snack">Snack</option>
+                <option value="Dessert">Dessert</option>
+                <option value="Beverage">Beverage</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Recipe.Instructions" class="form-label">Instructions</label>
+            <textarea asp-for="Recipe.Instructions" class="form-control" rows="6"></textarea>
+        </div>
+
+        <h4>Recipe Uploads</h4>
+
+        <div class="mb-3">
+            <label asp-for="RecipeImage" class="form-label">Recipe Image</label>
+            <input asp-for="RecipeImage" type="file" class="form-control" accept="image/*" />
+        </div>
+
+
+        <h4>Dietary Information</h4>
+
+        <div class="form-check">
+            <input asp-for="Recipe.IsDairyFree" class="form-check-input" />
+            <label asp-for="Recipe.IsDairyFree" class="form-check-label">Dairy Free</label>
+        </div>
+
+        <div class="form-check">
+            <input asp-for="Recipe.IsGlutenFree" class="form-check-input" />
+            <label asp-for="Recipe.IsGlutenFree" class="form-check-label">Gluten Free</label>
+        </div>
+
+        <div class="form-check">
+            <input asp-for="Recipe.IsVegetarian" class="form-check-input" />
+            <label asp-for="Recipe.IsVegetarian" class="form-check-label">Vegetarian</label>
+        </div>
+
+        <div class="form-check">
+            <input asp-for="Recipe.IsVegan" class="form-check-input" />
+            <label asp-for="Recipe.IsVegan" class="form-check-label">Vegan</label>
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="Recipe.IsNutFree" class="form-check-input" />
+            <label asp-for="Recipe.IsNutFree" class="form-check-label">Nut Free</label>
+        </div>
+
+        <h4>Ingredients</h4>
+
+        <table class="table" id="ingredientTable">
+            <thead>
+                <tr>
+                    <th style="width:12%">Quantity</th>
+                    <th style="width:14%">Unit</th>
+                    <th style="width:34%">Ingredient</th>
+                    <th style="width:34%">Substitute</th>
+                    <th style="width:6%"></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @{
+                    var ingredientRows = Model.Ingredients.Any()
+                        ? Model.Ingredients
+                        : new List<Pantreats.Models.RecipeIngredient>
+                        {
+                    new Pantreats.Models.RecipeIngredient()
+                        };
+                }
+
+                @for (int i = 0; i < ingredientRows.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            <select name="Ingredients[@i].Quantity" class="form-control">
+                                <option value="">-- Qty --</option>
+                                @foreach (var qty in new[] { "1/4", "1/3", "1/2", "2/3", "3/4", "1", "1 1/2", "2", "3", "4" })
+                                {
+                                    <option value="@qty" selected="@(ingredientRows[i].Quantity == qty)">
+                                        @qty
+                                    </option>
+                                }
+                            </select>
+                        </td>
+
+                        <td>
+                            <select name="Ingredients[@i].Unit" class="form-control">
+                                <option value="">-- Unit --</option>
+                                @foreach (var unit in new[] { "cup", "cups", "tbsp", "tsp", "oz", "lb", "can", "cans", "package", "packages", "slice", "slices", "pinch" })
+                                {
+                                    <option value="@unit" selected="@(ingredientRows[i].Unit == unit)">
+                                        @unit
+                                    </option>
+                                }
+                            </select>
+                        </td>
+
+                        <td>
+                            <select name="Ingredients[@i].CustomIngredientName"
+                                    class="form-control ingredient-select">
+                                <option value="">-- Select Pantry Item --</option>
+
+                                @foreach (var group in Model.InventoryItems
+                                    .Where(item =>
+                                        !string.IsNullOrWhiteSpace(item.ItemName) &&
+                                        !excludedCategories.Contains(item.Category ?? "", StringComparer.OrdinalIgnoreCase))
+                                    .GroupBy(item => string.IsNullOrWhiteSpace(item.Subcategory) ? "Other" : item.Subcategory)
+                                    .OrderBy(group => group.Key))
+                                {
+                                    <optgroup label="@group.Key">
+                                        @foreach (var item in group.OrderBy(item => item.ItemName))
+                                        {
+                                            <option value="@item.ItemName"
+                                                    data-category="@group.Key"
+                                                    selected="@(ingredientRows[i].CustomIngredientName == item.ItemName)">
+                                                @item.ItemName
+                                            </option>
+                                        }
+                                    </optgroup>
+                                }
+
+                                <optgroup label="Common Recipe Ingredients">
+                                    <option value="Milk" data-category="Common Dairy" selected="@(ingredientRows[i].CustomIngredientName == "Milk")">Milk</option>
+                                    <option value="Eggs" data-category="Common Animal Products" selected="@(ingredientRows[i].CustomIngredientName == "Eggs")">Eggs</option>
+                                    <option value="Butter" data-category="Common Dairy" selected="@(ingredientRows[i].CustomIngredientName == "Butter")">Butter</option>
+                                    <option value="Cream" data-category="Common Dairy" selected="@(ingredientRows[i].CustomIngredientName == "Cream")">Cream</option>
+                                    <option value="Cheese" data-category="Common Dairy" selected="@(ingredientRows[i].CustomIngredientName == "Cheese")">Cheese</option>
+                                    <option value="Bread" data-category="Common Gluten" selected="@(ingredientRows[i].CustomIngredientName == "Bread")">Bread</option>
+                                    <option value="Flour" data-category="Common Gluten" selected="@(ingredientRows[i].CustomIngredientName == "Flour")">Flour</option>
+                                    <option value="Sugar" data-category="Common Baking" selected="@(ingredientRows[i].CustomIngredientName == "Sugar")">Sugar</option>
+                                    <option value="Oil" data-category="Common Baking" selected="@(ingredientRows[i].CustomIngredientName == "Oil")">Oil</option>
+                                    <option value="Vanilla Extract" data-category="Common Baking" selected="@(ingredientRows[i].CustomIngredientName == "Vanilla Extract")">Vanilla Extract</option>
+                                    <option value="Baking Powder" data-category="Common Baking" selected="@(ingredientRows[i].CustomIngredientName == "Baking Powder")">Baking Powder</option>
+                                    <option value="Baking Soda" data-category="Common Baking" selected="@(ingredientRows[i].CustomIngredientName == "Baking Soda")">Baking Soda</option>
+                                    <option value="Peanut Butter" data-category="Common Nuts" selected="@(ingredientRows[i].CustomIngredientName == "Peanut Butter")">Peanut Butter</option>
+                                    <option value="Chicken" data-category="Common Meat" selected="@(ingredientRows[i].CustomIngredientName == "Chicken")">Chicken</option>
+                                    <option value="Ground Beef" data-category="Common Meat" selected="@(ingredientRows[i].CustomIngredientName == "Ground Beef")">Ground Beef</option>
+                                    <option value="Canned Tuna" data-category="Common Meat" selected="@(ingredientRows[i].CustomIngredientName == "Canned Tuna")">Canned Tuna</option>
+                                </optgroup>
+                            </select>
+
+                            @if (Model.IsImportedRecipe)
+                            {
+                                <input name="Ingredients[@i].ImportedIngredientName"
+                                       value="@ingredientRows[i].ImportedIngredientName"
+                                       class="form-control mt-2"
+                                       placeholder="Imported ingredient" />
+                            }
+                        </td>
+
+                        <td>
+                            <select name="Ingredients[@i].SubstituteIngredientName"
+                                    class="form-control substitute-select">
+                                <option value="">-- Optional Substitute --</option>
+                            </select>
+                        </td>
+
+                        <td>
+                            <button type="button"
+                                    class="btn btn-outline-danger removeRow">
+                                X
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-center gap-2 mt-3">
+            <button type="button"
+                    id="addIngredient"
+                    class="btn btn-outline-primary">
+                + Add Ingredient
+            </button>
+
+            <button type="submit"
+                    formaction="/Recipe/Preview"
+                    formmethod="post"
+                    class="btn btn-outline-primary">
+                Preview Recipe
+            </button>
+
+            <button type="submit" class="btn btn-primary">
+                Save Recipe
+            </button>
+
+            <a asp-controller="Recipe"
+               asp-action="Index"
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+        </div>
+
+        <select id="ingredientOptions" style="display:none;">
+            <option value="">-- Select Pantry Item --</option>
+
+            @foreach (var group in Model.InventoryItems
+                .Where(item =>
+                    !string.IsNullOrWhiteSpace(item.ItemName) &&
+                    !excludedCategories.Contains(item.Category ?? "", StringComparer.OrdinalIgnoreCase))
+                .GroupBy(item => string.IsNullOrWhiteSpace(item.Subcategory) ? "Other" : item.Subcategory)
+                .OrderBy(group => group.Key))
+            {
+                <optgroup label="@group.Key">
+                    @foreach (var item in group.OrderBy(item => item.ItemName))
+                    {
+                        <option value="@item.ItemName"
+                                data-category="@group.Key">
+                            @item.ItemName
+                        </option>
+                    }
+                </optgroup>
+            }
+
+            <optgroup label="Common Recipe Ingredients">
+                <option value="Milk" data-category="Common Dairy">Milk</option>
+                <option value="Eggs" data-category="Common Animal Products">Eggs</option>
+                <option value="Butter" data-category="Common Dairy">Butter</option>
+                <option value="Cream" data-category="Common Dairy">Cream</option>
+                <option value="Cheese" data-category="Common Dairy">Cheese</option>
+                <option value="Bread" data-category="Common Gluten">Bread</option>
+                <option value="Flour" data-category="Common Gluten">Flour</option>
+                <option value="Sugar" data-category="Common Baking">Sugar</option>
+                <option value="Oil" data-category="Common Baking">Oil</option>
+                <option value="Vanilla Extract" data-category="Common Baking">Vanilla Extract</option>
+                <option value="Baking Powder" data-category="Common Baking">Baking Powder</option>
+                <option value="Baking Soda" data-category="Common Baking">Baking Soda</option>
+                <option value="Peanut Butter" data-category="Common Nuts">Peanut Butter</option>
+                <option value="Chicken" data-category="Common Meat">Chicken</option>
+                <option value="Ground Beef" data-category="Common Meat">Ground Beef</option>
+                <option value="Canned Tuna" data-category="Common Meat">Canned Tuna</option>
+            </optgroup>
+        </select>
+
+        <script>
+                    let ingredientIndex = @ingredientRows.Count;
+
+                    document.getElementById("addIngredient").addEventListener("click", function () {
+                        const ingredientOptions = document.getElementById("ingredientOptions").innerHTML;
+
+                        const row = `
+                            <tr>
+                                <td>
+                                    <select name="Ingredients[${ingredientIndex}].Quantity" class="form-control">
+                                        <option value="">-- Qty --</option>
+                                        <option value="1/4">1/4</option>
+                                        <option value="1/3">1/3</option>
+                                        <option value="1/2">1/2</option>
+                                        <option value="2/3">2/3</option>
+                                        <option value="3/4">3/4</option>
+                                        <option value="1">1</option>
+                                        <option value="1 1/2">1 1/2</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <select name="Ingredients[${ingredientIndex}].Unit" class="form-control">
+                                        <option value="">-- Unit --</option>
+                                        <option value="cup">cup</option>
+                                        <option value="cups">cups</option>
+                                        <option value="tbsp">tbsp</option>
+                                        <option value="tsp">tsp</option>
+                                        <option value="oz">oz</option>
+                                        <option value="lb">lb</option>
+                                        <option value="can">can</option>
+                                        <option value="cans">cans</option>
+                                        <option value="package">package</option>
+                                        <option value="packages">packages</option>
+                                        <option value="slice">slice</option>
+                                        <option value="slices">slices</option>
+                                        <option value="pinch">pinch</option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <select name="Ingredients[${ingredientIndex}].CustomIngredientName"
+                                            class="form-control ingredient-select">
+                                        ${ingredientOptions}
+                                    </select>
+                                    
+                                    @(Model.IsImportedRecipe ? @"
+                                    <input name=""Ingredients[${ingredientIndex}].ImportedIngredientName""
+                                    class=""form-control mt-2""
+                                    placeholder=""Imported ingredient"" />
+                                    " : "")
+                                           class="form-control mt-2"
+                                           placeholder="Custom / imported ingredient" />
+                                </td>
+
+                                <td>
+                                    <select name="Ingredients[${ingredientIndex}].SubstituteIngredientName"
+                                            class="form-control substitute-select">
+                                        <option value="">-- Optional Substitute --</option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-outline-danger removeRow">
+                                        X
+                                    </button>
+                                </td>
+                            </tr>`;
+
+                        document.querySelector("#ingredientTable tbody")
+                            .insertAdjacentHTML("beforeend", row);
+
+                        ingredientIndex++;
+                    });
+
+                    document.addEventListener("click", function (e) {
+                        if (e.target.classList.contains("removeRow")) {
+                            e.target.closest("tr").remove();
+                            updateDietaryRestrictions();
+                        }
+                    });
+
+                    function updateDietaryRestrictions() {
+                        const selectedIngredients =
+                            Array.from(document.querySelectorAll(".ingredient-select"))
+                                .map(select => select.value.toLowerCase());
+
+                        const customIngredients =
+                            Array.from(document.querySelectorAll("input[name$='.ImportedIngredientName']"))
+                                .map(input => input.value.toLowerCase());
+
+                        const allIngredients = selectedIngredients.concat(customIngredients);
+
+                        const dairyItems = ["milk", "cheese", "butter", "cream"];
+                        const glutenItems = ["bread", "pasta", "flour", "spaghetti", "macaroni"];
+                        const meatItems = ["chicken", "ground beef", "beef", "canned tuna", "tuna", "salmon", "vienna sausage"];
+                        const animalItems = ["milk", "cheese", "eggs", "butter", "cream", "chicken", "ground beef", "beef", "canned tuna", "tuna", "salmon", "vienna sausage"];
+                        const nutItems = ["peanut butter", "nutter butter"];
+
+                        const hasDairy = allIngredients.some(i => dairyItems.some(d => i.includes(d)));
+                        const hasGluten = allIngredients.some(i => glutenItems.some(g => i.includes(g)));
+                        const hasMeat = allIngredients.some(i => meatItems.some(m => i.includes(m)));
+                        const hasAnimalProducts = allIngredients.some(i => animalItems.some(a => i.includes(a)));
+                        const hasNuts = allIngredients.some(i => nutItems.some(n => i.includes(n)));
+
+                        document.getElementById("Recipe_IsDairyFree").checked = !hasDairy;
+                        document.getElementById("Recipe_IsGlutenFree").checked = !hasGluten;
+                        document.getElementById("Recipe_IsVegetarian").checked = !hasMeat;
+                        document.getElementById("Recipe_IsVegan").checked = !hasAnimalProducts;
+                        document.getElementById("Recipe_IsNutFree").checked = !hasNuts;
+                    }
+
+                    function updateSubstituteDropdown(ingredientSelect) {
+                        const row = ingredientSelect.closest("tr");
+                        const substituteSelect = row.querySelector(".substitute-select");
+
+                        if (!substituteSelect) {
+                            return;
+                        }
+
+                        const selectedOption = ingredientSelect.options[ingredientSelect.selectedIndex];
+                        const selectedCategory = selectedOption.getAttribute("data-category");
+                        const selectedValue = ingredientSelect.value;
+
+                        substituteSelect.innerHTML = '<option value="">-- Optional Substitute --</option>';
+
+                        if (!selectedCategory) {
+                            return;
+                        }
+
+                        const allIngredientOptions = document.querySelectorAll("#ingredientOptions option");
+
+                        allIngredientOptions.forEach(function (option) {
+                            const optionCategory = option.getAttribute("data-category");
+                            const optionValue = option.value;
+
+                            if (optionCategory === selectedCategory && optionValue !== selectedValue && optionValue !== "") {
+                                const substituteOption = document.createElement("option");
+                                substituteOption.value = optionValue;
+                                substituteOption.textContent = optionValue;
+                                substituteSelect.appendChild(substituteOption);
+                            }
+                        });
+                    }
+
+                    document.addEventListener("change", function (e) {
+                        if (e.target.classList.contains("ingredient-select")) {
+                            updateDietaryRestrictions();
+                            updateSubstituteDropdown(e.target);
+                        }
+                    });
+
+                    document.addEventListener("input", function (e) {
+                        if (e.target.name && e.target.name.endsWith(".ImportedIngredientName")) {
+                            updateDietaryRestrictions();
+                        }
+                    });
+        </script>
+    </form>
+</div>

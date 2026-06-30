@@ -1,0 +1,212 @@
+﻿@model Pantreats.Models.RecipeEditorViewModel
+
+@{
+    ViewData["Title"] = "Edit Recipe";
+}
+
+<div class="student-page-header mb-4">
+    <div>
+        <h1 class="student-page-title">Edit Recipe</h1>
+        <p class="student-page-subtitle">Update the recipe, image, instructions, and ingredients.</p>
+    </div>
+</div>
+
+<div class="student-card">
+    <form asp-controller="Recipe"
+          asp-action="Edit"
+          method="post"
+          enctype="multipart/form-data">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="Recipe.RecipeId" />
+        <input type="hidden" asp-for="Recipe.ImagePath" />
+
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <h4>Recipe Information</h4>
+
+        <div class="mb-3">
+            <label asp-for="Recipe.Title" class="form-label">Recipe Title</label>
+            <input asp-for="Recipe.Title" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Recipe.Description" class="form-label">Description</label>
+            <textarea asp-for="Recipe.Description" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Recipe.MealType" class="form-label">Meal Type</label>
+            <select asp-for="Recipe.MealType" class="form-control">
+                <option value="">-- Select Meal Type --</option>
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+                <option value="Snack">Snack</option>
+                <option value="Dessert">Dessert</option>
+                <option value="Beverage">Beverage</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Recipe.Instructions" class="form-label">Instructions</label>
+            <textarea asp-for="Recipe.Instructions" class="form-control" rows="6"></textarea>
+        </div>
+
+        <h4>Recipe Image</h4>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Recipe.ImagePath))
+        {
+            <img src="@(string.IsNullOrWhiteSpace(Model.Recipe.ImagePath)
+                         ? "/images/pantreatsLogo.png"
+                         : Model.Recipe.ImagePath)"
+                 alt="@Model.Recipe.Title"
+                 class="img-fluid rounded mb-3"
+                 style="max-height:250px; object-fit:cover;" />
+        }
+
+        <div class="mb-3">
+            <label asp-for="RecipeImage" class="form-label">Upload New Image</label>
+            <input asp-for="RecipeImage" type="file" class="form-control" accept="image/*" />
+        </div>
+
+        <h4>Dietary Information</h4>
+
+        <div class="form-check">
+            <input asp-for="Recipe.IsDairyFree" class="form-check-input" />
+            <label asp-for="Recipe.IsDairyFree" class="form-check-label">Dairy Free</label>
+        </div>
+
+        <div class="form-check">
+            <input asp-for="Recipe.IsGlutenFree" class="form-check-input" />
+            <label asp-for="Recipe.IsGlutenFree" class="form-check-label">Gluten Free</label>
+        </div>
+
+        <div class="form-check">
+            <input asp-for="Recipe.IsVegetarian" class="form-check-input" />
+            <label asp-for="Recipe.IsVegetarian" class="form-check-label">Vegetarian</label>
+        </div>
+
+        <div class="form-check">
+            <input asp-for="Recipe.IsVegan" class="form-check-input" />
+            <label asp-for="Recipe.IsVegan" class="form-check-label">Vegan</label>
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="Recipe.IsNutFree" class="form-check-input" />
+            <label asp-for="Recipe.IsNutFree" class="form-check-label">Nut Free</label>
+        </div>
+
+        <h4>Ingredients</h4>
+
+        <table class="table" id="editIngredientTable">
+
+            <thead>
+                <tr>
+                    <th>Quantity</th>
+                    <th>Unit</th>
+                    <th>Ingredient</th>
+                    <th>Substitute</th>
+                </tr>
+            </thead>
+
+            <button type="button"
+                    id="addEditIngredient"
+                    class="btn btn-outline-primary mb-3">
+                + Add Ingredient
+            </button>
+            <script>
+
+                            let editIngredientIndex = @Model.Recipe.Ingredients.Count;
+
+                            document.getElementById("addEditIngredient").addEventListener("click", function () {
+
+                                const row = `
+                                <tr>
+
+                                    <td>
+                                        <input name="Ingredients[${editIngredientIndex}].Quantity"
+                                               class="form-control" />
+                                    </td>
+
+                                    <td>
+                                        <input name="Ingredients[${editIngredientIndex}].Unit"
+                                               class="form-control" />
+                                    </td>
+
+                                    <td>
+                                        <input name="Ingredients[${editIngredientIndex}].CustomIngredientName"
+                                               class="form-control" />
+                                    </td>
+
+                                    <td>
+                                        <input name="Ingredients[${editIngredientIndex}].SubstituteIngredientName"
+                                               class="form-control" />
+                                    </td>
+
+                                </tr>
+                                `;
+
+                                document.querySelector("#editIngredientTable tbody")
+                                    .insertAdjacentHTML("beforeend", row);
+
+                                editIngredientIndex++;
+
+                            });
+
+            </script>
+            <tbody>
+                @for (int i = 0; i < Model.Recipe.Ingredients.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            <input type="hidden"
+                                   name="Ingredients[@i].RecipeIngredientId"
+                                   value="@Model.Recipe.Ingredients[i].RecipeIngredientId" />
+
+                            <input type="hidden"
+                                   name="Ingredients[@i].RecipeId"
+                                   value="@Model.Recipe.RecipeId" />
+
+                            <input name="Ingredients[@i].Quantity"
+                                   value="@Model.Recipe.Ingredients[i].Quantity"
+                                   class="form-control" />
+                        </td>
+
+                        <td>
+                            <input name="Ingredients[@i].Unit"
+                                   value="@Model.Recipe.Ingredients[i].Unit"
+                                   class="form-control" />
+                        </td>
+
+                        <td>
+                            <input name="Ingredients[@i].CustomIngredientName"
+                                   value="@Model.Recipe.Ingredients[i].CustomIngredientName"
+                                   class="form-control" />
+                        </td>
+
+                        <td>
+                            <input name="Ingredients[@i].SubstituteIngredientName"
+                                   value="@Model.Recipe.Ingredients[i].SubstituteIngredientName"
+                                   class="form-control" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-center gap-2 mt-3">
+            <button type="submit" class="btn btn-primary">
+                Save Changes
+            </button>
+
+            <a asp-controller="Recipe"
+               asp-action="Details"
+               asp-route-id="@Model.Recipe.RecipeId"
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>

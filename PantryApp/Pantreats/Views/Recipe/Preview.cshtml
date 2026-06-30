@@ -1,0 +1,74 @@
+﻿@model Pantreats.Models.RecipeEditorViewModel
+
+@{
+    ViewData["Title"] = "Recipe Preview";
+}
+
+<div class="student-page-header mb-4">
+    <h1>Recipe Preview</h1>
+    <p> Student Recipe View</p>
+</div>
+
+<div class="student-card">
+
+    <h2>@Model.Recipe.Title</h2>
+
+    <img src="@(string.IsNullOrWhiteSpace(Model.Recipe.ImagePath)
+                     ? "/images/pantreatsLogo.png"
+                     : Model.Recipe.ImagePath)"
+         class="recipe-image" />
+
+    <p>@Model.Recipe.Description</p>
+
+    <p>
+        <strong>Meal Type:</strong>
+        @Model.Recipe.MealType
+    </p>
+
+    <p>
+        <strong>Dietary:</strong>
+        @Model.Recipe.DietaryTags
+    </p>
+
+    <h3>Ingredients</h3>
+
+    <ul>
+        @foreach (var ingredient in Model.Ingredients)
+        {
+            <li>
+                @ingredient.Quantity
+                @ingredient.Unit
+                @ingredient.CustomIngredientName
+
+                @if (!string.IsNullOrWhiteSpace(ingredient.SubstituteIngredientName))
+                {
+                    <span class="text-muted">
+                        (Substitute:
+                        @ingredient.SubstituteIngredientName)
+                    </span>
+                }
+            </li>
+        }
+    </ul>
+
+    <h3>Instructions</h3>
+
+    <p style="white-space:pre-wrap">
+        @Model.Recipe.Instructions
+    </p>
+
+    <div class="d-flex justify-content-center gap-2 mt-4">
+        <button type="button"
+                class="btn btn-outline-secondary"
+                onclick="history.back()">
+            Back to Edit
+        </button>
+
+        <button type="button"
+                class="btn btn-primary"
+                onclick="history.back()">
+            Looks Good
+        </button>
+    </div>
+
+</div>

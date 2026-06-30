@@ -5,7 +5,7 @@
     ViewData["ActivePage"] = ManageNavPages.Email;
 }
 
-<h3>@ViewData["Title"]</h3>
+<h3 style="color:var(--pantreats-blue)">@ViewData["Title"]</h3>
 
 <partial name="_StatusMessage" for="StatusMessage" />
 
@@ -21,7 +21,7 @@
             <!-- CURRENT EMAIL -->
             <div class="mb-3">
 
-                <label class="form-label">Current Email</label>
+                <label style="color:var(--pantreats-green)" class="form-label">Current Email</label>
 
                 <div class="input-group">
                     <input asp-for="Email"
@@ -49,12 +49,13 @@
             }
 
             <!-- NEW EMAIL -->
-            <div class="mb-3">
+            <div class="mb-3" style="color:var(--pantreats-green)">
 
                 <label asp-for="Input.NewEmail" class="form-label"></label>
 
                 <input asp-for="Input.NewEmail"
-                       class="form-control"
+                       class="form-control" 
+                       
                        autocomplete="email"
                        aria-required="true"
                        placeholder="Enter new email" />

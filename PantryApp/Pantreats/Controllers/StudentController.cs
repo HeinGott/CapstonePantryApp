@@ -366,6 +366,31 @@ namespace Pantreats.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteApplication(int id)
+        {
+            var application = await _context.UserApplications
+                .FirstOrDefaultAsync(foundApplication => foundApplication.ApplicationId == id);
+
+            if (application == null)
+            {
+                TempData["StatusMessage"] = "That student application no longer exists.";
+                TempData["StatusType"] = "error";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.UserApplications.Remove(application);
+
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = "Student application deleted.";
+            TempData["StatusType"] = "success";
+
+            return RedirectToAction(nameof(Index));
+        }
+
         private async Task<UserApplication?> GetLatestApplicationForUserAsync(string userId)
         {
             return await _context.UserApplications

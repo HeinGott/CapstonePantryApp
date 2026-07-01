@@ -20,6 +20,7 @@
     @if (User.IsInRole("Admin"))
     {
         <a asp-controller="OrderFulfilments" asp-action="Index" class="back-button">&larr; Back to Order Fulfilment</a>
+        <a asp-action="History" class="back-button">&larr; Back to Order History</a>
     }
     else
     {

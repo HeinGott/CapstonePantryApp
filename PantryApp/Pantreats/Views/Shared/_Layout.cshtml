@@ -261,6 +261,9 @@
                                     <a class="nav-link pantreats-nav-link" asp-controller="Home" asp-action="Privacy">Privacy</a>
                                 </li>
                                 <li class="nav-item">
+                                    <a class="nav-link pantreats-nav-link" asp-controller="Accessibility" asp-action="Index">Accessibility</a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link pantreats-nav-link" asp-controller="Support" asp-action="Index">Support</a>
                                 </li>
                             </ul>
@@ -299,6 +302,104 @@
             </footer>
         }
     </div>
+
+    <div id="accessibilityToolbar" class="accessibility-toolbar">
+        <button type="button"
+                class="accessibility-toggle"
+                onclick="toggleAccessibilityPanel()">
+            ♿ Accessibility
+        </button>
+
+        <div id="accessibilityPanel" class="accessibility-panel">
+            <button type="button" class="btn btn-primary btn-sm" onclick="readCurrentPage()">
+                🔊 Read Page
+            </button>
+
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="stopReadingPage()">
+                ⏹ Stop
+            </button>
+
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="hideAccessibilityToolbar()">
+                Hide Toolbar
+            </button>
+        </div>
+    </div>
+
+    <script>
+
+        function loadAccessibilityToolbar() {
+        const showToolbar = localStorage.getItem("showAccessibilityToolbar");
+        const toolbar = document.getElementById("accessibilityToolbar");
+
+        if (!toolbar) {
+        return;
+        }
+
+        toolbar.style.display = showToolbar === "true" ? "block" : "none";
+        }
+
+        function toggleAccessibilityPanel() {
+        const panel = document.getElementById("accessibilityPanel");
+        panel.style.display = panel.style.display === "block" ? "none" : "block";
+        }
+
+        function readCurrentPage() {
+        const mainContent = document.querySelector("main") || document.body;
+        const pageText = mainContent.innerText;
+
+        window.speechSynthesis.cancel();
+
+        const speech = new SpeechSynthesisUtterance(pageText);
+
+        const voices = window.speechSynthesis.getVoices();
+        const selectedVoice = localStorage.getItem("preferredVoice");
+
+        if (selectedVoice && voices[selectedVoice]) {
+        speech.voice = voices[selectedVoice];
+        }
+
+        speech.rate = parseFloat(localStorage.getItem("speechRate") || "1");
+        speech.pitch = 1;
+        speech.volume = 1;
+
+        window.speechSynthesis.speak(speech);
+        }
+
+        function stopReadingPage() {
+        window.speechSynthesis.cancel();
+        }
+
+        function hideAccessibilityToolbar() {
+        localStorage.setItem("showAccessibilityToolbar", "false");
+        loadAccessibilityToolbar();
+        }
+
+        function applyGlobalAccessibilityPreferences() {
+        document.body.classList.toggle("large-text-mode", localStorage.getItem("largeTextMode") === "true");
+        document.body.classList.toggle("high-contrast-mode", localStorage.getItem("highContrastMode") === "true");
+        document.body.classList.toggle("reduce-motion-mode", localStorage.getItem("reduceMotionMode") === "true");
+        document.body.classList.toggle("dyslexia-font-mode", localStorage.getItem("dyslexiaFontMode") === "true");
+        document.body.classList.toggle("large-buttons-mode", localStorage.getItem("largeButtonsMode") === "true");
+        document.body.classList.toggle("keyboard-focus-mode", localStorage.getItem("keyboardFocusMode") === "true");
+
+        document.body.classList.remove("deuteranopia-mode", "protanopia-mode", "tritanopia-mode");
+
+        switch (localStorage.getItem("colorBlindMode")) {
+        case "deuteranopia":
+        document.body.classList.add("deuteranopia-mode");
+        break;
+        case "protanopia":
+        document.body.classList.add("protanopia-mode");
+        break;
+        case "tritanopia":
+        document.body.classList.add("tritanopia-mode");
+        break;
+        }
+        }
+
+        loadAccessibilityToolbar();
+        applyGlobalAccessibilityPreferences();
+    </script>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

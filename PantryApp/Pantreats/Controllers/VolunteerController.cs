@@ -229,6 +229,7 @@ namespace Pantreats.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        [HttpGet]
         [Authorize(Roles = "Students")]
         public IActionResult ApplyVolunteer()
         {
@@ -236,6 +237,32 @@ namespace Pantreats.Controllers
             if (accessResult != null)
             {
                 return accessResult;
+            }
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Challenge();
+            }
+
+            var latestApplication = _context.VolunteerApplications
+                .AsNoTracking()
+                .Where(application => application.UserId == userId)
+                .OrderByDescending(application => application.SubmittedDate)
+                .ThenByDescending(application => application.VolunteerApplicationId)
+                .FirstOrDefault();
+
+            if (latestApplication != null)
+            {
+                var normalizedStatus = string.IsNullOrWhiteSpace(latestApplication.ApplicationStatus)
+                    ? ApplicationStatuses.Pending
+                    : latestApplication.ApplicationStatus;
+
+                if (normalizedStatus != ApplicationStatuses.Rejected)
+                {
+                    return RedirectToAction(nameof(Status));
+                }
             }
 
             var model = new VolunteerApplicationViewModel();
@@ -252,6 +279,33 @@ namespace Pantreats.Controllers
             {
                 return accessResult;
             }
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Challenge();
+            }
+
+            var existingApplication = _context.VolunteerApplications
+                .AsNoTracking()
+                .Where(application => application.UserId == userId)
+                .OrderByDescending(application => application.SubmittedDate)
+                .ThenByDescending(application => application.VolunteerApplicationId)
+                .FirstOrDefault();
+
+            if (existingApplication != null)
+            {
+                var normalizedStatus = string.IsNullOrWhiteSpace(existingApplication.ApplicationStatus)
+                    ? ApplicationStatuses.Pending
+                    : existingApplication.ApplicationStatus;
+
+                if (normalizedStatus != ApplicationStatuses.Rejected)
+                {
+                    return RedirectToAction(nameof(Status));
+                }
+            }
+
             // Re-show the form if validation fails
             if (!ModelState.IsValid)
             {
@@ -261,7 +315,7 @@ namespace Pantreats.Controllers
             // Map ViewModel → Entity
             var application = new VolunteerApplication
             {
-                UserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value,
+                UserId = userId,
 
                 FirstName = model.FirstName,
                 LastName = model.LastName,

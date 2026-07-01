@@ -1,7 +1,88 @@
-﻿@{
-    ViewData["Title"] = "Student Reports";
+﻿@model Pantreats.Models.StudentReportViewModel
+
+@{
+    ViewData["Title"] = "Student Order Report";
 }
 
-<h1>Student Reports</h1>
+<div class="student-report-page">
 
-<p>This page will be used to generate student Excel reports.</p>
+    <div class="student-report-header">
+        <div>
+            <h1>Student Order Report</h1>
+            <p>Review student pantry order activity, points used, and recent usage.</p>
+        </div>
+
+        <a asp-controller="Reports"
+           asp-action="ExportStudents"
+           class="report-export-btn">
+            Export Excel
+        </a>
+    </div>
+
+    <div class="report-summary-grid">
+
+        <div class="report-summary-card">
+            <p>Students With Orders</p>
+            <h2>@Model.TotalStudentsWithOrders</h2>
+        </div>
+
+        <div class="report-summary-card">
+            <p>Total Orders</p>
+            <h2>@Model.TotalOrders</h2>
+        </div>
+
+        <div class="report-summary-card">
+            <p>Total Points Used</p>
+            <h2>@Model.TotalPointsUsed</h2>
+        </div>
+
+        <div class="report-summary-card">
+            <p>Total Items Ordered</p>
+            <h2>@Model.TotalItemsOrdered</h2>
+        </div>
+
+    </div>
+
+    <div class="report-section">
+        <div class="report-section-header">
+            <h2>Student Order Activity</h2>
+            <p>Students grouped by email address with their order totals and most recent order date.</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table report-table">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Orders</th>
+                        <th>Total Points Used</th>
+                        <th>Total Items Ordered</th>
+                        <th>Most Recent Order</th>                        
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.StudentOrders.Any())
+                    {
+                        foreach (var student in Model.StudentOrders)
+                        {
+                            <tr>
+                                <td>@student.Email</td>
+                                <td>@student.OrderCount</td>
+                                <td>@student.TotalPointsUsed</td>
+                                <td>@student.TotalItemsOrdered</td>
+                                <td>@student.MostRecentOrder.ToString("MM/dd/yyyy")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5">No student order activity found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

@@ -1,13 +1,122 @@
-﻿@model List<Pantreats.Models.Inventory>
+﻿@model Pantreats.Models.InventoryReportViewModel
 
 @{
-    ViewData["Title"] = "Inventory Reports";
+    ViewData["Title"] = "Inventory Report";
 }
 
-<h1>Inventory Reports</h1>
+<div class="inventory-report-page">
 
-<p>Total inventory records: @Model.Count</p>
+    <div class="inventory-report-header">
+        <div>
+            <h1>Pantry Inventory Report</h1>
+            <p>Review current pantry stock, category totals, and low inventory items.</p>
+        </div>
 
-<a asp-controller="Reports" asp-action="ExportInventory" class="btn btn-primary">
-    Generate Excel Report
-</a>
+        <a asp-controller="Reports"
+           asp-action="ExportInventory"
+           class="report-export-btn">
+            Export Excel
+        </a>
+    </div>
+
+    <div class="report-summary-grid">
+
+        <div class="report-summary-card">
+            <p>Total Item Types</p>
+            <h2>@Model.TotalInventoryItems</h2>
+        </div>
+
+        <div class="report-summary-card">
+            <p>Total Inventory Quantity</p>
+            <h2>@Model.TotalInventoryQuantity</h2>
+        </div>
+
+        <div class="report-summary-card">
+            <p>Low Stock Items</p>
+            <h2>@Model.LowStockCount</h2>
+        </div>
+
+    </div>
+
+    <div class="report-section">
+        <div class="report-section-header">
+            <h2>Category Totals</h2>
+            <p>Total quantity grouped by inventory category.</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table report-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Item Types</th>
+                        <th>Total Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.CategoryTotals.Any())
+                    {
+                        foreach (var category in Model.CategoryTotals)
+                        {
+                            <tr>
+                                <td>@category.Category</td>
+                                <td>@category.ItemTypes</td>
+                                <td>@category.TotalQuantity</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3">No category data found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="report-section-header">
+            <h2>Low Stock Items</h2>
+            <p>Items with a quantity of 5 or less.</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table report-table">
+                <thead>
+                    <tr>
+                        <th>UPC</th>
+                        <th>Item Name</th>
+                        <th>Brand</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.LowStockItems.Any())
+                    {
+                        foreach (var item in Model.LowStockItems)
+                        {
+                            <tr>
+                                <td>@item.UPC</td>
+                                <td>@item.ItemName</td>
+                                <td>@item.BrandName</td>
+                                <td>@item.Category</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.Points</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6">No low stock items found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>    
+</div>

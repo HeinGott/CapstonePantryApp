@@ -1,7 +1,152 @@
-﻿@{
-    ViewData["Title"] = "Pantry Usage";
+﻿@model Pantreats.Models.UsageReportViewModel
+
+@{
+    ViewData["Title"] = "Pantry Usage Report";
 }
 
-<h1>Pantry Usage</h1>
+<div class="usage-report-page">
 
-<p>This page will be used to generate pantry usage Excel reports.</p>
+    <div class="usage-report-header">
+        <div>
+            <h1>Pantry Usage Report</h1>
+            <p>Review pantry activity, order totals, fulfillment status, and most requested items.</p>
+        </div>
+
+        <a asp-controller="Reports"
+           asp-action="ExportUsage"
+           class="report-export-btn">
+            Export Excel
+        </a>
+    </div>
+
+    <div class="report-summary-grid">
+
+        <div class="report-summary-card">
+            <p>Total Orders</p>
+            <h2>@Model.TotalOrders</h2>
+        </div>
+
+        <div class="report-summary-card">
+            <p>Total Items Ordered</p>
+            <h2>@Model.TotalItemsOrdered</h2>
+        </div>
+
+        <div class="report-summary-card">
+            <p>Total Points Used</p>
+            <h2>@Model.TotalPointsUsed</h2>
+        </div>
+
+        <div class="report-summary-card">
+            <p>Pending Orders</p>
+            <h2>@Model.PendingOrders</h2>
+        </div>
+
+    </div>
+
+    <div class="report-section">
+        <div class="report-section-header">
+            <h2>Order Summary</h2>
+            <p>Quick breakdown of online, kiosk, fulfilled, and pending orders.</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table report-table">
+                <thead>
+                    <tr>
+                        <th>Online Orders</th>
+                        <th>Kiosk Orders</th>
+                        <th>Fulfilled Orders</th>
+                        <th>Pending Orders</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Model.OnlineOrders</td>
+                        <td>@Model.KioskOrders</td>
+                        <td>@Model.FulfilledOrders</td>
+                        <td>@Model.PendingOrders</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="report-section-header">
+            <h2>Most Requested Items</h2>
+            <p>Items ordered most often across pantry orders.</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table report-table">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Category</th>
+                        <th>Total Quantity Ordered</th>
+                        <th>Total Points Used</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.MostRequestedItems.Any())
+                    {
+                        foreach (var item in Model.MostRequestedItems)
+                        {
+                            <tr>
+                                <td>@item.ItemName</td>
+                                <td>@item.Category</td>
+                                <td>@item.TotalQuantityOrdered</td>
+                                <td>@item.TotalPointsUsed</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4">No requested item data found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="report-section-header">
+            <h2>Orders By Date</h2>
+            <p>Daily order activity and points used.</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table report-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Order Count</th>
+                        <th>Total Points Used</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.OrdersByDate.Any())
+                    {
+                        foreach (var date in Model.OrdersByDate)
+                        {
+                            <tr>
+                                <td>@date.OrderDate.ToString("MM/dd/yyyy")</td>
+                                <td>@date.OrderCount</td>
+                                <td>@date.TotalPoints</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3">No order date data found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

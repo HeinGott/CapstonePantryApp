@@ -528,7 +528,7 @@ a:hover {
 
 /* admin dashboard */
 .admin-dashboard {
-    color: #14213d;
+    color: var(--pantreats-blue-dark);
     width: min(100%, 1440px);
     margin: 0 auto;
     min-height: calc(100vh - 170px);
@@ -3824,4 +3824,190 @@ span.flatpickr-weekday {
     border-radius: 12px;
     object-fit: contain;
     box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
+}
+
+
+.inventory-report-page,
+.student-report-page,
+.usage-report-page {
+    padding: 16px 0;
+}
+
+/* inventory header */
+.inventory-report-header {
+    background: linear-gradient(135deg, var(--pantreats-blue), var(--pantreats-blue));
+    color: white;
+    border-radius: 18px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    box-shadow: var(--pantreats-shadow);
+}
+
+/* student header */
+.student-report-header {
+    background: linear-gradient(135deg, var(--pantreats-blue), var(--pantreats-blue));
+    color: white;
+    border-radius: 18px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    box-shadow: var(--pantreats-shadow);
+}
+
+/* usage report header */
+.usage-report-header {
+    background: linear-gradient(135deg, var(--pantreats-blue), var(--pantreats-blue));
+    color: white;
+    border-radius: 18px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    box-shadow: var(--pantreats-shadow);
+}
+
+    .inventory-report-header h1,
+    .student-report-header h1,
+    .usage-report-header h1 {
+        font-size: 32px;
+        font-weight: 800;
+        margin: 0 0 6px 0;
+    }
+
+    .inventory-report-header p,
+    .student-report-header p,
+    .usage-report-header p {
+        margin: 0;
+        opacity: 0.95;
+        font-size: 16px;
+    }
+
+.report-export-btn {
+    background: white;
+    color: var(--pantreats-blue);
+    border: none;
+    border-radius: 999px;
+    padding: 11px 20px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: 0.2s ease;
+}
+
+    .report-export-btn:hover {
+        background: var(--pantreats-blue-soft);
+        color: var(--pantreats-blue-dark);
+        transform: translateY(-1px);
+    }
+
+.report-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.inventory-report-page .report-summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.report-summary-card {
+    background: white;
+    border-radius: 16px;
+    padding: 22px 24px;
+    border: 1px solid var(--pantreats-border);
+    border-left: 6px solid var(--pantreats-green);
+    box-shadow: var(--pantreats-shadow);
+}
+
+    .report-summary-card p {
+        margin: 0 0 8px 0;
+        color: var(--pantreats-blue);
+        font-weight: 700;
+    }
+
+    .report-summary-card h2 {
+        margin: 0;
+        color: var(--pantreats-green-dark);
+        font-size: 34px;
+        font-weight: 800;
+    }
+
+.report-section {
+    background: white;
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 24px;
+    border: 1px solid var(--pantreats-border);
+    box-shadow: var(--pantreats-shadow);
+}
+
+.report-section-header {
+    margin-bottom: 16px;
+}
+
+    .report-section-header h2 {
+        color: var(--pantreats-blue);
+        font-size: 22px;
+        font-weight: 800;
+        margin: 0 0 4px 0;
+    }
+
+    .report-section-header p {
+        color: rgba(16, 47, 97, 0.70);
+        margin: 0;
+    }
+
+.report-table {
+    margin-bottom: 0;
+}
+
+    .report-table thead th {
+        background: var(--pantreats-green-soft);
+        color: var(--pantreats-blue);
+        font-weight: 800;
+        border-bottom: 2px solid var(--pantreats-border);
+        white-space: nowrap;
+    }
+
+    .report-table tbody td {
+        vertical-align: middle;
+        color: #24364f;
+    }
+
+    .report-table tbody tr:hover {
+        background: var(--pantreats-blue-soft);
+    }
+
+@media (max-width: 992px) {
+    .report-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .inventory-report-page .report-summary-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .inventory-report-header,
+    .student-report-header,
+    .usage-report-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .report-summary-grid,
+    .inventory-report-page .report-summary-grid {
+        grid-template-columns: 1fr;
+    }
 }

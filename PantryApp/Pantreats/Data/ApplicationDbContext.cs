@@ -19,6 +19,8 @@ namespace Pantreats.Data
         public DbSet<InventoryImage> InventoryImages { get; set; }
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<RecipeIngredient> RecipeIngredients { get; set; }
+        public DbSet<VolunteerSchedule> VolunteerSchedules { get; set; }
+        public DbSet<ScheduleChangeRequest> ScheduleChangeRequests { get; set; }
 
         /*this method configures the relationships between OrderItem and Inventory,
         this will ensure if the inventory item is deleted, that the upc will be set to null and
@@ -42,6 +44,10 @@ namespace Pantreats.Data
 
             modelBuilder.Entity<Inventory>()
                 .HasIndex(i => i.UPC)
+                .IsUnique();
+
+            modelBuilder.Entity<VolunteerSchedule>()
+                .HasIndex(s => s.UserId)
                 .IsUnique();
 
             //configures the relationships between Orders and OrderFulfilment

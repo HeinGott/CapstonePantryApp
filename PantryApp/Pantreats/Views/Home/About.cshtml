@@ -37,7 +37,7 @@
             Behind every pantry visit is a team of dedicated volunteers who make it possible.<br />
             Be the change and volunteer today!
         </p>
-        @if (User.Identity?.IsAuthenticated ?? false)
+        @if (User.IsInRole("Students"))
         {
             <div>
                 <a asp-controller="Volunteer" asp-action="ApplyVolunteer"

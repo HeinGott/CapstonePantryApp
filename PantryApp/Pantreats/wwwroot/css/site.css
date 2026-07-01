@@ -3511,6 +3511,64 @@ span.flatpickr-weekday {
     color: #ffffff;
 }
 
+/* Volunteer schedule page */
+.volunteer-schedule-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.volunteer-schedule-request-btn {
+    background-color: var(--pantreats-green);
+    border: 1px solid var(--pantreats-green);
+    color: #ffffff !important;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 9px 18px;
+    white-space: nowrap;
+}
+
+    .volunteer-schedule-request-btn:hover {
+        background-color: var(--pantreats-green-dark) !important;
+        border-color: var(--pantreats-green-dark) !important;
+    }
+
+.volunteer-schedule-pending-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background: #fff5d9;
+    color: #9a6700;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+}
+
+.volunteer-schedule-roster-table th,
+.volunteer-schedule-roster-table td {
+    text-align: center;
+    white-space: nowrap;
+}
+
+    .volunteer-schedule-roster-table th:first-child,
+    .volunteer-schedule-roster-table td:first-child {
+        text-align: left;
+    }
+
+.volunteer-schedule-roster-cell {
+    color: transparent;
+    font-weight: 700;
+}
+
+    .volunteer-schedule-roster-cell.is-on {
+        color: var(--pantreats-blue);
+    }
+
 .image-popup {
     position: fixed;
     inset: 0;

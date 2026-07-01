@@ -1,0 +1,81 @@
+﻿@model Pantreats.Models.RequestScheduleChangeViewModel
+
+@{
+    ViewData["Title"] = "Request Schedule Change";
+}
+
+<div class="pantreats-white-section">
+    <div class="container">
+
+        <div class="student-card mx-auto" style="max-width: 1100px;">
+
+            <div class="mb-4 text-center">
+                <h1 class="section-title">Request Schedule Change</h1>
+                <p class="section-text">Update the days and times you're available, then tell us why.</p>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <form asp-controller="Volunteer" asp-action="SubmitScheduleChangeRequest" method="post">
+                @Html.AntiForgeryToken()
+
+                <h5 class="mb-3" style="color: var(--pantreats-blue);">Weekly Availability</h5>
+                <p class="text-muted small">Check the days and times you're available:</p>
+
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered text-center align-middle">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Mon</th>
+                                <th>Tue</th>
+                                <th>Wed</th>
+                                <th>Thu</th>
+                                <th>Fri</th>
+                                <th>Sat</th>
+                                <th>Sun</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>9 – 11 a.m.</th>
+                                <td><input asp-for="MonMorning" class="form-check-input" /></td>
+                                <td><input asp-for="TueMorning" class="form-check-input" /></td>
+                                <td><input asp-for="WedMorning" class="form-check-input" /></td>
+                                <td><input asp-for="ThuMorning" class="form-check-input" /></td>
+                                <td><input asp-for="FriMorning" class="form-check-input" /></td>
+                                <td><input asp-for="SatMorning" class="form-check-input" /></td>
+                                <td><input asp-for="SunMorning" class="form-check-input" /></td>
+                            </tr>
+                            <tr>
+                                <th>4 – 6 p.m.</th>
+                                <td><input asp-for="MonAfternoon" class="form-check-input" /></td>
+                                <td><input asp-for="TueAfternoon" class="form-check-input" /></td>
+                                <td><input asp-for="WedAfternoon" class="form-check-input" /></td>
+                                <td><input asp-for="ThuAfternoon" class="form-check-input" /></td>
+                                <td><input asp-for="FriAfternoon" class="form-check-input" /></td>
+                                <td><input asp-for="SatAfternoon" class="form-check-input" /></td>
+                                <td><input asp-for="SunAfternoon" class="form-check-input" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h5 class="mb-3" style="color: var(--pantreats-blue);">Reason for Change</h5>
+
+                <div class="mb-4">
+                    <label class="form-label">Why are you requesting this change?</label>
+                    <textarea asp-for="Reason" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Reason" class="text-danger"></span>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn admin-tile-btn-featured px-5 py-2">
+                        Submit Request
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

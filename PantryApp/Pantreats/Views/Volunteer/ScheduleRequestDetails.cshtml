@@ -1,0 +1,193 @@
+﻿@model Pantreats.Models.ScheduleRequestDetailsViewModel
+
+@{
+    ViewData["Title"] = "Schedule Request Details";
+
+    string FormatDateTime(DateTime? value) => value.HasValue ? value.Value.ToLocalTime().ToString("MM/dd/yyyy h:mm tt") : "Not reviewed yet";
+
+    var currentRows = new[]
+    {
+        ("Mon", Model.CurrentMonMorning, Model.CurrentMonAfternoon),
+        ("Tue", Model.CurrentTueMorning, Model.CurrentTueAfternoon),
+        ("Wed", Model.CurrentWedMorning, Model.CurrentWedAfternoon),
+        ("Thu", Model.CurrentThuMorning, Model.CurrentThuAfternoon),
+        ("Fri", Model.CurrentFriMorning, Model.CurrentFriAfternoon),
+        ("Sat", Model.CurrentSatMorning, Model.CurrentSatAfternoon),
+        ("Sun", Model.CurrentSunMorning, Model.CurrentSunAfternoon)
+    };
+
+    var requestedRows = new[]
+    {
+        ("Mon", Model.MonMorning, Model.MonAfternoon),
+        ("Tue", Model.TueMorning, Model.TueAfternoon),
+        ("Wed", Model.WedMorning, Model.WedAfternoon),
+        ("Thu", Model.ThuMorning, Model.ThuAfternoon),
+        ("Fri", Model.FriMorning, Model.FriAfternoon),
+        ("Sat", Model.SatMorning, Model.SatAfternoon),
+        ("Sun", Model.SunMorning, Model.SunAfternoon)
+    };
+}
+
+<div class="student-details-page py-4">
+    <div class="mb-3">
+        <a asp-action="ScheduleRequests" class="btn student-back-btn">&larr; Back to Schedule Requests</a>
+    </div>
+
+    <section class="student-review-shell mb-4">
+        <div class="student-review-hero">
+            <div>
+                <p class="student-review-eyebrow mb-2">Schedule Request Review</p>
+                <h1 class="student-details-title mb-1">@Model.FullName</h1>
+            </div>
+
+            <div class="student-review-status-wrap">
+                <span class="student-review-badge student-review-badge-@Model.RequestStatus.ToLowerInvariant()">
+                    @Model.RequestStatus
+                </span>
+            </div>
+        </div>
+
+        <div class="student-review-summary">
+            <div class="student-review-summary-item">
+                <span>Submitted</span>
+                <strong>@FormatDateTime(Model.SubmittedAt)</strong>
+            </div>
+            <div class="student-review-summary-item">
+                <span>Reviewed</span>
+                <strong>@FormatDateTime(Model.ReviewedAt)</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="student-review-panel mb-4">
+        <div class="student-review-panel-header">
+            <div>
+                <h2 class="student-section-title mb-1">Reason</h2>
+                <p class="student-page-subtitle mb-0">Why the volunteer is requesting this change.</p>
+            </div>
+        </div>
+
+        <div class="student-review-note">
+            <span>Volunteer's reason</span>
+            <p class="mb-0">@Model.Reason</p>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.ReviewNotes))
+        {
+            <div class="student-review-note mt-4">
+                <span>Latest Review Notes</span>
+                <p class="mb-0">@Model.ReviewNotes</p>
+            </div>
+        }
+    </section>
+
+    <section class="student-review-panel mb-4">
+        <div class="student-review-panel-header">
+            <div>
+                <h2 class="student-section-title mb-1">Schedule Comparison</h2>
+                <p class="student-page-subtitle mb-0">What's on file now versus what's being requested.</p>
+            </div>
+        </div>
+
+        <div class="student-decision-grid">
+            <div class="student-decision-form">
+                <label class="form-label">Current Schedule</label>
+                @if (!Model.HasCurrentSchedule)
+                {
+                    <div class="admin-empty-state">
+                        <i class="bi bi-calendar-x"></i>
+                        <span>No schedule on file yet.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="volunteer-schedule">
+                        <div class="volunteer-schedule-head">
+                            <span class="volunteer-schedule-corner"></span>
+                            <span class="volunteer-schedule-col">AM</span>
+                            <span class="volunteer-schedule-col">PM</span>
+                        </div>
+
+                        @foreach (var (day, morning, afternoon) in currentRows)
+                        {
+                            <div class="volunteer-schedule-row">
+                                <span class="volunteer-schedule-day">@day</span>
+                                <span class="volunteer-schedule-cell @(morning ? "is-on" : "")">
+                                    @(morning ? "✓" : "")
+                                </span>
+                                <span class="volunteer-schedule-cell @(afternoon ? "is-on" : "")">
+                                    @(afternoon ? "✓" : "")
+                                </span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="student-decision-form">
+                <label class="form-label">Requested Schedule</label>
+                <div class="volunteer-schedule">
+                    <div class="volunteer-schedule-head">
+                        <span class="volunteer-schedule-corner"></span>
+                        <span class="volunteer-schedule-col">AM</span>
+                        <span class="volunteer-schedule-col">PM</span>
+                    </div>
+
+                    @foreach (var (day, morning, afternoon) in requestedRows)
+                    {
+                        <div class="volunteer-schedule-row">
+                            <span class="volunteer-schedule-day">@day</span>
+                            <span class="volunteer-schedule-cell @(morning ? "is-on" : "")">
+                                @(morning ? "✓" : "")
+                            </span>
+                            <span class="volunteer-schedule-cell @(afternoon ? "is-on" : "")">
+                                @(afternoon ? "✓" : "")
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="student-review-panel mb-4">
+        <div class="student-review-panel-header">
+            <div>
+                <h2 class="student-section-title mb-1">Decision</h2>
+                <p class="student-page-subtitle mb-0">Approve or reject after reviewing the requested schedule.</p>
+            </div>
+        </div>
+
+        @if (Model.RequestStatus == Pantreats.Models.ApplicationStatuses.Pending)
+        {
+            <div class="student-decision-grid">
+                <form asp-action="ApproveScheduleRequest" asp-route-id="@Model.ScheduleChangeRequestId" method="post" class="student-decision-form student-decision-form-approve">
+                    @Html.AntiForgeryToken()
+                    <label class="form-label">Approval notes</label>
+                    <textarea name="reviewNotes" class="form-control" rows="4" placeholder="Optional note for the request record"></textarea>
+                    <button type="submit" class="btn btn-success mt-3">Approve Request</button>
+                </form>
+
+                <form asp-action="RejectScheduleRequest" asp-route-id="@Model.ScheduleChangeRequestId" method="post" class="student-decision-form student-decision-form-reject">
+                    @Html.AntiForgeryToken()
+                    <label class="form-label">Rejection notes</label>
+                    <textarea name="reviewNotes" class="form-control" rows="4" placeholder="Tell the volunteer why this wasn't approved"></textarea>
+                    <button type="submit" class="btn btn-outline-danger mt-3">Reject Request</button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="student-fact-list">
+                <div class="student-fact-row">
+                    <span>Current status</span>
+                    <strong>@Model.RequestStatus</strong>
+                </div>
+                <div class="student-fact-row">
+                    <span>Reviewed on</span>
+                    <strong>@FormatDateTime(Model.ReviewedAt)</strong>
+                </div>
+            </div>
+        }
+    </section>
+</div>

@@ -1,5 +1,226 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Pantreats.Models.VolunteerSchedulePageViewModel
+
 @{
+    ViewData["Title"] = "My Schedule";
+
+    var scheduleRows = new[]
+    {
+        ("Mon", Model.MonMorning, Model.MonAfternoon),
+        ("Tue", Model.TueMorning, Model.TueAfternoon),
+        ("Wed", Model.WedMorning, Model.WedAfternoon),
+        ("Thu", Model.ThuMorning, Model.ThuAfternoon),
+        ("Fri", Model.FriMorning, Model.FriAfternoon),
+        ("Sat", Model.SatMorning, Model.SatAfternoon),
+        ("Sun", Model.SunMorning, Model.SunAfternoon)
+    };
+
+    string FormatDateTime(DateTime value) => value.ToLocalTime().ToString("MM/dd/yyyy h:mm tt");
+}
+
+<div class="student-page py-4">
+
+    @if (TempData["ScheduleAccessMessage"] is string scheduleAccessMessage)
+    {
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="scheduleAccessToast" class="toast text-bg-secondary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">Heads up</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    @scheduleAccessMessage
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="donor-page-header mb-4">
+        <div>
+            <h1 class="donor-page-title mb-1">My Schedule</h1>
+            <p class="donor-page-subtitle mb-0">
+                Your current volunteer availability and the full team roster.
+            </p>
+        </div>
+    </div>
+
+    <section class="student-review-panel mb-4">
+        <div class="volunteer-schedule-panel-header">
+            <div>
+                <h2 class="student-section-title mb-1">Your Availability</h2>
+                <p class="student-page-subtitle mb-0">
+                    This is what's on file for you right now.
+                </p>
+            </div>
+
+            @if (Model.HasPendingRequest)
+            {
+                <span class="volunteer-schedule-pending-note">
+                    <i class="bi bi-hourglass-split"></i> Request pending
+                </span>
+            }
+            else
+            {
+                <a asp-action="RequestScheduleChange" class="btn btn-success volunteer-schedule-request-btn">
+                    Request Change
+                </a>
+            }
+        </div>
+
+        @if (!Model.HasSchedule)
+        {
+            <div class="admin-empty-state">
+                <i class="bi bi-calendar-x"></i>
+                <span>No schedule on file yet.</span>
+            </div>
+        }
+        else
+        {
+            <div class="volunteer-schedule">
+                <div class="volunteer-schedule-head">
+                    <span class="volunteer-schedule-corner"></span>
+                    <span class="volunteer-schedule-col">AM</span>
+                    <span class="volunteer-schedule-col">PM</span>
+                </div>
+
+                @foreach (var (day, morning, afternoon) in scheduleRows)
+                {
+                    <div class="volunteer-schedule-row">
+                        <span class="volunteer-schedule-day">@day</span>
+                        <span class="volunteer-schedule-cell @(morning ? "is-on" : "")">
+                            @(morning ? "✓" : "")
+                        </span>
+                        <span class="volunteer-schedule-cell @(afternoon ? "is-on" : "")">
+                            @(afternoon ? "✓" : "")
+                        </span>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    @if (Model.HasPendingRequest && Model.PendingRequest != null)
+    {
+        <section class="student-card mb-4">
+            <div class="student-history-header mb-3">
+                <div>
+                    <h2 class="student-section-title mb-1">Pending Request</h2>
+                    <p class="student-page-subtitle mb-0">
+                        Waiting on admin review. You can't submit another until this is resolved.
+                    </p>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table student-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>@Model.PendingRequest.Reason</td>
+                            <td>
+                                <span class="student-review-badge student-review-badge-@Model.PendingRequest.RequestStatus.ToLowerInvariant()">
+                                    @Model.PendingRequest.RequestStatus
+                                </span>
+                            </td>
+                            <td>@FormatDateTime(Model.PendingRequest.SubmittedAt)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
+    <section class="student-card">
+        <div class="student-history-header mb-3">
+            <div>
+                <h2 class="student-section-title mb-1">Volunteer Roster</h2>
+                <p class="student-page-subtitle mb-0">
+                    Everyone's current availability, at a glance.
+                </p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table student-table volunteer-schedule-roster-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th rowspan="2">Name</th>
+                        <th colspan="2">Mon</th>
+                        <th colspan="2">Tue</th>
+                        <th colspan="2">Wed</th>
+                        <th colspan="2">Thu</th>
+                        <th colspan="2">Fri</th>
+                        <th colspan="2">Sat</th>
+                        <th colspan="2">Sun</th>
+                    </tr>
+                    <tr>
+                        <th>AM</th>
+                        <th>PM</th>
+                        <th>AM</th>
+                        <th>PM</th>
+                        <th>AM</th>
+                        <th>PM</th>
+                        <th>AM</th>
+                        <th>PM</th>
+                        <th>AM</th>
+                        <th>PM</th>
+                        <th>AM</th>
+                        <th>PM</th>
+                        <th>AM</th>
+                        <th>PM</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Roster.Any())
+                    {
+                        <tr>
+                            <td colspan="15" class="text-muted">No volunteer schedules on file yet.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var volunteer in Model.Roster)
+                        {
+                            <tr>
+                                <td>@volunteer.FullName</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.MonMorning ? "is-on" : "")">@(volunteer.MonMorning ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.MonAfternoon ? "is-on" : "")">@(volunteer.MonAfternoon ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.TueMorning ? "is-on" : "")">@(volunteer.TueMorning ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.TueAfternoon ? "is-on" : "")">@(volunteer.TueAfternoon ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.WedMorning ? "is-on" : "")">@(volunteer.WedMorning ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.WedAfternoon ? "is-on" : "")">@(volunteer.WedAfternoon ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.ThuMorning ? "is-on" : "")">@(volunteer.ThuMorning ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.ThuAfternoon ? "is-on" : "")">@(volunteer.ThuAfternoon ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.FriMorning ? "is-on" : "")">@(volunteer.FriMorning ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.FriAfternoon ? "is-on" : "")">@(volunteer.FriAfternoon ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.SatMorning ? "is-on" : "")">@(volunteer.SatMorning ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.SatAfternoon ? "is-on" : "")">@(volunteer.SatAfternoon ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.SunMorning ? "is-on" : "")">@(volunteer.SunMorning ? "✓" : "")</td>
+                                <td class="volunteer-schedule-roster-cell @(volunteer.SunAfternoon ? "is-on" : "")">@(volunteer.SunAfternoon ? "✓" : "")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const scheduleAccessToastElement = document.getElementById("scheduleAccessToast");
+            if (scheduleAccessToastElement) {
+                const scheduleAccessToast = new bootstrap.Toast(scheduleAccessToastElement, {
+                    delay: 3500
+                });
+                scheduleAccessToast.show();
+            }
+        });
+    </script>
 }

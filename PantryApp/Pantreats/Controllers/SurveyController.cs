@@ -4,9 +4,9 @@ using Pantreats.Models;
 
 namespace Pantreats.Controllers
 {
-    public class SurveysController : Controller
+    public class SurveyController : Controller
     {
-        public IActionResult FacultySurvey()
+        public IActionResult Survey()
         {
             return View();
         }

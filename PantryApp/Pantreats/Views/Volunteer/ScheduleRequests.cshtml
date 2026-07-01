@@ -1,0 +1,133 @@
+﻿@model Pantreats.Models.ScheduleRequestAdminIndexViewModel
+
+@{
+    ViewData["Title"] = "Schedule Requests";
+}
+
+<div class="student-page py-4">
+    <div class="donor-page-header mb-4">
+        <div>
+            <h1 class="donor-page-title mb-1">Schedule Requests</h1>
+            <p class="donor-page-subtitle mb-0">
+                Review pending schedule change requests from volunteers.
+            </p>
+        </div>
+
+        <a asp-controller="Volunteer" asp-action="ExportSchedule" class="btn fulfilment-excel-btn">
+            <i class="bi bi-file-earmark-excel"></i> Export Schedule
+        </a>
+    </div>
+
+    <div class="student-card mb-4">
+        <div class="student-history-header mb-3">
+            <div>
+                <h2 class="student-section-title mb-1">Pending Requests</h2>
+                <p class="student-page-subtitle mb-0">
+                    These requests still need an admin decision.
+                </p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table student-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Reason</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.PendingRequests.Any())
+                    {
+                        <tr>
+                            <td colspan="3" class="text-muted">No pending schedule requests right now.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var request in Model.PendingRequests)
+                        {
+                            <tr class="student-row"
+                                role="button"
+                                tabindex="0"
+                                onclick="goToScheduleRequestDetails(@request.ScheduleChangeRequestId)"
+                                onkeydown="openScheduleRequestDetailsFromKey(event, @request.ScheduleChangeRequestId)">
+                                <td>@request.FullName</td>
+                                <td>@request.Reason</td>
+                                <td>@request.SubmittedAt.ToLocalTime().ToString("MM/dd/yyyy")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="student-card">
+        <div class="student-history-header mb-3">
+            <div>
+                <h2 class="student-section-title mb-1">Reviewed Requests</h2>
+                <p class="student-page-subtitle mb-0">
+                    Past approved and rejected schedule requests.
+                </p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table student-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.ReviewedRequests.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-muted">No reviewed requests yet.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var request in Model.ReviewedRequests)
+                        {
+                            <tr class="student-row"
+                                role="button"
+                                tabindex="0"
+                                onclick="goToScheduleRequestDetails(@request.ScheduleChangeRequestId)"
+                                onkeydown="openScheduleRequestDetailsFromKey(event, @request.ScheduleChangeRequestId)">
+                                <td>@request.FullName</td>
+                                <td>@request.Reason</td>
+                                <td>
+                                    <span class="student-review-badge student-review-badge-@request.RequestStatus.ToLowerInvariant()">
+                                        @request.RequestStatus
+                                    </span>
+                                </td>
+                                <td>@request.SubmittedAt.ToLocalTime().ToString("MM/dd/yyyy")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function goToScheduleRequestDetails(id) {
+            window.location.href = '/Volunteer/ScheduleRequestDetails/' + id;
+        }
+
+        function openScheduleRequestDetailsFromKey(event, id) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                goToScheduleRequestDetails(id);
+            }
+        }
+    </script>
+}

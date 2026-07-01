@@ -157,18 +157,54 @@
         </div>
 
         <div class="row g-4">
-                <div class="col-md-4">
-                <!--Brings to register/Login page-->
-                <a asp-area="Identity" asp-page="/Account/Register" class="text-decoration-none">
-                
+            <div class="col-md-4">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Admin" asp-action="Index" class="text-decoration-none">
+                            <div class="step-card h-100 p-4 text-center">
+                                <h5 class="fw-bold">Go to Dashboard</h5>
+                                <p class="text-muted mb-0">
+                                    Jump back into your pantry tools and pick up where you left off.
+                                </p>
+                            </div>
+                        </a>
+                    }
+                    else if (User.IsInRole("Donors"))
+                    {
+                        <a asp-controller="Donor" asp-action="Dashboard" class="text-decoration-none">
+                            <div class="step-card h-100 p-4 text-center">
+                                <h5 class="fw-bold">Go to Dashboard</h5>
+                                <p class="text-muted mb-0">
+                                    Jump back into your pantry tools and pick up where you left off.
+                                </p>
+                            </div>
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
+                            <div class="step-card h-100 p-4 text-center">
+                                <h5 class="fw-bold">Go to Dashboard</h5>
+                                <p class="text-muted mb-0">
+                                    Jump back into your pantry tools and pick up where you left off.
+                                </p>
+                            </div>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <a asp-area="Identity" asp-page="/Account/Register" class="text-decoration-none">
                         <div class="step-card h-100 p-4 text-center">
                             <h5 class="fw-bold">Create an Account</h5>
                             <p class="text-muted mb-0">
                                 Students and pantry users can register online and securely enter household and contact information.
                             </p>
                         </div>
-            
-                </a>
+                    </a>
+                }
             </div>
 
         

@@ -28,10 +28,32 @@
 
 <style>
     .inventory-subcategory-strip {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+        display: flex;
+        flex-wrap: nowrap;
         gap: 1rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0;
+        margin: 0;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .inventory-subcategory-strip::-webkit-scrollbar {
+        display: none;
+    }
+
+    .inventory-subcategory-rail {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
         margin-bottom: 1.5rem;
+    }
+
+    .inventory-subcategory-strip-wrap {
+        min-width: 0;
+        flex: 1 1 auto;
+        overflow: hidden;
     }
 
     .inventory-subcategory-card {
@@ -42,8 +64,37 @@
         flex-direction: column;
         align-items: center;
         gap: .55rem;
+        flex: 0 0 96px;
         color: #183153;
         transition: transform .15s ease, opacity .15s ease;
+    }
+
+    .inventory-subcategory-next {
+        width: 36px;
+        height: 36px;
+        border: 1px solid rgba(16, 47, 97, 0.08);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        color: rgba(24, 49, 83, 0.58);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        box-shadow: 0 4px 12px rgba(16, 47, 97, 0.05);
+        transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease, color .15s ease, border-color .15s ease;
+    }
+
+    .inventory-subcategory-next:hover:not(:disabled) {
+        color: rgba(24, 49, 83, 0.78);
+        border-color: rgba(16, 47, 97, 0.14);
+        box-shadow: 0 6px 14px rgba(16, 47, 97, 0.08);
+    }
+
+    .inventory-subcategory-next:disabled {
+        opacity: 0;
+        cursor: default;
+        box-shadow: none;
+        pointer-events: none;
     }
 
     .inventory-subcategory-card:hover {
@@ -213,48 +264,66 @@
     }
 </style>
 
-<div class="student-page py-4">
+<div class="donor-page py-4">
 
-    <div class="student-page-header inventory-page-header mb-4">
-        <div>
-            <h1 class="student-page-title mb-1">Inventory</h1>
-            <p class="student-page-subtitle mb-0">
+    <div class="donor-page-header inventory-page-header mb-4">
+        <div class="inventory-page-intro">
+            <h1 class="donor-page-title mb-1">Inventory</h1>
+            <p class="donor-page-subtitle mb-0">
                 View and manage all pantry inventory items.
             </p>
         </div>
 
         <div class="student-card inventory-card">
 
-            <div class="inventory-subcategory-strip">
+            <div class="inventory-subcategory-rail">
                 <button type="button"
-                        class="inventory-subcategory-card active"
-                        data-subcategory-filter="">
-                    <span class="inventory-subcategory-icon">
-                        <img src="@Url.Content("~/images/subcategories/groceries-svgrepo-com.svg")" alt="All Items" />
-                    </span>
-                    <span class="inventory-subcategory-label">All Items</span>
+                        class="inventory-subcategory-next"
+                        id="inventorySubcategoryPrevious"
+                        aria-label="Show previous inventory categories">
+                    <i class="bi bi-chevron-left"></i>
                 </button>
 
-                @foreach (var subcategory in subcategories)
-                {
-                    var iconPath = GetSubcategoryIconPath(subcategory);
-                    var displayName = GetSubcategoryDisplayName(subcategory);
-                    <button type="button"
-                            class="inventory-subcategory-card"
-                            data-subcategory-filter="@subcategory">
-                        <span class="inventory-subcategory-icon">
-                            @if (!string.IsNullOrWhiteSpace(iconPath))
-                            {
-                                <img src="@Url.Content(iconPath)" alt="@displayName" />
-                            }
-                            else
-                            {
-                                <i class="bi bi-tag-fill inventory-subcategory-fallback"></i>
-                            }
-                        </span>
-                        <span class="inventory-subcategory-label">@displayName</span>
-                    </button>
-                }
+                <div class="inventory-subcategory-strip-wrap">
+                    <div class="inventory-subcategory-strip" id="inventorySubcategoryStrip">
+                        <button type="button"
+                                class="inventory-subcategory-card active"
+                                data-subcategory-filter="">
+                            <span class="inventory-subcategory-icon">
+                                <img src="@Url.Content("~/images/subcategories/groceries-svgrepo-com.svg")" alt="All Items" />
+                            </span>
+                            <span class="inventory-subcategory-label">All Items</span>
+                        </button>
+
+                        @foreach (var subcategory in subcategories)
+                        {
+                            var iconPath = GetSubcategoryIconPath(subcategory);
+                            var displayName = GetSubcategoryDisplayName(subcategory);
+                            <button type="button"
+                                    class="inventory-subcategory-card"
+                                    data-subcategory-filter="@subcategory">
+                                <span class="inventory-subcategory-icon">
+                                    @if (!string.IsNullOrWhiteSpace(iconPath))
+                                    {
+                                        <img src="@Url.Content(iconPath)" alt="@displayName" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-tag-fill inventory-subcategory-fallback"></i>
+                                    }
+                                </span>
+                                <span class="inventory-subcategory-label">@displayName</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <button type="button"
+                        class="inventory-subcategory-next"
+                        id="inventorySubcategoryNext"
+                        aria-label="Show more inventory categories">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
 
             <div class="inventory-toolbar">
@@ -448,6 +517,9 @@
         const searchText = document.getElementById("searchText");
         const inStockOnly = document.getElementById("inStockOnly");
         const subcategoryButtons = document.querySelectorAll("[data-subcategory-filter]");
+        const subcategoryStrip = document.getElementById("inventorySubcategoryStrip");
+        const subcategoryPreviousButton = document.getElementById("inventorySubcategoryPrevious");
+        const subcategoryNextButton = document.getElementById("inventorySubcategoryNext");
         const deleteModal = document.getElementById("inventoryDeleteModal");
         const deleteCancelButton = document.getElementById("inventoryDeleteCancel");
         const deleteConfirmButton = document.getElementById("inventoryDeleteConfirm");
@@ -510,6 +582,46 @@
                 filterInventoryTable();
             });
         });
+
+        function updateSubcategoryNavState() {
+            if (!subcategoryStrip || !subcategoryPreviousButton || !subcategoryNextButton) {
+                return;
+            }
+
+            const maxScrollLeft = subcategoryStrip.scrollWidth - subcategoryStrip.clientWidth;
+            const hasOverflow = maxScrollLeft > 8;
+            const atStart = subcategoryStrip.scrollLeft <= 8;
+            const atEnd = subcategoryStrip.scrollLeft >= maxScrollLeft - 8;
+
+            subcategoryPreviousButton.hidden = !hasOverflow;
+            subcategoryNextButton.hidden = !hasOverflow;
+            subcategoryPreviousButton.disabled = atStart;
+            subcategoryNextButton.disabled = atEnd;
+        }
+
+        if (subcategoryStrip && subcategoryPreviousButton && subcategoryNextButton) {
+            subcategoryPreviousButton.addEventListener("click", function () {
+                const scrollAmount = Math.max(220, Math.floor(subcategoryStrip.clientWidth * 0.72));
+
+                subcategoryStrip.scrollBy({
+                    left: -scrollAmount,
+                    behavior: "smooth"
+                });
+            });
+
+            subcategoryNextButton.addEventListener("click", function () {
+                const scrollAmount = Math.max(220, Math.floor(subcategoryStrip.clientWidth * 0.72));
+
+                subcategoryStrip.scrollBy({
+                    left: scrollAmount,
+                    behavior: "smooth"
+                });
+            });
+
+            subcategoryStrip.addEventListener("scroll", updateSubcategoryNavState);
+            window.addEventListener("resize", updateSubcategoryNavState);
+            updateSubcategoryNavState();
+        }
 
         document.querySelectorAll(".inventory-row").forEach(function (row) {
             row.addEventListener("click", function (event) {

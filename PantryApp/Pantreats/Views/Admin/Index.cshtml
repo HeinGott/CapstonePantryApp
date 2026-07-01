@@ -10,9 +10,8 @@
 <div class="admin-dashboard">
     <section class="admin-hero">
         <div class="admin-hero-copy">
-            <span class="admin-eyebrow">Admin Dashboard</span>
-            <h1 class="admin-page-title mb-2">Hello, @displayName</h1>
-            <p class="admin-page-subtitle mb-0">
+            <h1 class="donor-page-title mb-1">Admin Dashboard</h1>
+            <p class="donor-page-subtitle mb-0">
                 Keep orders moving, review applications, and stay on top of incoming donations from one clean workspace.
             </p>
         </div>
@@ -36,7 +35,6 @@
                 <i class="bi bi-bag-check admin-queue-icon"></i>
                 <span class="admin-queue-content">
                     <span class="admin-queue-label">New orders</span>
-                    <small>Still need admin action</small>
                 </span>
                 <strong class="admin-queue-count">@Model.NewOrders</strong>
                 <i class="bi bi-arrow-right admin-queue-arrow"></i>
@@ -46,7 +44,6 @@
                 <i class="bi bi-file-earmark-person admin-queue-icon"></i>
                 <span class="admin-queue-content">
                     <span class="admin-queue-label">Pending applications</span>
-                    <small>Waiting for an admin decision</small>
                 </span>
                 <strong class="admin-queue-count">@Model.PendingApplications</strong>
                 <i class="bi bi-arrow-right admin-queue-arrow"></i>
@@ -56,7 +53,6 @@
                 <i class="bi bi-people admin-queue-icon"></i>
                 <span class="admin-queue-content">
                     <span class="admin-queue-label">Pending volunteers</span>
-                    <small>Waiting for an admin decision</small>
                 </span>
                 <strong class="admin-queue-count">@Model.PendingVolunteerApplications</strong>
                 <i class="bi bi-arrow-right admin-queue-arrow"></i>
@@ -66,7 +62,6 @@
                 <i class="bi bi-gift admin-queue-icon"></i>
                 <span class="admin-queue-content">
                     <span class="admin-queue-label">New donations</span>
-                    <small>Waiting for review</small>
                 </span>
                 <strong class="admin-queue-count">@Model.NewDonations</strong>
                 <i class="bi bi-arrow-right admin-queue-arrow"></i>
@@ -79,7 +74,7 @@
             <div class="admin-panel-header">
                 <div>
                     <span class="admin-panel-kicker">Orders</span>
-                    <h2 class="admin-panel-title mb-0">Recent student orders</h2>
+                    <h2 class="admin-panel-title mb-0">Orders needing action</h2>
                 </div>
                 <a asp-controller="OrderFulfilments" asp-action="Index" class="admin-text-link">
                     View all <i class="bi bi-arrow-right"></i>

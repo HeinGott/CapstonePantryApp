@@ -88,6 +88,12 @@ namespace Pantreats.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null, string accountType = null)
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                Response.Redirect(GetSignedInRedirectUrl());
+                return;
+            }
+
             ReturnUrl = returnUrl;
             AccountType = NormalizeAccountType(accountType);
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -95,6 +101,11 @@ namespace Pantreats.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null, string accountType = null)
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return LocalRedirect(GetSignedInRedirectUrl());
+            }
+
             returnUrl ??= Url.Content("~/");
             AccountType = NormalizeAccountType(accountType);
             ReturnUrl = returnUrl;
@@ -208,6 +219,21 @@ namespace Pantreats.Areas.Identity.Pages.Account
                 "donor" => "donor",
                 _ => string.Empty
             };
+        }
+
+        private string GetSignedInRedirectUrl()
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return Url.Action("Index", "Admin") ?? "/";
+            }
+
+            if (User.IsInRole("Donors"))
+            {
+                return Url.Action("Dashboard", "Donor") ?? "/";
+            }
+
+            return Url.Action("Index", "Home") ?? "/";
         }
 
         private IdentityUser CreateUser()

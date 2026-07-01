@@ -259,6 +259,9 @@ namespace Pantreats.Controllers
             {
                 var prevRoles = await _userManager.GetRolesAsync(user);
 
+                var wasVolunteer = prevRoles.Contains("Volunteers");
+                var changingToStudent = newRole == "Students";
+
                 if (prevRoles.Any())
                 {
                     await _userManager.RemoveFromRolesAsync(user, prevRoles);
@@ -266,6 +269,38 @@ namespace Pantreats.Controllers
 
                 await EnsureRoleExists(newRole);
                 await _userManager.AddToRoleAsync(user, newRole);
+
+                if (wasVolunteer && changingToStudent)
+                {
+                    var volunteerApplications = await _context.VolunteerApplications
+                        .Where(application => application.UserId == userID)
+                        .ToListAsync();
+
+                    if (volunteerApplications.Any())
+                    {
+                        _context.VolunteerApplications.RemoveRange(volunteerApplications);
+                    }
+
+                    var volunteerSchedules = await _context.VolunteerSchedules
+                        .Where(schedule => schedule.UserId == userID)
+                        .ToListAsync();
+
+                    if (volunteerSchedules.Any())
+                    {
+                        _context.VolunteerSchedules.RemoveRange(volunteerSchedules);
+                    }
+
+                    var scheduleChangeRequests = await _context.ScheduleChangeRequests
+                        .Where(request => request.UserId == userID)
+                        .ToListAsync();
+
+                    if (scheduleChangeRequests.Any())
+                    {
+                        _context.ScheduleChangeRequests.RemoveRange(scheduleChangeRequests);
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
             }
 
             return RedirectToAction("Users");
@@ -342,6 +377,24 @@ namespace Pantreats.Controllers
             if (volunteerApplications.Any())
             {
                 _context.VolunteerApplications.RemoveRange(volunteerApplications);
+            }
+
+            var volunteerSchedules = await _context.VolunteerSchedules
+                .Where(schedule => schedule.UserId == userId)
+                .ToListAsync();
+
+            if (volunteerSchedules.Any())
+            {
+                _context.VolunteerSchedules.RemoveRange(volunteerSchedules);
+            }
+
+            var scheduleChangeRequests = await _context.ScheduleChangeRequests
+                .Where(request => request.UserId == userId)
+                .ToListAsync();
+
+            if (scheduleChangeRequests.Any())
+            {
+                _context.ScheduleChangeRequests.RemoveRange(scheduleChangeRequests);
             }
 
             var itemRequests = await _context.ItemRequest

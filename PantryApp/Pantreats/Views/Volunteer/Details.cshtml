@@ -24,8 +24,19 @@
 }
 
 <div class="student-details-page py-4">
-    <div class="mb-3">
+    <div class="mb-3 d-flex justify-content-between align-items-center gap-2 flex-wrap">
         <a asp-action="Index" class="btn student-back-btn">&larr; Back to Volunteers</a>
+
+        <form asp-action="DeleteApplication"
+              asp-route-id="@Model.VolunteerApplicationId"
+              method="post"
+              onsubmit="return confirm('Are you sure you want to delete this volunteer application? This cannot be undone.');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-outline-danger">
+                Delete Application
+            </button>
+        </form>
+    </div>
     </div>
 
     <section class="student-review-shell mb-4">

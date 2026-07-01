@@ -812,6 +812,60 @@ namespace Pantreats.Controllers
             return RedirectToAction(nameof(ScheduleRequestDetails), new { id });
         }
 
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteApplication(int id)
+        {
+            var application = await _context.VolunteerApplications
+                .FirstOrDefaultAsync(foundApplication => foundApplication.VolunteerApplicationId == id);
+
+            if (application == null)
+            {
+                TempData["StatusMessage"] = "That volunteer application no longer exists.";
+                TempData["StatusType"] = "error";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var userId = application.UserId;
+
+            _context.VolunteerApplications.Remove(application);
+
+            var remainingApplications = await _context.VolunteerApplications
+                .AsNoTracking()
+                .Where(existingApplication =>
+                    existingApplication.UserId == userId &&
+                    existingApplication.VolunteerApplicationId != id)
+                .AnyAsync();
+
+            if (!remainingApplications)
+            {
+                var volunteerSchedule = await _context.VolunteerSchedules
+                    .FirstOrDefaultAsync(schedule => schedule.UserId == userId);
+
+                if (volunteerSchedule != null)
+                {
+                    _context.VolunteerSchedules.Remove(volunteerSchedule);
+                }
+
+                var scheduleChangeRequests = await _context.ScheduleChangeRequests
+                    .Where(request => request.UserId == userId)
+                    .ToListAsync();
+
+                if (scheduleChangeRequests.Any())
+                {
+                    _context.ScheduleChangeRequests.RemoveRange(scheduleChangeRequests);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = "Volunteer application deleted.";
+            TempData["StatusType"] = "success";
+
+            return RedirectToAction(nameof(Index));
+        }
+
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ExportSchedule()

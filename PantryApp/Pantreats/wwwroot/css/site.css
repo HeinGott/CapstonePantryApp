@@ -529,10 +529,10 @@ a:hover {
 /* admin dashboard */
 .admin-dashboard {
     color: var(--pantreats-blue-dark);
-    width: min(100%, 1440px);
+    width: min(100%, 1320px);
     margin: 0 auto;
     min-height: calc(100vh - 170px);
-    padding: 1rem clamp(1rem, 2vw, 2rem) 0.5rem;
+    padding: 40px 12px 0.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.1rem;
@@ -540,15 +540,14 @@ a:hover {
 
 .admin-hero {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: 2rem;
-    padding: 2.8rem 1.6rem 2.6rem;
-    margin-block: 0.35rem 0.8rem;
-    border: 1px solid rgba(219, 234, 254, 0.18);
-    border-radius: 20px;
-    background: linear-gradient(180deg, #1d3b72 0%, #1f417d 100%);
-    box-shadow: 0 12px 28px rgba(16, 47, 97, 0.10);
+    gap: 20px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--pantreats-blue), var(--pantreats-blue));
+    box-shadow: var(--pantreats-shadow);
     color: #ffffff;
 }
 
@@ -558,15 +557,15 @@ a:hover {
 
 .admin-hero .donor-page-title {
     color: #ffffff;
-    font-size: clamp(2.1rem, 3vw, 3.1rem);
+    font-size: 32px;
     font-weight: 800;
-    letter-spacing: -0.04em;
+    margin: 0 0 6px 0;
 }
 
 .admin-hero .donor-page-subtitle {
     color: rgba(255, 255, 255, 0.86);
-    font-size: 1.02rem;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 400;
     max-width: 720px;
 }
 
@@ -582,7 +581,7 @@ a:hover {
 }
 
 .admin-date-card span {
-    color: #cfe7a8;
+    color: var(--pantreats-green-dark);
     font-size: 0.78rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -3925,7 +3924,6 @@ span.flatpickr-weekday {
     border-radius: 16px;
     padding: 22px 24px;
     border: 1px solid var(--pantreats-border);
-    border-left: 6px solid var(--pantreats-green);
     box-shadow: var(--pantreats-shadow);
 }
 

@@ -275,7 +275,7 @@ namespace Pantreats.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(RecipeEditorViewModel model)
+        public async Task<IActionResult> Create(RecipeEditorViewModel model, string? actionType)
         {
             ModelState.Remove("Recipe.Ingredients");
             ModelState.Remove("Recipe.DietaryTags");
@@ -285,6 +285,27 @@ namespace Pantreats.Controllers
             {
                 ModelState.Remove($"Ingredients[{i}].Recipe");
                 ModelState.Remove($"Ingredients[{i}].InventoryItem");
+            }
+
+            if (actionType == "BackToEdit")
+            {
+                model.InventoryItems = await _context.Inventory
+                    .OrderBy(i => i.Category)
+                    .ThenBy(i => i.ItemName)
+                    .ToListAsync();
+
+                model.RecipeIngredientNames = model.InventoryItems
+                    .Where(i => !string.IsNullOrWhiteSpace(i.ItemName))
+                    .Select(i => i.ItemName)
+                    .Distinct()
+                    .OrderBy(name => name)
+                    .ToList();
+
+                model.IsImportedRecipe = true;
+
+                ModelState.Clear();
+
+                return View("Create", model);
             }
 
             if (!ModelState.IsValid)

@@ -58,17 +58,65 @@
     </p>
 
     <div class="d-flex justify-content-center gap-2 mt-4">
-        <button type="button"
-                class="btn btn-outline-secondary"
-                onclick="history.back()">
-            Back to Edit
-        </button>
 
-        <button type="button"
-                class="btn btn-primary"
-                onclick="history.back()">
-            Looks Good
-        </button>
+        <form asp-controller="Recipe"
+              asp-action="Create"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="Recipe.Title" />
+            <input type="hidden" asp-for="Recipe.Description" />
+            <input type="hidden" asp-for="Recipe.MealType" />
+            <input type="hidden" asp-for="Recipe.DietaryTags" />
+            <input type="hidden" asp-for="Recipe.Instructions" />
+            <input type="hidden" asp-for="IsImportedRecipe" value="true" />
+
+            @for (int i = 0; i < Model.Ingredients.Count; i++)
+            {
+                <input type="hidden" name="Ingredients[@i].Quantity" value="@Model.Ingredients[i].Quantity" />
+                <input type="hidden" name="Ingredients[@i].Unit" value="@Model.Ingredients[i].Unit" />
+                <input type="hidden" name="Ingredients[@i].CustomIngredientName" value="@Model.Ingredients[i].CustomIngredientName" />
+                <input type="hidden" name="Ingredients[@i].ImportedIngredientName" value="@Model.Ingredients[i].ImportedIngredientName" />
+                <input type="hidden" name="Ingredients[@i].SubstituteIngredientName" value="@Model.Ingredients[i].SubstituteIngredientName" />
+            }
+
+            <button type="submit"
+                    name="actionType"
+                    value="BackToEdit"
+                    class="btn btn-outline-secondary">
+                Back to Edit
+            </button>
+        </form>
+
+        <form asp-controller="Recipe"
+              asp-action="Create"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="Recipe.Title" />
+            <input type="hidden" asp-for="Recipe.Description" />
+            <input type="hidden" asp-for="Recipe.MealType" />
+            <input type="hidden" asp-for="Recipe.DietaryTags" />
+            <input type="hidden" asp-for="Recipe.Instructions" />
+            <input type="hidden" asp-for="IsImportedRecipe" value="true" />
+
+            @for (int i = 0; i < Model.Ingredients.Count; i++)
+            {
+                <input type="hidden" name="Ingredients[@i].Quantity" value="@Model.Ingredients[i].Quantity" />
+                <input type="hidden" name="Ingredients[@i].Unit" value="@Model.Ingredients[i].Unit" />
+                <input type="hidden" name="Ingredients[@i].CustomIngredientName" value="@Model.Ingredients[i].CustomIngredientName" />
+                <input type="hidden" name="Ingredients[@i].ImportedIngredientName" value="@Model.Ingredients[i].ImportedIngredientName" />
+                <input type="hidden" name="Ingredients[@i].SubstituteIngredientName" value="@Model.Ingredients[i].SubstituteIngredientName" />
+            }
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Looks Good
+            </button>
+        </form>
+
     </div>
 
 </div>

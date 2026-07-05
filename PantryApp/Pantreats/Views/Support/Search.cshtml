@@ -1,0 +1,23 @@
+﻿@model List<SupportArticle>
+@{
+	ViewData["Title"] = "Search Results";
+}
+
+@if(!Model.Any())
+{
+	<p>No articles matched the search. Please try something else.</p> <!--Claude used to troubleshoot-->
+}
+
+	@foreach (var article in Model)
+	{
+		<div>
+
+		<h1>@article.Title</h1>
+
+		<p>@article.Summary</p>
+
+		<a asp-controller="Support" asp-action="Article" asp-route-slug="@article.Slug">
+			@article.Title
+		</a>
+		</div>
+	}

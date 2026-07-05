@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pantreats.Data;
 
@@ -11,9 +12,11 @@ using Pantreats.Data;
 namespace Pantreats.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260703183827_SeedSupportArticles")]
+    partial class SeedSupportArticles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -556,15 +559,6 @@ namespace Pantreats.Data.Migrations
                             Slug = "fill-out-application",
                             Summary = "Learn how to fill out an application for Pantreats.",
                             Title = "How to Fill Out an Application"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Content = "Step 1: Log in as an admin.\nStep 2: Click the User Management button in the navbar.\nStep 3. Click the dropdown menu under Actions for any user and change to the desired role.\nStep 4. Click the Save button next to the modified user when finished.",
-                            Keywords = "change,user roles,user,roles",
-                            Slug = "change-user-roles",
-                            Summary = "Learn how to change the role of a user to admin, volunteer, etc.",
-                            Title = "How to Change User Roles"
                         });
                 });
 

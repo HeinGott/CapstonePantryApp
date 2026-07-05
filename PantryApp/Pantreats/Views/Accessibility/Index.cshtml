@@ -1,0 +1,426 @@
+﻿@{
+    ViewData["Title"] = "Accessibility & Assistance";
+}
+
+<div class="student-page-header accessibility-page-header text-center mb-5">
+
+    <h1 class="display-4 fw-bold mb-2" style="color: var(--pantreats-blue);">
+        Accessibility & Assistance
+    </h1>
+
+    <h3 class="fw-bold mb-4" style="color: var(--pantreats-green);">
+        Making PanTreats accessible to everyone.
+    </h3>
+
+    <p class="fs-5 mx-auto" style="max-width:900px;">
+        PanTreats is committed to providing an accessible experience for every
+        student. Whether you need assistance reading recipes, navigating the
+        website, or locating pantry items, we're here to help.
+    </p>
+
+</div>
+
+<div class="student-card mb-4">
+    <h3>Accessibility Toolbar</h3>
+    <p>
+        Turn on the toolbar to quickly access reading tools from any page.
+    </p>
+
+    <div class="form-check form-switch">
+        <input class="form-check-input"
+               type="checkbox"
+               id="toolbarToggle"
+               onchange="toggleToolbarPreference()" />
+        <label class="form-check-label" for="toolbarToggle">
+            Show Accessibility Toolbar on every page
+        </label>
+    </div>
+</div>
+
+<div class="student-card mb-4">
+    <h3>Our Commitment</h3>
+    <p>
+        We believe every student should be able to use PanTreats comfortably and independently.
+        This page provides tools to help with reading the current page aloud, adjusting text size,
+        improving contrast, and making pantry information easier to understand.
+    </p>
+</div>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-md-4">
+        <div class="student-card h-100">
+            <h3>Read PanTreats Aloud</h3>
+            <p>Listen to the page using your personally devices built-in voice.</p>
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn btn-primary" onclick="readPanTreatsPageAloud()">Read</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="stopReadingPage()">Stop</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="student-card h-100">
+            <h3>Choose Reading Voice</h3>
+            <p>Choose the voice that is easiest for you to understand.</p>
+            <select id="voiceSelect" class="form-select">
+                <option value="">Loading voices...</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="student-card h-100">
+            <h3>PanTreats Reading Speed</h3>
+            <p>Adjust how fast the page is read aloud.</p>
+            <input type="range"
+                   id="panTreatsReadingSpeed"
+                   min="0.5"
+                   max="2"
+                   step="0.1"
+                   value="1"
+                   class="form-range" />
+            <p class="text-muted mb-0">
+                Current speed: <span id="rateValue">1</span>x
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="student-card h-100">
+            <h3>Larger Text</h3>
+            <p>Increase text size across PanTreats to make pages easier to read.</p>
+            <div class="form-check form-switch">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="largeTextToggle"
+                       onchange="turnPanTreatsLargeTextOnOff()" />
+                <label class="form-check-label" for="largeTextToggle">
+                    Enable Larger Text
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="student-card h-100">
+            <h3>High Contrast</h3>
+            <p>Increase contrast across PanTreats to make text and buttons easier to see.</p>
+            <div class="form-check form-switch">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="highContrastToggle"
+                       onchange="turnPanTreatsHighContrastOnOff()" />
+                <label class="form-check-label" for="highContrastToggle">
+                    Enable High Contrast
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="student-card h-100">
+            <h3>Color Blind Options</h3>
+            <p>Adjust the color theme to make the pages easier to view</p>
+            <select id="panTreatsColorSupport" class="form-select" onchange="changePanTreatsColorSupport()">
+                <option value="none">Default Colors</option>
+                <option value="greenRed">Green-Red Support</option>
+                <option value="redGreen">Red-Green Support</option>
+                <option value="blueYellow">Blue-Yellow Support</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="student-card h-100">
+            <h3>Reduce Motion</h3>
+            <p>Limit animations and movement across PanTreats.</p>
+            <div class="form-check form-switch">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="reduceMotionToggle"
+                       onchange="toggleReduceMotion()" />
+                <label class="form-check-label" for="reduceMotionToggle">
+                    Enable Reduce Motion
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="student-card h-100">
+            <h3>Dyslexia-Friendly Font</h3>
+            <p>Switch to a simpler font that may be easier to read.</p>
+            <div class="form-check form-switch">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="dyslexiaFontToggle"
+                       onchange="toggleDyslexiaFont()" />
+                <label class="form-check-label" for="dyslexiaFontToggle">
+                    Enable Dyslexia-Friendly Font
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="student-card h-100">
+            <h3>Larger Buttons</h3>
+            <p>Make buttons and form controls larger and easier to click.</p>
+            <div class="form-check form-switch">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="largeButtonsToggle"
+                       onchange="toggleLargeButtons()" />
+                <label class="form-check-label" for="largeButtonsToggle">
+                    Enable Larger Buttons
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="student-card h-100">
+            <h3>Keyboard Navigation</h3>
+            <p>Make links, buttons, and form fields easier to see/go to by pressing tab.</p>
+
+            <div class="form-check form-switch">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="keyboardFocusToggle"
+                       onchange="toggleKeyboardFocus()" />
+
+                <label class="form-check-label" for="keyboardFocusToggle">
+                    Enable Keyboard Focus Help
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="student-card mb-4">
+    <h3>Accessibility Tips</h3>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <h5>Read Recipes</h5>
+            <p>Use the PanTreats Reader while following recipes</p>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <h5>Need Help?</h5>
+            <p>If you have questions while using PanTreats or visiting the pantry, our volunteers are always happy to help.</p>
+        </div>
+        <div class="col-md-4 mb-3">
+            <h5>Interact with the pantry</h5>
+            <p>Use the PanTreats Reader while moving throught the pantry.</p>
+        </div>
+    </div>
+</div>
+
+<div class="student-card mb-4">
+    <h3>Need Additional Assistance?</h3>
+    <p>
+        If you need additional assistance while using PanTreats or visiting the pantry,
+        please let our volunteers know. We are happy to assist with locating pantry items
+        and answering questions.
+    </p>
+</div>
+
+<div class="student-card mb-4">
+    <h3>Pantry Assistance</h3>
+    <p>Our volunteers and staff are happy to assist with:</p>
+    <ul>
+        <li>Finding pantry items throughout the pantry</li>
+        <li>Suggesting ingredient substitutions</li>
+        <li>Helping students get started with Pantry to Plate recipes</li>
+        <li>Answering questions about pantry services</li>
+        <li>Helping students navigate the website</li>
+    </ul>
+</div>
+
+<div class="student-card mb-4">
+    <h3>Need More Help?</h3>
+    <p>
+        If you require additional support, please contact our pantry staff through the Support page.
+    </p>
+    <a asp-controller="Support"
+       asp-action="Index"
+       class="btn btn-primary">
+        Contact Support
+    </a>
+</div>
+
+<div class="student-card mb-5">
+    <h3>Accessibility Features</h3>
+
+    <p>
+        PanTreats includes several accessibility features that you can turn on or off based on your needs.
+    </p>
+
+    <p class="text-muted">
+        These settings are saved only on this device, so each student can choose what works best for them.
+    </p>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h5>Reading & Navigation</h5>
+            <ul>
+                <li class="mb-3"><strong>Read PanTreats Aloud</strong><br />Reads the current page aloud using your device's built-in voice.<br /><em>How to use:</em> Click <strong>Read</strong> to begin or <strong>Stop</strong> to end narration.</li>
+                <li class="mb-3"><strong>Choose Reading Voice</strong><br />Choose the voice that is easiest for you to understand.<br /><em>How to use:</em> Select a voice from the drop-down before using the PanTreats Reader.</li>
+                <li class="mb-3"><strong>PanTreats Reading Speed</strong><br />Adjust how quickly or slowly pages are read aloud.<br /><em>How to use:</em> Move the slider left for slower speech or right for faster speech.</li>
+                <li class="mb-3"><strong>Accessibility Toolbar</strong><br />Displays a floating accessibility button on every page for quick access to reading tools.<br /><em>How to use:</em> Turn the switch on to display the toolbar throughout the website.</li>
+                <li class="mb-3"><strong>Keyboard Navigation</strong><br />Makes the currently selected link, button, or form field easier to see while navigating with the keyboard.<br /><em>How to use:</em> Enable this option and use the <strong>Tab</strong> key to move around the website.</li>
+            </ul>
+        </div>
+
+        <div class="col-md-6">
+            <h5>Display & Visual Options</h5>
+            <ul>
+                <li class="mb-3"><strong>Larger Text</strong><br />Increases text size throughout PanTreats for easier reading.<br /><em>How to use:</em> Turn the switch on to enlarge text across the website.</li>
+                <li class="mb-3"><strong>High Contrast</strong><br />Improves visibility by increasing the contrast between text and backgrounds.<br /><em>How to use:</em> Enable the switch for a higher contrast display.</li>
+                <li class="mb-3"><strong>Color Blind Options</strong><br />Adjusts website colors to better support different types of color blindness.<br /><em>How to use:</em> Select the color mode that works best for you from the drop-down.</li>
+                <li class="mb-3"><strong>Reduce Motion</strong><br />Reduces animations and transitions that may be distracting or uncomfortable.<br /><em>How to use:</em> Turn the switch on to minimize motion throughout the website.</li>
+                <li class="mb-3"><strong>Dyslexia-Friendly Font</strong><br />Uses a simpler font with improved spacing to make reading more comfortable.<br /><em>How to use:</em> Enable the switch to apply the alternate font across PanTreats.</li>
+                <li class="mb-3"><strong>Larger Buttons</strong><br />Makes buttons and controls easier to see and click, especially on touch devices.<br /><em>How to use:</em> Turn the switch on to enlarge buttons and interactive controls.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    let availableVoices = [];
+
+    function savePanTreatsAccessSetting(key, value) {
+        localStorage.setItem(key, value);
+    }
+
+    function loadPanTreatsAccessSettings() {
+        document.getElementById("toolbarToggle").checked = localStorage.getItem("panTreatsShowAccessToolbar") === "true";
+        document.getElementById("largeTextToggle").checked = localStorage.getItem("panTreatsLargeText") === "true";
+        document.getElementById("highContrastToggle").checked = localStorage.getItem("panTreatsHighContrast") === "true";
+        document.getElementById("reduceMotionToggle").checked = localStorage.getItem("reduceMotionMode") === "true";
+        document.getElementById("dyslexiaFontToggle").checked = localStorage.getItem("dyslexiaFontMode") === "true";
+        document.getElementById("largeButtonsToggle").checked = localStorage.getItem("largeButtonsMode") === "true";
+        document.getElementById("keyboardFocusToggle").checked = localStorage.getItem("keyboardFocusMode") === "true";
+
+        const savedRate = localStorage.getItem("panTreatsReadingSpeed");
+        if (savedRate) {
+            document.getElementById("panTreatsReadingSpeed").value = savedRate;
+            document.getElementById("rateValue").textContent = savedRate;
+        }
+        const savedColorMode = localStorage.getItem("panTreatsColorSupport");
+        if (savedColorMode) {
+            document.getElementById("panTreatsColorSupport").value = savedColorMode;
+        }
+        applyPanTreatsAccessSettings();
+    }
+
+    function applyPanTreatsAccessSettings() {
+        document.body.classList.toggle("large-text-mode", localStorage.getItem("panTreatsLargeText") === "true");
+        document.body.classList.toggle("high-contrast-mode", localStorage.getItem("panTreatsHighContrast") === "true");
+        document.body.classList.toggle("reduce-motion-mode", localStorage.getItem("reduceMotionMode") === "true");
+        document.body.classList.toggle("dyslexia-font-mode", localStorage.getItem("dyslexiaFontMode") === "true");
+        document.body.classList.toggle("large-buttons-mode", localStorage.getItem("largeButtonsMode") === "true");
+        document.body.classList.toggle("keyboard-focus-mode", localStorage.getItem("keyboardFocusMode") === "true");
+        document.body.classList.remove("greenRed-mode", "redGreen-mode", "blueYellow-mode");
+
+        switch (localStorage.getItem("panTreatsColorSupport")) {
+            case "greenRed":
+                document.body.classList.add("greenRed-mode");
+                break;
+            case "redGreen":
+                document.body.classList.add("redGreen-mode");
+                break;
+            case "blueYellow":
+                document.body.classList.add("blueYellow-mode");
+                break;
+        }
+    }
+    function toggleToolbarPreference() {
+        savePanTreatsAccessSetting("panTreatsShowAccessToolbar", document.getElementById("toolbarToggle").checked);
+
+        if (typeof loadAccessibilityToolbar === "function") {
+            loadAccessibilityToolbar();
+        }
+    }
+    function turnPanTreatsLargeTextOnOff() {
+        savePanTreatsAccessSetting("panTreatsLargeText", document.getElementById("largeTextToggle").checked);
+        applyPanTreatsAccessSettings();
+    }
+    function turnPanTreatsHighContrastOnOff() {
+        savePanTreatsAccessSetting("panTreatsHighContrast", document.getElementById("highContrastToggle").checked);
+        applyPanTreatsAccessSettings();
+    }
+    function changePanTreatsColorSupport() {
+        savePanTreatsAccessSetting("panTreatsColorSupport", document.getElementById("panTreatsColorSupport").value);
+        applyPanTreatsAccessSettings();
+    }
+    document.getElementById("panTreatsReadingSpeed").addEventListener("input", function () {
+        document.getElementById("rateValue").textContent = this.value;
+        savePanTreatsAccessSetting("panTreatsReadingSpeed", this.value);
+    });
+
+    function loadVoices() {
+        availableVoices = speechSynthesis.getVoices();
+        const voiceSelect = document.getElementById("voiceSelect");
+
+        voiceSelect.innerHTML = "";
+
+        availableVoices.forEach(function (voice, index) {
+            const option = document.createElement("option");
+            option.value = index;
+            option.textContent = `${voice.name} (${voice.lang})`;
+            voiceSelect.appendChild(option);
+        });
+        const savedVoice = localStorage.getItem("panTreatsReaderVoice");
+
+        if (savedVoice !== null) {
+            voiceSelect.value = savedVoice;
+        }
+    }
+
+    document.getElementById("voiceSelect").addEventListener("change", function () {
+        savePanTreatsAccessSetting("panTreatsReaderVoice", this.value);
+    });
+
+    function readPanTreatsPageAloud() {
+        const text = (document.querySelector("main") || document.body).innerText;
+
+        speechSynthesis.cancel();
+
+        const speech = new SpeechSynthesisUtterance(text);
+        const selectedVoice = localStorage.getItem("panTreatsReaderVoice");
+
+        if (selectedVoice && availableVoices[selectedVoice]) {
+            speech.voice = availableVoices[selectedVoice];
+        }
+        speech.rate = parseFloat(localStorage.getItem("panTreatsReadingSpeed") || "1");
+        speech.pitch = 1;
+        speech.volume = 1;
+
+        speechSynthesis.speak(speech);
+    }
+    function stopReadingPage() {
+        speechSynthesis.cancel();
+    }
+    function toggleReduceMotion() {
+        savePanTreatsAccessSetting("reduceMotionMode", document.getElementById("reduceMotionToggle").checked);
+        applyPanTreatsAccessSettings();
+    }
+    function toggleDyslexiaFont() {
+        savePanTreatsAccessSetting("dyslexiaFontMode", document.getElementById("dyslexiaFontToggle").checked);
+        applyPanTreatsAccessSettings();
+    }
+    function toggleLargeButtons() {
+        savePanTreatsAccessSetting("largeButtonsMode", document.getElementById("largeButtonsToggle").checked);
+        applyPanTreatsAccessSettings();
+    }
+    function toggleKeyboardFocus() {
+        savePanTreatsAccessSetting("keyboardFocusMode", document.getElementById("keyboardFocusToggle").checked);
+        applyPanTreatsAccessSettings();
+    }
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+    loadPanTreatsAccessSettings();
+</script>

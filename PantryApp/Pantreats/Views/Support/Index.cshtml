@@ -1,6 +1,27 @@
-﻿@{
+﻿@model List<SupportArticle>
+
+@{
     ViewData["Title"] = "Support Index";
     ViewData["FullWidth"] = true;
 }
+<div class="col-lg-6 text-center text-lg-start">
+    <h1 style="color: darkblue">
+        User Manual
+    </h1>
+    <form asp-controller="Support" asp-action="Search" method="get">
+        <input type="text" name="keyword" placeholder="Search the manual" />
+        <button type="submit">Search</button>
+    </form>
 
-<span class="support-page-title">Support Page for Users goes here.</span>
+    @foreach (var article in Model)
+    {
+        <div>
+            <h2>
+                <a asp-controller="Support" asp-action="Article" asp-route-slug="@article.Slug">
+                    @article.Title
+                </a>
+            </h2>
+            <p>@article.Summary</p>
+        </div>
+    }
+</div>

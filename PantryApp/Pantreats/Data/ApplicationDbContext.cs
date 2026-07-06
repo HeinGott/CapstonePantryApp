@@ -21,6 +21,7 @@ namespace Pantreats.Data
         public DbSet<RecipeIngredient> RecipeIngredients { get; set; }
         public DbSet<VolunteerSchedule> VolunteerSchedules { get; set; }
         public DbSet<ScheduleChangeRequest> ScheduleChangeRequests { get; set; }
+        public DbSet<SupportArticle> SupportArticles { get; set; }
 
         /*this method configures the relationships between OrderItem and Inventory,
         this will ensure if the inventory item is deleted, that the upc will be set to null and
@@ -69,6 +70,9 @@ namespace Pantreats.Data
                     .HasForeignKey<InventoryImage>(e => e.InventoryItemId);
 
             });
+
+            modelBuilder.ApplyConfiguration(new SupportArticleConfiguration());
+
         }
     }
 }

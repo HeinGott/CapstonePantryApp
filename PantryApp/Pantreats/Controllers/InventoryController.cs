@@ -196,6 +196,8 @@ namespace Pantreats.Controllers
 
         public async Task<IActionResult> GetImage(int? itemId, string? upc)
         {
+            Response.Headers.CacheControl = "public,max-age=86400";
+
             int? resolvedItemId = itemId;
 
             if (!resolvedItemId.HasValue && !string.IsNullOrWhiteSpace(upc))

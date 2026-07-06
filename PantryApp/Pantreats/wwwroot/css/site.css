@@ -2473,6 +2473,8 @@ span.flatpickr-weekday {
     border-radius: 8px;
     background: #ffffff;
     box-shadow: var(--pantreats-shadow);
+    content-visibility: auto;
+    contain-intrinsic-size: 340px 420px;
 }
 
 .shop-item-image {
@@ -3530,10 +3532,10 @@ span.flatpickr-weekday {
     white-space: nowrap;
 }
 
-    .volunteer-schedule-request-btn:hover {
-        background-color: var(--pantreats-green-dark) !important;
-        border-color: var(--pantreats-green-dark) !important;
-    }
+.volunteer-schedule-request-btn:hover {
+    background-color: var(--pantreats-green-dark) !important;
+    border-color: var(--pantreats-green-dark) !important;
+}
 
 .volunteer-schedule-pending-note {
     display: inline-flex;
@@ -3554,19 +3556,19 @@ span.flatpickr-weekday {
     white-space: nowrap;
 }
 
-    .volunteer-schedule-roster-table th:first-child,
-    .volunteer-schedule-roster-table td:first-child {
-        text-align: left;
-    }
+.volunteer-schedule-roster-table th:first-child,
+.volunteer-schedule-roster-table td:first-child {
+    text-align: left;
+}
 
 .volunteer-schedule-roster-cell {
     color: transparent;
     font-weight: 700;
 }
 
-    .volunteer-schedule-roster-cell.is-on {
-        color: var(--pantreats-blue);
-    }
+.volunteer-schedule-roster-cell.is-on {
+    color: var(--pantreats-blue);
+}
 
 .image-popup {
     position: fixed;
@@ -3874,21 +3876,21 @@ span.flatpickr-weekday {
     box-shadow: var(--pantreats-shadow);
 }
 
-    .inventory-report-header h1,
-    .student-report-header h1,
-    .usage-report-header h1 {
-        font-size: 32px;
-        font-weight: 800;
-        margin: 0 0 6px 0;
-    }
+.inventory-report-header h1,
+.student-report-header h1,
+.usage-report-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+}
 
-    .inventory-report-header p,
-    .student-report-header p,
-    .usage-report-header p {
-        margin: 0;
-        opacity: 0.95;
-        font-size: 16px;
-    }
+.inventory-report-header p,
+.student-report-header p,
+.usage-report-header p {
+    margin: 0;
+    opacity: 0.95;
+    font-size: 16px;
+}
 
 .report-export-btn {
     background: white;
@@ -3902,11 +3904,11 @@ span.flatpickr-weekday {
     transition: 0.2s ease;
 }
 
-    .report-export-btn:hover {
-        background: var(--pantreats-blue-soft);
-        color: var(--pantreats-blue-dark);
-        transform: translateY(-1px);
-    }
+.report-export-btn:hover {
+    background: var(--pantreats-blue-soft);
+    color: var(--pantreats-blue-dark);
+    transform: translateY(-1px);
+}
 
 .report-summary-grid {
     display: grid;
@@ -3927,18 +3929,18 @@ span.flatpickr-weekday {
     box-shadow: var(--pantreats-shadow);
 }
 
-    .report-summary-card p {
-        margin: 0 0 8px 0;
-        color: var(--pantreats-blue);
-        font-weight: 700;
-    }
+.report-summary-card p {
+    margin: 0 0 8px 0;
+    color: var(--pantreats-blue);
+    font-weight: 700;
+}
 
-    .report-summary-card h2 {
-        margin: 0;
-        color: var(--pantreats-green-dark);
-        font-size: 34px;
-        font-weight: 800;
-    }
+.report-summary-card h2 {
+    margin: 0;
+    color: var(--pantreats-green-dark);
+    font-size: 34px;
+    font-weight: 800;
+}
 
 .report-section {
     background: white;
@@ -3953,38 +3955,38 @@ span.flatpickr-weekday {
     margin-bottom: 16px;
 }
 
-    .report-section-header h2 {
-        color: var(--pantreats-blue);
-        font-size: 22px;
-        font-weight: 800;
-        margin: 0 0 4px 0;
-    }
+.report-section-header h2 {
+    color: var(--pantreats-blue);
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0 0 4px 0;
+}
 
-    .report-section-header p {
-        color: rgba(16, 47, 97, 0.70);
-        margin: 0;
-    }
+.report-section-header p {
+    color: rgba(16, 47, 97, 0.70);
+    margin: 0;
+}
 
 .report-table {
     margin-bottom: 0;
 }
 
-    .report-table thead th {
-        background: var(--pantreats-green-soft);
-        color: var(--pantreats-blue);
-        font-weight: 800;
-        border-bottom: 2px solid var(--pantreats-border);
-        white-space: nowrap;
-    }
+.report-table thead th {
+    background: var(--pantreats-green-soft);
+    color: var(--pantreats-blue);
+    font-weight: 800;
+    border-bottom: 2px solid var(--pantreats-border);
+    white-space: nowrap;
+}
 
-    .report-table tbody td {
-        vertical-align: middle;
-        color: #24364f;
-    }
+.report-table tbody td {
+    vertical-align: middle;
+    color: #24364f;
+}
 
-    .report-table tbody tr:hover {
-        background: var(--pantreats-blue-soft);
-    }
+.report-table tbody tr:hover {
+    background: var(--pantreats-blue-soft);
+}
 
 @media (max-width: 992px) {
     .report-summary-grid {
@@ -3997,6 +3999,7 @@ span.flatpickr-weekday {
 }
 
 @media (max-width: 768px) {
+
     .inventory-report-header,
     .student-report-header,
     .usage-report-header {
@@ -4009,6 +4012,7 @@ span.flatpickr-weekday {
         grid-template-columns: 1fr;
     }
 }
+
 .accessibility-toolbar {
     position: fixed;
     bottom: 20px;
@@ -4114,7 +4118,7 @@ span.flatpickr-weekday {
     background: #ffff00 !important;
     color: #000 !important;
     border: 2px solid #ffff00 !important;
-    }
+}
 
 .high-contrast-mode .btn-outline-primary,
 .high-contrast-mode .btn-outline-secondary,
@@ -4191,21 +4195,11 @@ span.flatpickr-weekday {
 a:focus,
 button:focus,
 input:focus,
-select:focus,
-textarea:focus {
-    outline: 3px solid var(--pantreats-green) !important;
-    outline-offset: 3px;
-}
-
-.keyboard-focus-mode a:focus,
+select:focus .keyboard-focus-mode a:focus,
 .keyboard-focus-mode button:focus,
 .keyboard-focus-mode input:focus,
 .keyboard-focus-mode select:focus,
-.keyboard-focus-mode textarea:focus {
-    outline: 4px solid #ffcc00 !important;
-    outline-offset: 4px !important;
-    box-shadow: 0 0 0 6px rgba(255, 204, 0, 0.35) !important;
-}
+
 
 .accessibility-page-header {
     display: block !important;

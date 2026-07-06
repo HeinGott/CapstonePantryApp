@@ -2,12 +2,9 @@
 
 @{
     ViewData["Title"] = "Shop";
-    var subcategories = Model.Items
-        .Select(item => item.Subcategory)
-        .Where(subcategory => !string.IsNullOrWhiteSpace(subcategory))
-        .Distinct(StringComparer.OrdinalIgnoreCase)
-        .OrderBy(subcategory => subcategory)
-        .ToList();
+    var subcategories = Model.Subcategories;
+    var selectedSubcategory = Model.SelectedSubcategory ?? string.Empty;
+    var searchTerm = Model.SearchTerm ?? string.Empty;
 
     string GetSubcategoryIconPath(string subcategory) => subcategory.ToLowerInvariant() switch
     {
@@ -25,6 +22,16 @@
 
     string GetSubcategoryDisplayName(string subcategory) =>
         string.Equals(subcategory, "Pantry - Other", StringComparison.OrdinalIgnoreCase) ? "Other" : subcategory;
+
+    string GetShopUrl(int page, string? subcategory = null, string? search = null) =>
+        Url.Action("Index", "Shop", new
+        {
+            page,
+            subcategory = string.IsNullOrWhiteSpace(subcategory) || string.Equals(subcategory, "all", StringComparison.OrdinalIgnoreCase)
+                ? null
+                : subcategory,
+            search = string.IsNullOrWhiteSpace(search) ? null : search
+        }) ?? "#";
 }
 
 <style>
@@ -104,6 +111,7 @@
         gap: .55rem;
         flex: 0 0 96px;
         color: #183153;
+        text-decoration: none;
         transition: transform .15s ease, opacity .15s ease;
     }
 
@@ -292,7 +300,7 @@
         </div>
     </div>
 
-    @if (!Model.Items.Any())
+    @if (Model.TotalInventoryItems == 0)
     {
         <div class="student-card text-center py-5">
             <h2 class="h5 mb-2">No pantry items are available yet.</h2>
@@ -312,19 +320,20 @@
 
                 <div class="shop-subcategory-strip-wrap">
                     <div class="shop-subcategory-strip" id="shopSubcategoryStrip">
-                        <button type="button" class="shop-subcategory-card active" data-subcategory-filter="all">
+                        <a class="shop-subcategory-card @(string.IsNullOrWhiteSpace(selectedSubcategory) ? "active" : "")"
+                           href="@GetShopUrl(1, null, searchTerm)">
                             <span class="shop-subcategory-icon">
                                 <img src="@Url.Content("~/images/subcategories/groceries-svgrepo-com.svg")" alt="All Items" />
                             </span>
                             <span class="shop-subcategory-label">All Items</span>
-                        </button>
+                        </a>
                         @foreach (var subcategory in subcategories)
                         {
                             var iconPath = GetSubcategoryIconPath(subcategory);
                             var displayName = GetSubcategoryDisplayName(subcategory);
-                            <button type="button"
-                                    class="shop-subcategory-card"
-                                    data-subcategory-filter="@subcategory">
+                            var isSelectedSubcategory = string.Equals(selectedSubcategory, subcategory, StringComparison.OrdinalIgnoreCase);
+                            <a class="shop-subcategory-card @(isSelectedSubcategory ? "active" : "")"
+                               href="@GetShopUrl(1, subcategory, searchTerm)">
                                 <span class="shop-subcategory-icon">
                                     @if (!string.IsNullOrWhiteSpace(iconPath))
                                     {
@@ -336,7 +345,7 @@
                                     }
                                 </span>
                                 <span class="shop-subcategory-label">@displayName</span>
-                            </button>
+                            </a>
                         }
                     </div>
                 </div>
@@ -349,18 +358,29 @@
                 </button>
             </div>
 
-            <div class="shop-toolbar">
+            <form class="shop-toolbar" method="get" action="@Url.Action("Index", "Shop")">
+                @if (!string.IsNullOrWhiteSpace(selectedSubcategory))
+                {
+                    <input type="hidden" name="subcategory" value="@selectedSubcategory" />
+                }
                 <div class="shop-toolbar-search">
                     <div class="shop-search-input-wrap">
                         <i class="bi bi-search"></i>
                         <input type="search"
                                class="form-control"
                                id="shopSearchInput"
+                               name="search"
+                               value="@searchTerm"
                                placeholder="Search by item name, brand, subcategory, or size" />
                     </div>
                 </div>
 
                 <div class="shop-toolbar-actions">
+                    <button type="submit" class="btn btn-outline-secondary">Search</button>
+                    @if (Model.HasActiveFilters)
+                    {
+                        <a class="btn btn-outline-secondary" href="@GetShopUrl(1)">Clear</a>
+                    }
                     <button type="button"
                             class="btn shop-cart-button"
                             id="cartToggleButton"
@@ -371,27 +391,44 @@
                         <span id="cartCountBadge" class="badge rounded-pill">0</span>
                     </button>
                 </div>
-            </div>
+            </form>
         </section>
 
-        <div class="shop-grid mb-4" id="shopGrid">
-            @foreach (var item in Model.Items)
-            {
-                var isOutOfStock = item.Quantity <= 0;
+        @if (!Model.Items.Any())
+        {
+            <div class="student-card text-center py-5" id="shopEmptyResults">
+                <h2 class="h5 mb-2">No pantry items match that search.</h2>
+                <p class="text-muted mb-0">Try a different search or switch categories to see more items.</p>
+            </div>
+        }
+        else
+        {
+            <div class="shop-grid mb-4" id="shopGrid">
+                @{
+                    var itemIndex = 0;
+                }
+                @foreach (var item in Model.Items)
+                {
+                    var isOutOfStock = item.Quantity <= 0;
+                    var cardClass = isOutOfStock ? "shop-item-card out-of-stock" : "shop-item-card";
+                    var loadPriority = itemIndex < 4 ? "high" : "low";
+                    var loadingMode = itemIndex < 4 ? "eager" : "lazy";
 
-                <article class="shop-item-card" @(isOutOfStock ? "out-of-stock" : "")"
-                         data-shop-item
-                         data-upc="@item.UPC"
-                         data-stock="@item.Quantity"
-                         data-subcategory="@item.Subcategory"
-                         data-item-name="@item.ItemName"
-                         data-brand-name="@item.BrandName"
-                         data-unit-size="@item.UnitSize">
-                    <div class="shop-item-image">
-                        <img src="~/images/items/@(item.ImageName).webp"
+                    <article class="@cardClass"
+                             data-shop-item
+                             data-upc="@item.UPC"
+                             data-stock="@item.Quantity"
+                             data-subcategory="@item.Subcategory"
+                             data-item-name="@item.ItemName"
+                             data-brand-name="@item.BrandName"
+                             data-unit-size="@item.UnitSize">
+                        <div class="shop-item-image">
+                            <img src="@item.ImageUrl"
                              alt="@item.ItemName"
                              class="shop-item-image-small @(isOutOfStock ? "shop-item-unavailable" : "")"
-                             loading="lazy"
+                             loading="@loadingMode"
+                             fetchpriority="@loadPriority"
+                             decoding="async"
                              width="300"
                              height="300"
                              data-name="@item.ItemName"
@@ -403,43 +440,55 @@
                              onmouseover="previewImage(this.src)"
                              onmouseout="hidePreview()"
                              onclick="showImage(this)"
-                             data-fallback-src="@Url.Action("GetImage", "Inventory", new { itemId = item.ItemId })"
-                             onerror="if (!this.dataset.retried) { this.dataset.retried='true'; this.src=this.dataset.fallbackSrc; } else { this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none'); }" />
-                        <div class="shop-image-fallback d-none">
-                            <img src="~/images/pantreatsLogo.png" alt="Pantreats" class="fallback-logo" />
-                            <p>Photo Coming Soon</p>
+                             onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');" />
+                            <div class="shop-image-fallback d-none">
+                                <img src="~/images/pantreatsLogo.png" alt="Pantreats" class="fallback-logo" />
+                                <p>Photo Coming Soon</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="shop-item-body">
-                        <div class="shop-item-meta">@item.Subcategory</div>
-                        <h2 class="shop-item-title">@item.ItemName</h2>
-                        <p class="shop-item-brand">@item.BrandName</p>
-                        <p class="shop-item-size">@item.UnitSize</p>
-                    </div>
+                        <div class="shop-item-body">
+                            <div class="shop-item-meta">@item.Subcategory</div>
+                            <h2 class="shop-item-title">@item.ItemName</h2>
+                            <p class="shop-item-brand">@item.BrandName</p>
+                            <p class="shop-item-size">@item.UnitSize</p>
+                        </div>
 
-                    <div class="shop-item-footer">
-                        <span class="shop-stock @(isOutOfStock ? "shop-stock-empty" : "")">
-                            @(isOutOfStock ? "Out of stock" : $"{item.Quantity} available")
-                        </span>
+                        <div class="shop-item-footer">
+                            <span class="shop-stock @(isOutOfStock ? "shop-stock-empty" : "")">
+                                @(isOutOfStock ? "Out of stock" : $"{item.Quantity} available")
+                            </span>
 
-                        <button type="button"
-                                class="btn shop-add-button"
-                                data-upc="@item.UPC"
-                                @(isOutOfStock ? "disabled" : "")>
-                            @(isOutOfStock ? "Currently Unavailable" : "Add to cart")
-                        </button>
-                    </div>
-                </article>
-            }
-        </div>
+                            <button type="button"
+                                    class="btn shop-add-button"
+                                    data-upc="@item.UPC"
+                                    @(isOutOfStock ? "disabled" : "")>
+                                @(isOutOfStock ? "Currently Unavailable" : "Add to cart")
+                            </button>
+                        </div>
+                    </article>
 
-        <div class="student-card text-center py-5 d-none" id="shopEmptyResults">
-            <h2 class="h5 mb-2">No pantry items match that search.</h2>
-            <p class="text-muted mb-0">Try a different search or switch categories to see more items.</p>
-        </div>
+                    itemIndex++;
+                }
+            </div>
+        }
 
-        <nav aria-label="Shop page navigation" class="shop-pagination" id="shopPagination"></nav>
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Shop page navigation" class="shop-pagination" id="shopPagination">
+                <a class="shop-page-link @(Model.HasPreviousPage ? "" : "disabled")"
+                   href="@GetShopUrl(Model.PageNumber - 1, selectedSubcategory, searchTerm)">Previous</a>
+                <div class="shop-page-numbers">
+                    @for (var pageNumber = 1; pageNumber <= Model.TotalPages; pageNumber++)
+                    {
+                        <a class="shop-page-number @(pageNumber == Model.PageNumber ? "active" : "")"
+                           href="@GetShopUrl(pageNumber, selectedSubcategory, searchTerm)">@pageNumber</a>
+                    }
+                </div>
+                <a class="shop-page-link @(Model.HasNextPage ? "" : "disabled")"
+                   href="@GetShopUrl(Model.PageNumber + 1, selectedSubcategory, searchTerm)">Next</a>
+            </nav>
+        }
     }
 
 </div>
@@ -505,12 +554,9 @@
             const cartKey = 'pantreats-shop-cart';
             const cartOpenKey = 'pantreats-shop-cart-open';
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-            const shopPage = document.querySelector('.shop-page');
-            const pageSize = 12;
             const itemCards = Array.from(document.querySelectorAll('[data-shop-item]'));
             let currentIndex = 0;
-            let visibleImages = [];
-            const totalPages = Math.max(1, Math.ceil(itemCards.length / pageSize));
+            let visibleImages = Array.from(document.querySelectorAll(".shop-item-image-small"));
             const cartPanel = document.getElementById('shopCartPanel');
             const cartToggleButton = document.getElementById('cartToggleButton');
             const cartCloseButton = document.getElementById('cartCloseButton');
@@ -525,19 +571,11 @@
             const confirmCheckoutButton = document.getElementById('confirmCheckoutButton');
             const checkoutConfirmation = bootstrap.Modal.getOrCreateInstance(checkoutConfirmationElement);
             const viewOrdersLink = document.getElementById('viewOrdersLink');
-            const pagination = document.getElementById('shopPagination');
-            const searchInput = document.getElementById('shopSearchInput');
-            const subcategoryButtons = Array.from(document.querySelectorAll('[data-subcategory-filter]'));
             const subcategoryStrip = document.getElementById('shopSubcategoryStrip');
             const subcategoryPreviousButton = document.getElementById('shopSubcategoryPrevious');
             const subcategoryNextButton = document.getElementById('shopSubcategoryNext');
-            const emptyResults = document.getElementById('shopEmptyResults');
-            const shopListAnchor = document.getElementById('shopFilterBar') || document.getElementById('shopGrid');
 
             let cart = loadCart().map(normalizeCartItem).filter(item => item.upc);
-            let currentPage = 1;
-            let activeSubcategory = 'all';
-            let searchTerm = '';
             let statusTimeoutId = null;
             let statusHideTimeoutId = null;
             let isCheckingOut = false;
@@ -546,22 +584,10 @@
                 button.addEventListener('click', () => addItem(button));
             });
 
-            cartToggleButton.addEventListener('click', toggleCart);
-            cartCloseButton.addEventListener('click', closeCart);
+            cartToggleButton?.addEventListener('click', toggleCart);
+            cartCloseButton?.addEventListener('click', closeCart);
             checkoutButton.addEventListener('click', showCheckoutConfirmation);
             confirmCheckoutButton.addEventListener('click', checkout);
-            searchInput?.addEventListener('input', () => {
-                searchTerm = searchInput.value.trim().toLowerCase();
-                renderPage(1);
-            });
-
-            subcategoryButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    activeSubcategory = button.dataset.subcategoryFilter || 'all';
-                    subcategoryButtons.forEach(pill => pill.classList.toggle('active', pill === button));
-                    renderPage(1);
-                });
-            });
 
             function updateSubcategoryNavState() {
                 if (!subcategoryStrip || !subcategoryPreviousButton || !subcategoryNextButton) {
@@ -603,8 +629,6 @@
                 updateSubcategoryNavState();
             }
 
-            renderPage(currentPage);
-            renderPagination();
             renderCart();
 
             if (sessionStorage.getItem(cartOpenKey) === 'true') {
@@ -621,116 +645,6 @@
 
             function saveCart() {
                 sessionStorage.setItem(cartKey, JSON.stringify(cart));
-            }
-
-            function normalizePage(page) {
-                const filteredPageCount = getTotalPages();
-
-                if (!Number.isFinite(page) || page < 1) {
-                    return 1;
-                }
-
-                return Math.min(page, filteredPageCount);
-            }
-
-            function renderPage(page) {
-                currentPage = normalizePage(page);
-
-                const filteredItems = getFilteredItems();
-                const start = (currentPage - 1) * pageSize;
-                const end = start + pageSize;
-
-                itemCards.forEach(card => {
-                    card.classList.add('d-none');
-                });
-
-                filteredItems.forEach((card, index) => {
-                    card.classList.toggle('d-none', index < start || index >= end);
-                });
-
-                const filteredCount = filteredItems.length;
-                const totalFilteredPages = getTotalPages(filteredCount);
-                emptyResults?.classList.toggle('d-none', filteredCount !== 0);
-                pagination.classList.toggle('d-none', totalFilteredPages <= 1 || filteredCount === 0);
-                visibleImages = Array.from(document.querySelectorAll(".shop-item-image-small"))
-                .filter(img => !img.closest("[data-shop-item]").classList.contains("d-none"));
-                renderPagination();
-            }
-
-            function renderPagination() {
-                if (!pagination) {
-                    return;
-                }
-
-                pagination.innerHTML = '';
-
-                const filteredCount = getFilteredItems().length;
-                const filteredPageCount = getTotalPages(filteredCount);
-
-                if (filteredPageCount <= 1) {
-                    return;
-                }
-
-                pagination.appendChild(createPageButton('Previous', currentPage - 1, currentPage === 1, 'shop-page-link'));
-
-                const numbers = document.createElement('div');
-                numbers.className = 'shop-page-numbers';
-
-                for (let page = 1; page <= filteredPageCount; page++) {
-                    numbers.appendChild(createPageButton(page, page, false, `shop-page-number ${page === currentPage ? 'active' : ''}`));
-                }
-
-                pagination.appendChild(numbers);
-                pagination.appendChild(createPageButton('Next', currentPage + 1, currentPage === filteredPageCount, 'shop-page-link'));
-            }
-
-            function createPageButton(label, page, disabled, className) {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = `btn ${className}`;
-                button.textContent = label;
-                button.disabled = disabled;
-                button.addEventListener('click', () => {
-                    renderPage(page);
-                    scrollToShopResults();
-                });
-                return button;
-            }
-
-            function scrollToShopResults() {
-                if (!shopListAnchor) {
-                    return;
-                }
-
-                const offset = 24;
-                const targetTop = Math.max(0, window.scrollY + shopListAnchor.getBoundingClientRect().top - offset);
-
-                window.scrollTo({
-                    top: targetTop,
-                    behavior: 'smooth'
-                });
-            }
-
-            function getFilteredItems() {
-                return itemCards.filter(card => {
-                    const subcategory = String(card.dataset.subcategory || '').toLowerCase();
-                    const itemName = String(card.dataset.itemName || '').toLowerCase();
-                    const brandName = String(card.dataset.brandName || '').toLowerCase();
-                    const unitSize = String(card.dataset.unitSize || '').toLowerCase();
-                    const matchesSubcategory = activeSubcategory === 'all' || subcategory === activeSubcategory.toLowerCase();
-                    const matchesSearch = !searchTerm
-                        || itemName.includes(searchTerm)
-                        || brandName.includes(searchTerm)
-                        || subcategory.includes(searchTerm)
-                        || unitSize.includes(searchTerm)
-                        || `${brandName} ${itemName}`.includes(searchTerm);
-
-                    return matchesSubcategory && matchesSearch;
-                });
-            }
-
-            function getTotalPages(filteredCount = getFilteredItems().length) {
-                return Math.max(1, Math.ceil(filteredCount / pageSize));
             }
 
             async function addItem(button) {
@@ -765,8 +679,9 @@
 
                     if (existingItem) {
                         existingItem.quantity = requestedQuantity;
+                        existingItem.availableStock = Math.max(existingItem.availableStock || 0, Number(result.item.quantity || result.item.Quantity || requestedQuantity));
                     } else {
-                        const cartItem = normalizeCartItem(result.item);
+                        const cartItem = normalizeCartItem(result.item, result.item.quantity || result.item.Quantity);
                         cartItem.quantity = 1;
                         cart.push(cartItem);
                     }
@@ -944,7 +859,12 @@
 
             function getAvailableStock(upc) {
                 const card = itemCards.find(item => item.dataset.upc === upc);
-                return Math.max(0, Number(card?.dataset.stock || 0));
+                if (card) {
+                    return Math.max(0, Number(card.dataset.stock || 0));
+                }
+
+                const cartItem = cart.find(item => item.upc === upc);
+                return Math.max(0, Number(cartItem?.availableStock || Number.MAX_SAFE_INTEGER));
             }
 
             function getCartItemQuantity(upc) {
@@ -952,6 +872,11 @@
             }
 
             function decrementStock(upc) {
+                const cartItem = cart.find(item => item.upc === upc);
+                if (cartItem && Number.isFinite(Number(cartItem.availableStock))) {
+                    cartItem.availableStock = Math.max(0, Number(cartItem.availableStock) - 1);
+                }
+
                 const card = itemCards.find(item => item.dataset.upc === upc);
                 if (!card) {
                     return;
@@ -973,12 +898,13 @@
                 stockLabel.textContent = `${stock} available`;
             }
 
-            function normalizeCartItem(item) {
+            function normalizeCartItem(item, availableStock = null) {
                 return {
                     upc: item.upc || item.UPC,
                     itemName: item.itemName || item.ItemName,
                     brandName: item.brandName || item.BrandName,
                     unitSize: item.unitSize || item.UnitSize,
+                    availableStock: Math.max(0, Number(availableStock ?? item.availableStock ?? item.AvailableStock ?? Number.MAX_SAFE_INTEGER)),
                     quantity: Math.max(1, Number(item.quantity || item.Quantity || 1))
                 };
             }
@@ -997,13 +923,13 @@
 
             function openCart() {
                 cartPanel.classList.remove('d-none');
-                cartToggleButton.setAttribute('aria-expanded', 'true');
+                cartToggleButton?.setAttribute('aria-expanded', 'true');
                 sessionStorage.setItem(cartOpenKey, 'true');
             }
 
             function closeCart() {
                 cartPanel.classList.add('d-none');
-                cartToggleButton.setAttribute('aria-expanded', 'false');
+                cartToggleButton?.setAttribute('aria-expanded', 'false');
                 sessionStorage.setItem(cartOpenKey, 'false');
             }
 

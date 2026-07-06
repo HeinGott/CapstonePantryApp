@@ -375,12 +375,18 @@
         </section>
 
         <div class="shop-grid mb-4" id="shopGrid">
+            @{
+                var itemIndex = 0;
+            }
             @foreach (var item in Model.Items)
             {
                 var isOutOfStock = item.Quantity <= 0;
+                var cardClass = isOutOfStock ? "shop-item-card out-of-stock" : "shop-item-card";
+                var loadPriority = itemIndex < 4 ? "high" : "low";
+                var loadingMode = itemIndex < 4 ? "eager" : "lazy";
 
-                <article class="shop-item-card" @(isOutOfStock ? "out-of-stock" : "")"
-                         data-shop-item
+                <article class="@cardClass"
+                          data-shop-item
                          data-upc="@item.UPC"
                          data-stock="@item.Quantity"
                          data-subcategory="@item.Subcategory"
@@ -391,7 +397,9 @@
                         <img src="~/images/items/@(item.ImageName).webp"
                              alt="@item.ItemName"
                              class="shop-item-image-small @(isOutOfStock ? "shop-item-unavailable" : "")"
-                             loading="lazy"
+                             loading="@loadingMode"
+                             fetchpriority="@loadPriority"
+                             decoding="async"
                              width="300"
                              height="300"
                              data-name="@item.ItemName"
@@ -431,6 +439,8 @@
                         </button>
                     </div>
                 </article>
+
+                itemIndex++;
             }
         </div>
 

@@ -38,45 +38,23 @@
                         <span asp-validation-for="LastName" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label">Phone</label>
                         <input asp-for="PhoneNum" class="form-control" />
                         <span asp-validation-for="PhoneNum" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label">Email</label>
                         <input asp-for="Email" class="form-control" />
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Year</label>
-                        <select asp-for="Year" class="form-select">
-                            <option value="">-- Select Year --</option>
-                            <option value="Freshman">Freshman</option>
-                            <option value="Sophomore">Sophomore</option>
-                            <option value="Junior">Junior</option>
-                            <option value="Senior">Senior</option>
-                            <option value="Graduate">Graduate</option>
-                        </select>
-                        <span asp-validation-for="Year" class="text-danger"></span>
-                    </div>
+                    
                 </div>
 
                 <!-- Volunteer Experience -->
                 <h5 class="mb-3" style="color: var(--pantreats-blue);">Volunteer Experience</h5>
-
-                <div class="form-check mb-3">
-                    <input asp-for="HasVolunteeredBefore" class="form-check-input" />
-                    <label class="form-check-label">I have volunteered in the pantry before</label>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">If yes, in what capacity? (e.g., weekly volunteer, food drive donor)</label>
-                    <input asp-for="PreviousCapacity" class="form-control" />
-                </div>
-
+                             
                 <div class="mb-4">
                     <label class="form-label">Why do you want to volunteer?</label>
                     <textarea asp-for="ReasonForVolunteering" class="form-control" rows="3"></textarea>

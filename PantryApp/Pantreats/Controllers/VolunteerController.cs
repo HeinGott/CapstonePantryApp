@@ -231,7 +231,7 @@ namespace Pantreats.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Students")]
-        public IActionResult ApplyVolunteer()
+        public async Task<IActionResult> ApplyVolunteer()
         {
             var accessResult = EnsureApprovedStudentAccess();
             if (accessResult != null)
@@ -266,6 +266,27 @@ namespace Pantreats.Controllers
             }
 
             var model = new VolunteerApplicationViewModel();
+            var studentApplication = _context.UserApplications
+            .AsNoTracking()
+            .Where(application => application.UserId == userId)
+            .OrderByDescending(application => application.RegistrationDate)
+            .ThenByDescending(application => application.ApplicationId)
+            .FirstOrDefault();
+
+            if (studentApplication != null)
+            {
+                model.FirstName = studentApplication.FirstName;
+                model.LastName = studentApplication.LastName;
+                model.PhoneNum = studentApplication.PhoneNum;               
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user != null)
+            {
+                model.Email = user.Email;
+            }
+
             return View(model);
         }
 

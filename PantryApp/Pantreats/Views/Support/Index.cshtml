@@ -1,4 +1,6 @@
-﻿@{
+﻿@model List<SupportArticle>
+
+@{
     ViewData["Title"] = "Support Index";
     ViewData["FullWidth"] = true;
 }
@@ -10,5 +12,18 @@
     <input type="text" name="keyword" placeholder="Search the manual" />
     <button type="submit">Search</button>
 </form>
+
+@foreach (var article in Model)
+    {
+        <div>
+            <h2>
+            <a asp-controller="Support" asp-action="Article" asp-route-slug="@article.Slug">
+                @article.Title
+            </a>
+            </h2>
+            <p>@article.Summary</p>
+        </div>
+    }
+
 </div>
 

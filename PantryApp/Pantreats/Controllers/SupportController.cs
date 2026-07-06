@@ -15,7 +15,8 @@ namespace Pantreats.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var allArticles = _context.SupportArticles.ToList();
+            return View(allArticles);
         }
 
         [HttpGet]

@@ -12,16 +12,18 @@ namespace Pantreats.Controllers
         private readonly ApplicationDbContext _context;
         private readonly CheckoutService _checkoutService;
         private readonly IEmailService _emailService;
+        private readonly IWebHostEnvironment _environment;
 
-        public ShopController(ApplicationDbContext context, CheckoutService checkoutService, IEmailService emailService)
+        public ShopController(ApplicationDbContext context, CheckoutService checkoutService, IEmailService emailService, IWebHostEnvironment environment)
         {
             _context = context;
             _checkoutService = checkoutService;
             _emailService = emailService;
+            _environment = environment;
         }
 
         [HttpGet("")]
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index(int page = 1, string? search = null, string? subcategory = null)
         {
             var accessResult = await EnsureApprovedStudentAccessAsync();
             if (accessResult != null)
@@ -30,17 +32,45 @@ namespace Pantreats.Controllers
             }
 
             page = Math.Max(page, 1);
+            search = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
+            subcategory = string.IsNullOrWhiteSpace(subcategory) || subcategory.Equals("all", StringComparison.OrdinalIgnoreCase)
+                ? null
+                : subcategory.Trim();
 
-            var query = _context.Inventory
-                .AsNoTracking()
-                .OrderBy(i => i.ItemName)
-                .ThenBy(i => i.BrandName);
+            var baseQuery = _context.Inventory.AsNoTracking();
+            var totalInventoryItems = await baseQuery.CountAsync();
+            var subcategories = await baseQuery
+                .Where(i => i.Subcategory != null && i.Subcategory != string.Empty)
+                .Select(i => i.Subcategory)
+                .Distinct()
+                .OrderBy(currentSubcategory => currentSubcategory)
+                .ToListAsync();
+
+            var query = baseQuery;
+
+            if (!string.IsNullOrWhiteSpace(subcategory))
+            {
+                query = query.Where(i => i.Subcategory == subcategory);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(i =>
+                    i.ItemName.Contains(search) ||
+                    i.BrandName.Contains(search) ||
+                    i.Subcategory.Contains(search) ||
+                    i.UnitSize.Contains(search));
+            }
 
             var totalItems = await query.CountAsync();
             var totalPages = Math.Max(1, (int)Math.Ceiling(totalItems / (double)PageSize));
             page = Math.Min(page, totalPages);
 
             var items = await query
+                .OrderBy(i => i.ItemName)
+                .ThenBy(i => i.BrandName)
+                .Skip((page - 1) * PageSize)
+                .Take(PageSize)
                 .Select(i => new ShopItemViewModel
                 {
                     ItemId = i.ItemId,
@@ -56,12 +86,21 @@ namespace Pantreats.Controllers
                 })
                 .ToListAsync();
 
+            foreach (var item in items)
+            {
+                item.ImageUrl = ResolveShopImageUrl(item) ?? Url.Action("GetImage", "Inventory", new { itemId = item.ItemId }) ?? "/images/pantreatsLogo.png";
+            }
+
             return View(new ShopViewModel
             {
                 Items = items,
+                Subcategories = subcategories,
                 PageNumber = page,
                 TotalPages = totalPages,
                 TotalItems = totalItems,
+                TotalInventoryItems = totalInventoryItems,
+                SearchTerm = search,
+                SelectedSubcategory = subcategory,
                 PageSize = PageSize
             });
         }
@@ -105,6 +144,8 @@ namespace Pantreats.Controllers
             {
                 return NotFound(new { success = false, message = "That item could not be found." });
             }
+
+            item.ImageUrl = ResolveShopImageUrl(item) ?? Url.Action("GetImage", "Inventory", new { itemId = item.ItemId }) ?? "/images/pantreatsLogo.png";
 
             if (item.Quantity <= 0)
             {
@@ -199,6 +240,42 @@ namespace Pantreats.Controllers
                 .ToLowerInvariant();
 
             return Regex.Replace(normalized, "[^a-z0-9]", string.Empty);
+        }
+
+        private string? ResolveShopImageUrl(ShopItemViewModel item)
+        {
+            var folderPath = Path.Combine(_environment.WebRootPath, "images", "items");
+            if (!Directory.Exists(folderPath))
+            {
+                return null;
+            }
+
+            var baseNames = new[]
+            {
+                item.UPC,
+                item.ImageName,
+                item.ItemName
+            }
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
+            var extensions = new[] { ".webp", ".png", ".jpg", ".jpeg" };
+
+            foreach (var baseName in baseNames)
+            {
+                foreach (var extension in extensions)
+                {
+                    var fileName = $"{baseName}{extension}";
+                    var filePath = Path.Combine(folderPath, fileName);
+
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        return $"/images/items/{Uri.EscapeDataString(fileName)}";
+                    }
+                }
+            }
+
+            return null;
         }
 
         private async Task<IActionResult?> EnsureApprovedStudentAccessAsync()

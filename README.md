@@ -1,6 +1,5 @@
 # CapstonePantryApp
 Final Capstone project for Summer 2026.
-Expected Finish Date June 30th
 Contributors: 
 
     Heinrich Gottberg

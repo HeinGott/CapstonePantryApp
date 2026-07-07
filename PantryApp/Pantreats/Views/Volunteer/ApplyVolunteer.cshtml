@@ -14,13 +14,13 @@
                 <img src="/Images/pantreatsLogo.png" class="mb-3" style="max-width: 220px;">
                 <h1 class="section-title">Volunteer Application</h1>
                 <p class="section-text">Thank you for your interest in volunteering with PanTreats!</p>
-            </div>
-
-            <!-- Validation Summary -->
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            </div>            
 
             <form asp-controller="Volunteer" asp-action="VolunteerApplicationForm" method="post">
                 @Html.AntiForgeryToken()
+
+                <!-- Validation Summary -->
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                 <!-- Basic Info -->
                 <h5 class="mb-3" style="color: var(--pantreats-blue);">Basic Information</h5>

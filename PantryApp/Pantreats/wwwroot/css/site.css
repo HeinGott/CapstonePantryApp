@@ -744,6 +744,17 @@ a:hover {
     flex-direction: column;
 }
 
+.admin-panel-volunteer {
+    background: #ffffff;
+    border: 1px solid var(--pantreats-border);
+    border-radius: 16px;
+    padding: 1rem 1.05rem;
+    box-shadow: 0 8px 22px rgba(16, 47, 97, 0.07);
+    min-height: max-content;
+    display: flex;
+    flex-direction: column;
+}
+
 .admin-panel-orders {
     grid-column: 1;
     grid-row: 1 / span 2;

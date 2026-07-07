@@ -172,13 +172,94 @@ namespace Pantreats.Controllers
             }
 
             var roles = await _userManager.GetRolesAsync(user);
+            var studentApplication = await _context.UserApplications
+                .AsNoTracking()
+                .Where(application => application.UserId == id)
+                .OrderByDescending(application => application.RegistrationDate)
+                .ThenByDescending(application => application.ApplicationId)
+                .FirstOrDefaultAsync();
+
+            var volunteerApplication = await _context.VolunteerApplications
+                .AsNoTracking()
+                .Where(application => application.UserId == id)
+                .OrderByDescending(application => application.SubmittedDate)
+                .ThenByDescending(application => application.VolunteerApplicationId)
+                .FirstOrDefaultAsync();
+
+            var donor = await _context.Donors
+                .AsNoTracking()
+                .FirstOrDefaultAsync(existingDonor => existingDonor.UserId == id);
+
             var model = new UserEditViewModel
             {
                 UserId = user.Id,
                 Email = user.Email ?? string.Empty,
                 UserName = user.UserName ?? string.Empty,
                 PhoneNumber = user.PhoneNumber,
-                Role = NormalizeRole(roles.FirstOrDefault())
+                Role = NormalizeRole(roles.FirstOrDefault()),
+                StudentApplicationId = studentApplication?.ApplicationId,
+                StudentSubmittedAt = studentApplication?.RegistrationDate,
+                StudentReviewedAt = studentApplication?.ReviewedAt,
+                StudentApplicationStatus = studentApplication?.ApplicationStatus,
+                StudentReviewNotes = studentApplication?.ReviewNotes,
+                StudentApplicationIsActive = studentApplication?.IsActive ?? false,
+                StudentApplicationIsVolunteer = studentApplication?.IsVolunteer ?? false,
+                StudentNumber = studentApplication?.StudentId,
+                StudentFirstName = studentApplication?.FirstName ?? string.Empty,
+                StudentMiddleName = studentApplication?.MiddleName ?? string.Empty,
+                StudentLastName = studentApplication?.LastName ?? string.Empty,
+                StudentDateOfBirth = studentApplication?.DOB,
+                StudentApplicationPhoneNumber = studentApplication?.PhoneNum ?? string.Empty,
+                StudentGender = studentApplication?.Gender ?? string.Empty,
+                StudentStatus = studentApplication?.StudentStatus ?? string.Empty,
+                StudentCampus = studentApplication?.Campus ?? string.Empty,
+                HouseholdBabiesToddlers = studentApplication?.HouseholdBabiesToddlers ?? 0,
+                HouseholdChildren = studentApplication?.HouseholdBabiesChildren ?? 0,
+                HouseholdTeens = studentApplication?.HouseholdTeens ?? 0,
+                HouseholdAdults = studentApplication?.HouseholdAdults ?? 0,
+                HasTransportation = studentApplication?.HasTransportation,
+                EmploymentStatus = studentApplication?.EmploymentStatus ?? string.Empty,
+                EmployedHouseMembers = studentApplication?.EmployedHouseMembers ?? 0,
+                HasSnap = studentApplication?.HasSNAP ?? false,
+                HasWic = studentApplication?.HasWIC ?? false,
+                HasTanf = studentApplication?.HasTANF ?? false,
+                InterestedInSnap = studentApplication?.IsInterestedInSNAP ?? false,
+                InterestedInWic = studentApplication?.IsInterestedInWIC ?? false,
+                InterestedInTanf = studentApplication?.IsInterestedInTANF ?? false,
+                VolunteerApplicationId = volunteerApplication?.VolunteerApplicationId,
+                VolunteerSubmittedAt = volunteerApplication?.SubmittedDate,
+                VolunteerReviewedAt = volunteerApplication?.ReviewedAt,
+                VolunteerApplicationStatus = volunteerApplication?.ApplicationStatus,
+                VolunteerReviewNotes = volunteerApplication?.ReviewNotes,
+                VolunteerFirstName = volunteerApplication?.FirstName ?? string.Empty,
+                VolunteerLastName = volunteerApplication?.LastName ?? string.Empty,
+                VolunteerEmail = volunteerApplication?.Email ?? string.Empty,
+                VolunteerPhoneNumber = volunteerApplication?.PhoneNum ?? string.Empty,
+                VolunteerYear = volunteerApplication?.Year ?? string.Empty,
+                HasVolunteeredBefore = volunteerApplication?.HasVolunteeredBefore ?? false,
+                PreviousCapacity = volunteerApplication?.PreviousCapacity,
+                ReasonForVolunteering = volunteerApplication?.ReasonForVolunteering ?? string.Empty,
+                VolunteerFrequency = volunteerApplication?.VolunteerFrequency ?? string.Empty,
+                OtherFrequency = volunteerApplication?.OtherFrequency,
+                MonMorning = volunteerApplication?.MonMorning ?? false,
+                MonAfternoon = volunteerApplication?.MonAfternoon ?? false,
+                TueMorning = volunteerApplication?.TueMorning ?? false,
+                TueAfternoon = volunteerApplication?.TueAfternoon ?? false,
+                WedMorning = volunteerApplication?.WedMorning ?? false,
+                WedAfternoon = volunteerApplication?.WedAfternoon ?? false,
+                ThuMorning = volunteerApplication?.ThuMorning ?? false,
+                ThuAfternoon = volunteerApplication?.ThuAfternoon ?? false,
+                FriMorning = volunteerApplication?.FriMorning ?? false,
+                FriAfternoon = volunteerApplication?.FriAfternoon ?? false,
+                SatMorning = volunteerApplication?.SatMorning ?? false,
+                SatAfternoon = volunteerApplication?.SatAfternoon ?? false,
+                SunMorning = volunteerApplication?.SunMorning ?? false,
+                SunAfternoon = volunteerApplication?.SunAfternoon ?? false,
+                DonorId = donor?.DonorID,
+                DonorName = donor?.Name ?? string.Empty,
+                DonorEmail = donor?.Email,
+                DonorPhoneNumber = donor?.PhoneNumber,
+                DonorAddress = donor?.Address
             };
 
             PopulateRoleOptions(model);
@@ -192,6 +273,11 @@ namespace Pantreats.Controllers
             if (!AllowedRoles.ContainsKey(model.Role))
             {
                 ModelState.AddModelError(nameof(model.Role), "Select admin, student, volunteer, donor, or kiosk.");
+            }
+
+            if (model.StudentDateOfBirth > DateTime.Today)
+            {
+                ModelState.AddModelError(nameof(model.StudentDateOfBirth), "Date of birth cannot be in the future.");
             }
 
             if (!ModelState.IsValid)
@@ -239,8 +325,115 @@ namespace Pantreats.Controllers
                 return View(model);
             }
 
+            if (model.StudentApplicationId.HasValue)
+            {
+                var studentApplication = await _context.UserApplications
+                    .FirstOrDefaultAsync(application =>
+                        application.ApplicationId == model.StudentApplicationId.Value &&
+                        application.UserId == model.UserId);
+
+                if (studentApplication != null)
+                {
+                    studentApplication.StudentId = model.StudentNumber ?? studentApplication.StudentId;
+                    studentApplication.FirstName = model.StudentFirstName;
+                    studentApplication.MiddleName = model.StudentMiddleName;
+                    studentApplication.LastName = model.StudentLastName;
+                    studentApplication.DOB = model.StudentDateOfBirth;
+                    studentApplication.PhoneNum = model.StudentApplicationPhoneNumber;
+                    studentApplication.Gender = model.StudentGender;
+                    studentApplication.StudentStatus = model.StudentStatus;
+                    studentApplication.Campus = model.StudentCampus;
+                    studentApplication.HouseholdBabiesToddlers = model.HouseholdBabiesToddlers;
+                    studentApplication.HouseholdBabiesChildren = model.HouseholdChildren;
+                    studentApplication.HouseholdTeens = model.HouseholdTeens;
+                    studentApplication.HouseholdAdults = model.HouseholdAdults;
+                    studentApplication.HasTransportation = model.HasTransportation;
+                    studentApplication.EmploymentStatus = model.EmploymentStatus;
+                    studentApplication.EmployedHouseMembers = model.EmployedHouseMembers;
+                    studentApplication.HasSNAP = model.HasSnap;
+                    studentApplication.HasWIC = model.HasWic;
+                    studentApplication.HasTANF = model.HasTanf;
+                    studentApplication.IsInterestedInSNAP = model.InterestedInSnap;
+                    studentApplication.IsInterestedInWIC = model.InterestedInWic;
+                    studentApplication.IsInterestedInTANF = model.InterestedInTanf;
+                    studentApplication.ApplicationStatus = string.IsNullOrWhiteSpace(model.StudentApplicationStatus)
+                        ? studentApplication.ApplicationStatus
+                        : model.StudentApplicationStatus.Trim();
+                    studentApplication.ReviewNotes = string.IsNullOrWhiteSpace(model.StudentReviewNotes)
+                        ? null
+                        : model.StudentReviewNotes.Trim();
+                    studentApplication.IsActive = model.StudentApplicationIsActive;
+                    studentApplication.IsVolunteer = model.StudentApplicationIsVolunteer;
+                }
+            }
+
+            if (model.VolunteerApplicationId.HasValue)
+            {
+                var volunteerApplication = await _context.VolunteerApplications
+                    .FirstOrDefaultAsync(application =>
+                        application.VolunteerApplicationId == model.VolunteerApplicationId.Value &&
+                        application.UserId == model.UserId);
+
+                if (volunteerApplication != null)
+                {
+                    volunteerApplication.FirstName = model.VolunteerFirstName;
+                    volunteerApplication.LastName = model.VolunteerLastName;
+                    volunteerApplication.Email = model.VolunteerEmail;
+                    volunteerApplication.PhoneNum = model.VolunteerPhoneNumber;
+                    volunteerApplication.Year = model.VolunteerYear;
+                    volunteerApplication.HasVolunteeredBefore = model.HasVolunteeredBefore;
+                    volunteerApplication.PreviousCapacity = string.IsNullOrWhiteSpace(model.PreviousCapacity)
+                        ? null
+                        : model.PreviousCapacity.Trim();
+                    volunteerApplication.ReasonForVolunteering = model.ReasonForVolunteering;
+                    volunteerApplication.VolunteerFrequency = model.VolunteerFrequency;
+                    volunteerApplication.OtherFrequency = string.IsNullOrWhiteSpace(model.OtherFrequency)
+                        ? null
+                        : model.OtherFrequency.Trim();
+                    volunteerApplication.ApplicationStatus = string.IsNullOrWhiteSpace(model.VolunteerApplicationStatus)
+                        ? volunteerApplication.ApplicationStatus
+                        : model.VolunteerApplicationStatus.Trim();
+                    volunteerApplication.ReviewNotes = string.IsNullOrWhiteSpace(model.VolunteerReviewNotes)
+                        ? null
+                        : model.VolunteerReviewNotes.Trim();
+                    volunteerApplication.MonMorning = model.MonMorning;
+                    volunteerApplication.MonAfternoon = model.MonAfternoon;
+                    volunteerApplication.TueMorning = model.TueMorning;
+                    volunteerApplication.TueAfternoon = model.TueAfternoon;
+                    volunteerApplication.WedMorning = model.WedMorning;
+                    volunteerApplication.WedAfternoon = model.WedAfternoon;
+                    volunteerApplication.ThuMorning = model.ThuMorning;
+                    volunteerApplication.ThuAfternoon = model.ThuAfternoon;
+                    volunteerApplication.FriMorning = model.FriMorning;
+                    volunteerApplication.FriAfternoon = model.FriAfternoon;
+                    volunteerApplication.SatMorning = model.SatMorning;
+                    volunteerApplication.SatAfternoon = model.SatAfternoon;
+                    volunteerApplication.SunMorning = model.SunMorning;
+                    volunteerApplication.SunAfternoon = model.SunAfternoon;
+                }
+            }
+
+            if (model.DonorId.HasValue)
+            {
+                var donor = await _context.Donors
+                    .FirstOrDefaultAsync(existingDonor =>
+                        existingDonor.DonorID == model.DonorId.Value &&
+                        existingDonor.UserId == model.UserId);
+
+                if (donor != null)
+                {
+                    donor.Name = model.DonorName;
+                    donor.Email = model.DonorEmail;
+                    donor.PhoneNumber = model.DonorPhoneNumber;
+                    donor.Address = model.DonorAddress;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
             TempData["StatusMessage"] = "User updated successfully.";
-            return RedirectToAction("Users");
+            TempData["StatusType"] = "success";
+            return RedirectToAction(nameof(UserEdit), new { id = model.UserId });
         }
 
         // Edits the user's role from the user list.

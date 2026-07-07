@@ -1,16 +1,18 @@
 @model Pantreats.Models.UserEditViewModel
 
 @{
-    ViewData["Title"] = "Edit User";
+    ViewData["Title"] = "User Details";
 }
 
-<div class="student-page py-4">
-
-    <div class="student-page-header mb-4">
-        <h1 class="student-page-title">Edit User</h1>
-        <p class="student-page-subtitle">
-            Update account information and role assignment.
-        </p>
+<div class="admin-user-edit-page student-page py-4">
+    <div class="admin-user-edit-header">
+        <div>
+            <a asp-controller="Admin" asp-action="Users" class="admin-user-edit-back">
+                Back to users
+            </a>
+            <h1 class="admin-user-edit-title">User Account Details</h1>
+            <p class="admin-user-edit-subtitle">View and manage account details.</p>
+        </div>
     </div>
 
     @if (TempData["StatusMessage"] is string statusMessage)
@@ -23,50 +25,425 @@
         </div>
     }
 
-    <div class="student-card">
-        <form asp-controller="Admin" asp-action="UserEdit" method="post">
-            <input asp-for="UserId" type="hidden" />
+    <div class="admin-user-header-card">
+        <div class="admin-user-header-main">
+            <h2>@Model.Email</h2>
+            @if (!string.IsNullOrWhiteSpace(Model.UserName) && !string.Equals(Model.UserName, Model.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                <p>@Model.UserName</p>
+            }
+        </div>
 
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div class="admin-user-header-stats">
+            <article class="admin-user-header-stat">
+                <span>Role</span>
+                <strong>@(!string.IsNullOrWhiteSpace(Model.Role) ? Model.Role : "No role")</strong>
+            </article>
+            <article class="admin-user-header-stat">
+                <span>Phone</span>
+                <strong>@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "Not provided" : Model.PhoneNumber)</strong>
+            </article>
+            <article class="admin-user-header-stat">
+                <span>Student</span>
+                <strong>@(Model.HasStudentApplication ? (Model.StudentApplicationStatus ?? "On file") : "Not on file")</strong>
+            </article>
+            <article class="admin-user-header-stat">
+                <span>Volunteer</span>
+                <strong>@(Model.HasVolunteerApplication ? (Model.VolunteerApplicationStatus ?? "On file") : "Not on file")</strong>
+            </article>
+            <article class="admin-user-header-stat">
+                <span>Donor</span>
+                <strong>@(Model.HasDonorProfile ? "On file" : "Not on file")</strong>
+            </article>
+        </div>
+    </div>
 
-            <div class="row g-3">
-                <div class="col-md-6">
+    <div class="admin-user-summary-grid">
+        <article class="admin-user-summary-card">
+            <span class="admin-user-summary-label">Student application</span>
+            <strong>@(Model.HasStudentApplication ? (Model.StudentApplicationStatus ?? "On file") : "Not on file")</strong>
+            <p>@(Model.StudentSubmittedAt.HasValue ? $"Submitted {Model.StudentSubmittedAt.Value.ToLocalTime():MMM d, yyyy}" : "No student application recorded")</p>
+        </article>
+
+        <article class="admin-user-summary-card">
+            <span class="admin-user-summary-label">Volunteer application</span>
+            <strong>@(Model.HasVolunteerApplication ? (Model.VolunteerApplicationStatus ?? "On file") : "Not on file")</strong>
+            <p>@(Model.VolunteerSubmittedAt.HasValue ? $"Submitted {Model.VolunteerSubmittedAt.Value.ToLocalTime():MMM d, yyyy}" : "No volunteer application recorded")</p>
+        </article>
+
+        <article class="admin-user-summary-card">
+            <span class="admin-user-summary-label">Donor profile</span>
+            <strong>@(Model.HasDonorProfile ? "On file" : "Not on file")</strong>
+            <p>@(Model.HasDonorProfile ? "Editable from this page." : "No donor profile recorded")</p>
+        </article>
+    </div>
+
+    <form asp-controller="Admin" asp-action="UserEdit" method="post" class="admin-user-form">
+        <input asp-for="UserId" type="hidden" />
+        <input asp-for="StudentApplicationId" type="hidden" />
+        <input asp-for="VolunteerApplicationId" type="hidden" />
+        <input asp-for="DonorId" type="hidden" />
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <section class="admin-user-section">
+            <div class="admin-user-section-heading">
+                <h2>Account Details</h2>
+            </div>
+
+            <div class="admin-user-grid">
+                <div class="admin-user-field">
                     <label asp-for="Email" class="form-label"></label>
                     <input asp-for="Email" class="form-control" />
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6">
+                <div class="admin-user-field">
                     <label asp-for="UserName" class="form-label"></label>
                     <input asp-for="UserName" class="form-control" />
                     <span asp-validation-for="UserName" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6">
+                <div class="admin-user-field">
                     <label asp-for="PhoneNumber" class="form-label"></label>
                     <input asp-for="PhoneNumber" class="form-control" />
                     <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6">
+                <div class="admin-user-field">
                     <label asp-for="Role" class="form-label"></label>
                     <select asp-for="Role" asp-items="Model.AvailableRoles" class="form-select"></select>
                     <span asp-validation-for="Role" class="text-danger"></span>
                 </div>
             </div>
+        </section>
 
-            <div class="mt-4 d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-                <a asp-controller="Admin" asp-action="Users" class="btn btn-outline-secondary">Cancel</a>
-                <button type="button"
-                        class="btn btn-outline-danger ms-auto"
-                        data-bs-toggle="modal"
-                        data-bs-target="#deleteUserModal">
-                    Delete User
-                </button>
+        <section class="admin-user-section">
+            <div class="admin-user-section-heading">
+                <h2>Student Application</h2>
+
+                @if (Model.HasStudentApplication)
+                {
+                    <div class="admin-user-meta">
+                        <span>@(!string.IsNullOrWhiteSpace(Model.StudentApplicationStatus) ? Model.StudentApplicationStatus : "Pending")</span>
+                        @if (Model.StudentSubmittedAt.HasValue)
+                        {
+                            <span>Submitted @Model.StudentSubmittedAt.Value.ToLocalTime().ToString("MMM d, yyyy")</span>
+                        }
+                    </div>
+                }
             </div>
-        </form>
-    </div>
+
+            @if (Model.HasStudentApplication)
+            {
+                <div class="admin-user-grid">
+                    <div class="admin-user-field">
+                        <label asp-for="StudentNumber" class="form-label">Student ID</label>
+                        <input asp-for="StudentNumber" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="StudentCampus" class="form-label">Campus</label>
+                        <input asp-for="StudentCampus" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="StudentFirstName" class="form-label">First Name</label>
+                        <input asp-for="StudentFirstName" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="StudentMiddleName" class="form-label">Middle Name</label>
+                        <input asp-for="StudentMiddleName" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="StudentLastName" class="form-label">Last Name</label>
+                        <input asp-for="StudentLastName" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="StudentDateOfBirth" class="form-label">Date of Birth</label>
+                        <input asp-for="StudentDateOfBirth" type="date" class="form-control" />
+                        <span asp-validation-for="StudentDateOfBirth" class="text-danger"></span>
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="StudentApplicationPhoneNumber" class="form-label">Application Phone</label>
+                        <input asp-for="StudentApplicationPhoneNumber" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="StudentGender" class="form-label">Gender</label>
+                        <input asp-for="StudentGender" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="StudentStatus" class="form-label">Student Status</label>
+                        <input asp-for="StudentStatus" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="EmploymentStatus" class="form-label">Employment Status</label>
+                        <input asp-for="EmploymentStatus" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="EmployedHouseMembers" class="form-label">Employed Household Members</label>
+                        <input asp-for="EmployedHouseMembers" type="number" min="0" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="HasTransportation" class="form-label">Transportation</label>
+                        <select asp-for="HasTransportation" class="form-select">
+                            <option value="">Not provided</option>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="admin-user-subgrid">
+                    <div class="admin-user-subcard">
+                        <h3>Household Breakdown</h3>
+                        <div class="admin-user-grid admin-user-grid-compact">
+                            <div class="admin-user-field">
+                                <label asp-for="HouseholdBabiesToddlers" class="form-label">Babies / Toddlers</label>
+                                <input asp-for="HouseholdBabiesToddlers" type="number" min="0" class="form-control" />
+                            </div>
+
+                            <div class="admin-user-field">
+                                <label asp-for="HouseholdChildren" class="form-label">Children</label>
+                                <input asp-for="HouseholdChildren" type="number" min="0" class="form-control" />
+                            </div>
+
+                            <div class="admin-user-field">
+                                <label asp-for="HouseholdTeens" class="form-label">Teens</label>
+                                <input asp-for="HouseholdTeens" type="number" min="0" class="form-control" />
+                            </div>
+
+                            <div class="admin-user-field">
+                                <label asp-for="HouseholdAdults" class="form-label">Adults</label>
+                                <input asp-for="HouseholdAdults" type="number" min="0" class="form-control" />
+                            </div>
+                        </div>
+                        <p class="admin-user-footnote">Current household total: <strong>@Model.HouseholdTotal</strong></p>
+                    </div>
+
+                    <div class="admin-user-subcard">
+                        <h3>Benefits</h3>
+                        <div class="admin-user-toggle-grid">
+                            <label class="admin-user-toggle"><input asp-for="HasSnap" type="checkbox" /> <span>Has SNAP</span></label>
+                            <label class="admin-user-toggle"><input asp-for="HasWic" type="checkbox" /> <span>Has WIC</span></label>
+                            <label class="admin-user-toggle"><input asp-for="HasTanf" type="checkbox" /> <span>Has TANF</span></label>
+                            <label class="admin-user-toggle"><input asp-for="InterestedInSnap" type="checkbox" /> <span>Interested in SNAP</span></label>
+                            <label class="admin-user-toggle"><input asp-for="InterestedInWic" type="checkbox" /> <span>Interested in WIC</span></label>
+                            <label class="admin-user-toggle"><input asp-for="InterestedInTanf" type="checkbox" /> <span>Interested in TANF</span></label>
+                        </div>
+                    </div>
+
+                    <div class="admin-user-subcard">
+                        <h3>Admin Status</h3>
+                        <div class="admin-user-toggle-grid">
+                            <label class="admin-user-toggle"><input asp-for="StudentApplicationIsActive" type="checkbox" /> <span>Application active</span></label>
+                            <label class="admin-user-toggle"><input asp-for="StudentApplicationIsVolunteer" type="checkbox" /> <span>Marked as volunteer</span></label>
+                        </div>
+
+                        <div class="admin-user-grid admin-user-grid-compact mt-3">
+                            <div class="admin-user-field">
+                                <label asp-for="StudentApplicationStatus" class="form-label">Application Status</label>
+                                <select asp-for="StudentApplicationStatus" class="form-select">
+                                    <option value="Pending">Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                            </div>
+
+                            <div class="admin-user-field admin-user-field-full">
+                                <label asp-for="StudentReviewNotes" class="form-label">Review Notes</label>
+                                <textarea asp-for="StudentReviewNotes" rows="4" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="admin-user-empty-state">
+                    No student application is currently associated with this account.
+                </div>
+            }
+        </section>
+
+        <section class="admin-user-section">
+            <div class="admin-user-section-heading">
+                <h2>Volunteer Application</h2>
+
+                @if (Model.HasVolunteerApplication)
+                {
+                    <div class="admin-user-meta">
+                        <span>@(!string.IsNullOrWhiteSpace(Model.VolunteerApplicationStatus) ? Model.VolunteerApplicationStatus : "Pending")</span>
+                        @if (Model.VolunteerSubmittedAt.HasValue)
+                        {
+                            <span>Submitted @Model.VolunteerSubmittedAt.Value.ToLocalTime().ToString("MMM d, yyyy")</span>
+                        }
+                    </div>
+                }
+            </div>
+
+            @if (Model.HasVolunteerApplication)
+            {
+                <div class="admin-user-grid">
+                    <div class="admin-user-field">
+                        <label asp-for="VolunteerFirstName" class="form-label">First Name</label>
+                        <input asp-for="VolunteerFirstName" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="VolunteerLastName" class="form-label">Last Name</label>
+                        <input asp-for="VolunteerLastName" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="VolunteerEmail" class="form-label">Application Email</label>
+                        <input asp-for="VolunteerEmail" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="VolunteerPhoneNumber" class="form-label">Application Phone</label>
+                        <input asp-for="VolunteerPhoneNumber" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="VolunteerYear" class="form-label">Year</label>
+                        <input asp-for="VolunteerYear" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="VolunteerFrequency" class="form-label">Volunteer Frequency</label>
+                        <input asp-for="VolunteerFrequency" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="OtherFrequency" class="form-label">Other Frequency</label>
+                        <input asp-for="OtherFrequency" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="VolunteerApplicationStatus" class="form-label">Application Status</label>
+                        <select asp-for="VolunteerApplicationStatus" class="form-select">
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="admin-user-subgrid">
+                    <div class="admin-user-subcard">
+                        <h3>Background</h3>
+                        <div class="admin-user-toggle-grid admin-user-toggle-grid-single">
+                            <label class="admin-user-toggle"><input asp-for="HasVolunteeredBefore" type="checkbox" /> <span>Has volunteered before</span></label>
+                        </div>
+
+                        <div class="admin-user-grid admin-user-grid-compact mt-3">
+                            <div class="admin-user-field admin-user-field-full">
+                                <label asp-for="PreviousCapacity" class="form-label">Previous Capacity</label>
+                                <textarea asp-for="PreviousCapacity" rows="3" class="form-control"></textarea>
+                            </div>
+
+                            <div class="admin-user-field admin-user-field-full">
+                                <label asp-for="ReasonForVolunteering" class="form-label">Reason for Volunteering</label>
+                                <textarea asp-for="ReasonForVolunteering" rows="4" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-user-subcard">
+                        <h3>Weekly Availability</h3>
+                        <div class="admin-user-availability-grid">
+                            <label class="admin-user-toggle"><input asp-for="MonMorning" type="checkbox" /> <span>Mon AM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="MonAfternoon" type="checkbox" /> <span>Mon PM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="TueMorning" type="checkbox" /> <span>Tue AM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="TueAfternoon" type="checkbox" /> <span>Tue PM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="WedMorning" type="checkbox" /> <span>Wed AM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="WedAfternoon" type="checkbox" /> <span>Wed PM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="ThuMorning" type="checkbox" /> <span>Thu AM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="ThuAfternoon" type="checkbox" /> <span>Thu PM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="FriMorning" type="checkbox" /> <span>Fri AM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="FriAfternoon" type="checkbox" /> <span>Fri PM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="SatMorning" type="checkbox" /> <span>Sat AM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="SatAfternoon" type="checkbox" /> <span>Sat PM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="SunMorning" type="checkbox" /> <span>Sun AM</span></label>
+                            <label class="admin-user-toggle"><input asp-for="SunAfternoon" type="checkbox" /> <span>Sun PM</span></label>
+                        </div>
+                    </div>
+
+                    <div class="admin-user-subcard">
+                        <h3>Review Notes</h3>
+                        <div class="admin-user-field admin-user-field-full">
+                            <label asp-for="VolunteerReviewNotes" class="form-label">Volunteer Notes</label>
+                            <textarea asp-for="VolunteerReviewNotes" rows="4" class="form-control"></textarea>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="admin-user-empty-state">
+                    No volunteer application is currently associated with this account.
+                </div>
+            }
+        </section>
+
+        <section class="admin-user-section">
+            <div class="admin-user-section-heading">
+                <h2>Donor Profile</h2>
+            </div>
+
+            @if (Model.HasDonorProfile)
+            {
+                <div class="admin-user-grid">
+                    <div class="admin-user-field">
+                        <label asp-for="DonorName" class="form-label">Donor Name</label>
+                        <input asp-for="DonorName" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="DonorEmail" class="form-label">Donor Email</label>
+                        <input asp-for="DonorEmail" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="DonorPhoneNumber" class="form-label">Donor Phone</label>
+                        <input asp-for="DonorPhoneNumber" class="form-control" />
+                    </div>
+
+                    <div class="admin-user-field admin-user-field-full">
+                        <label asp-for="DonorAddress" class="form-label">Donor Address</label>
+                        <textarea asp-for="DonorAddress" rows="3" class="form-control"></textarea>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="admin-user-empty-state">
+                    No donor profile is currently associated with this account.
+                </div>
+            }
+        </section>
+
+        <div class="admin-user-submit-row">
+            <button type="submit" class="btn btn-primary admin-user-save-btn">Save Changes</button>
+            <a asp-controller="Admin" asp-action="Users" class="btn btn-outline-secondary">Cancel</a>
+            <button type="button"
+                    class="btn btn-outline-danger ms-auto"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteUserModal">
+                Delete User
+            </button>
+        </div>
+    </form>
 
     <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -89,7 +466,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 @section Scripts {

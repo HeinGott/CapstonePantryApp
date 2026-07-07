@@ -12,3 +12,9 @@ Contributors:
     Eric Maslyanchuk
     Brian Fritsche
     Jorge Ortiz
+
+# Project Testing
+
+    Run Update-Database in Package Manager Console
+    Test accounts exits for Admin, Student, Volunteer, and Donor
+    

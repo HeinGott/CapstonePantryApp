@@ -55,6 +55,98 @@ body {
     color: var(--bs-secondary-color);
 }
 
+/* shared non-destructive button system */
+.btn-primary,
+.inventory-edit-btn,
+.fulfilment-primary-btn,
+.shop-cart-button,
+.shop-checkout-button,
+.shop-add-button,
+.vendor-actions .btn-primary {
+    background-color: var(--pantreats-blue);
+    border-color: var(--pantreats-blue);
+    color: #ffffff !important;
+}
+
+.btn-outline-primary,
+.btn-outline-secondary,
+.back-button,
+.student-back-btn,
+.vendor-back-btn,
+.fulfilment-reset-btn,
+.vendor-actions .btn-outline-primary {
+    background-color: #ffffff;
+    border-color: rgba(16, 47, 97, 0.18);
+    color: var(--pantreats-blue) !important;
+}
+
+.btn-primary,
+.btn-outline-primary,
+.btn-outline-secondary,
+.inventory-edit-btn,
+.back-button,
+.student-back-btn,
+.vendor-back-btn,
+.fulfilment-primary-btn,
+.fulfilment-reset-btn,
+.shop-cart-button,
+.shop-checkout-button,
+.shop-add-button,
+.vendor-actions .btn-primary,
+.vendor-actions .btn-outline-primary {
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:focus-visible,
+.btn-primary:active,
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:focus-visible,
+.btn-outline-primary:active,
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus,
+.btn-outline-secondary:focus-visible,
+.btn-outline-secondary:active,
+.inventory-edit-btn:hover,
+.inventory-edit-btn:focus,
+.inventory-edit-btn:focus-visible,
+.inventory-edit-btn:active,
+.fulfilment-primary-btn:hover,
+.fulfilment-primary-btn:focus,
+.fulfilment-primary-btn:focus-visible,
+.fulfilment-primary-btn:active,
+.fulfilment-reset-btn:hover,
+.fulfilment-reset-btn:focus,
+.fulfilment-reset-btn:focus-visible,
+.fulfilment-reset-btn:active,
+.shop-cart-button:hover,
+.shop-cart-button:focus,
+.shop-cart-button:focus-visible,
+.shop-cart-button:active,
+.shop-checkout-button:hover,
+.shop-checkout-button:focus,
+.shop-checkout-button:focus-visible,
+.shop-checkout-button:active,
+.shop-add-button:hover,
+.shop-add-button:focus,
+.shop-add-button:focus-visible,
+.shop-add-button:active,
+.vendor-actions .btn-primary:hover,
+.vendor-actions .btn-primary:focus,
+.vendor-actions .btn-primary:focus-visible,
+.vendor-actions .btn-primary:active,
+.vendor-actions .btn-outline-primary:hover,
+.vendor-actions .btn-outline-primary:focus,
+.vendor-actions .btn-outline-primary:focus-visible,
+.vendor-actions .btn-outline-primary:active {
+    background-color: #f3f4f6 !important;
+    border-color: rgba(16, 47, 97, 0.18) !important;
+    color: var(--pantreats-green-dark) !important;
+    box-shadow: none !important;
+}
+
 .pantreats-navbar {
     background-color: var(--pantreats-blue);
     padding: 0.85rem 0;
@@ -1270,17 +1362,24 @@ span.flatpickr-weekday {
 }
 
 .student-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
     background-color: #ffffff;
     color: var(--pantreats-blue);
     border: 1px solid rgba(16, 47, 97, 0.16);
     border-radius: 999px;
     padding: 9px 18px;
     font-weight: 600;
+    white-space: nowrap;
+    box-sizing: border-box;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 
 .student-back-btn:hover {
-    background-color: #f4f7fc;
-    color: var(--pantreats-blue);
+    background-color: #f3f4f6;
+    color: var(--pantreats-green-dark);
 }
 
 .student-profile-grid {
@@ -1384,9 +1483,9 @@ span.flatpickr-weekday {
 }
 
 .vendor-actions .btn-primary:hover {
-    background-color: var(--pantreats-blue-dark) !important;
-    border-color: var(--pantreats-blue-dark) !important;
-    color: #ffffff !important;
+    background-color: #f3f4f6 !important;
+    border-color: rgba(16, 47, 97, 0.18) !important;
+    color: var(--pantreats-green-dark) !important;
 }
 
 .vendor-actions .btn-outline-primary {
@@ -1396,9 +1495,9 @@ span.flatpickr-weekday {
 }
 
 .vendor-actions .btn-outline-primary:hover {
-    background-color: #f4f7fc !important;
-    border-color: rgba(16, 47, 97, 0.24) !important;
-    color: var(--pantreats-blue) !important;
+    background-color: #f3f4f6 !important;
+    border-color: rgba(16, 47, 97, 0.18) !important;
+    color: var(--pantreats-green-dark) !important;
 }
 
 .vendor-card,
@@ -1458,17 +1557,24 @@ span.flatpickr-weekday {
 }
 
 .vendor-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
     background-color: #ffffff;
     color: var(--pantreats-blue);
     border: 1px solid rgba(16, 47, 97, 0.16);
     border-radius: 999px;
     padding: 9px 18px;
     font-weight: 600;
+    white-space: nowrap;
+    box-sizing: border-box;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 
 .vendor-back-btn:hover {
-    background-color: #f4f7fc;
-    color: var(--pantreats-blue);
+    background-color: #f3f4f6;
+    color: var(--pantreats-green-dark);
 }
 
 .vendor-profile-grid {
@@ -1718,7 +1824,9 @@ span.flatpickr-weekday {
 
 /*order details page*/
 .back-button {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 0.5rem 1.25rem;
     background: #fff;
     color: var(--pantreats-blue);
@@ -1727,11 +1835,43 @@ span.flatpickr-weekday {
     text-decoration: none;
     font-weight: 500;
     margin-bottom: 1.5rem;
+    white-space: nowrap;
+    box-sizing: border-box;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 
 .back-button:hover {
     background: #f3f4f6;
     color: var(--pantreats-blue);
+}
+
+.back-button:focus,
+.back-button:focus-visible,
+.back-button:active {
+    background: #f3f4f6;
+    color: var(--pantreats-blue);
+    border-color: #e5e7eb;
+    text-decoration: none;
+    box-shadow: none;
+    outline: none;
+}
+
+.student-back-btn:focus,
+.student-back-btn:focus-visible,
+.student-back-btn:active,
+.vendor-back-btn:focus,
+.vendor-back-btn:focus-visible,
+.vendor-back-btn:active,
+.btn:focus,
+.btn:focus-visible,
+.btn:active,
+.btn.active,
+.btn.show,
+.btn:first-child:active,
+:not(.btn-check)+.btn:active {
+    box-shadow: none !important;
+    transform: none !important;
+    outline: none;
 }
 
 .order-details-overview {
@@ -2111,8 +2251,9 @@ span.flatpickr-weekday {
 }
 
 .fulfilment-primary-btn:hover {
-    background-color: var(--pantreats-blue-dark) !important;
-    color: #ffffff !important;
+    background-color: #f3f4f6 !important;
+    border-color: rgba(16, 47, 97, 0.18) !important;
+    color: var(--pantreats-green-dark) !important;
 }
 
 .fulfilment-reset-btn {
@@ -2305,8 +2446,8 @@ span.flatpickr-weekday {
 /* Inventory Action Buttons */
 
 .inventory-edit-btn {
-    background-color: var(--pantreats-green);
-    border: 1px solid var(--pantreats-green);
+    background-color: var(--pantreats-blue);
+    border: 1px solid var(--pantreats-blue);
     color: white !important;
     font-weight: 600;
     border-radius: 6px;
@@ -2316,9 +2457,9 @@ span.flatpickr-weekday {
 }
 
 .inventory-edit-btn:hover {
-    background-color: var(--pantreats-green-dark) !important;
-    border-color: var(--pantreats-green-dark) !important;
-    color: white !important;
+    background-color: #f3f4f6 !important;
+    border-color: rgba(16, 47, 97, 0.18) !important;
+    color: var(--pantreats-green-dark) !important;
 }
 
 .inventory-delete-btn {
@@ -2357,8 +2498,8 @@ span.flatpickr-weekday {
 .shop-cart-button,
 .shop-checkout-button,
 .shop-add-button {
-    background-color: var(--pantreats-green);
-    border: 1px solid var(--pantreats-green);
+    background-color: var(--pantreats-blue);
+    border: 1px solid var(--pantreats-blue);
     color: #ffffff;
     font-weight: 700;
 }
@@ -2366,9 +2507,9 @@ span.flatpickr-weekday {
 .shop-cart-button:hover,
 .shop-checkout-button:hover,
 .shop-add-button:hover {
-    background-color: var(--pantreats-green-dark) !important;
-    border-color: var(--pantreats-green-dark) !important;
-    color: #ffffff !important;
+    background-color: #f3f4f6 !important;
+    border-color: rgba(16, 47, 97, 0.18) !important;
+    color: var(--pantreats-green-dark) !important;
 }
 
 .shop-cart-button {
@@ -4536,11 +4677,14 @@ span.flatpickr-weekday {
 a:focus,
 button:focus,
 input:focus,
-select:focus .keyboard-focus-mode a:focus,
+select:focus,
+.keyboard-focus-mode a:focus,
 .keyboard-focus-mode button:focus,
 .keyboard-focus-mode input:focus,
-.keyboard-focus-mode select:focus,
-
+.keyboard-focus-mode select:focus {
+    outline: 2px solid rgba(37, 140, 251, 0.45);
+    outline-offset: 2px;
+}
 
 .accessibility-page-header {
     display: block !important;

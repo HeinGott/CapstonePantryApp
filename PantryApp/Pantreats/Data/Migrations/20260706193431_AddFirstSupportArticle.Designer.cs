@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pantreats.Data;
 
@@ -11,9 +12,11 @@ using Pantreats.Data;
 namespace Pantreats.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260706193431_AddFirstSupportArticle")]
+    partial class AddFirstSupportArticle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -691,7 +694,7 @@ namespace Pantreats.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Keywords")
+                    b.PrimitiveCollection<string>("Keywords")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -710,35 +713,6 @@ namespace Pantreats.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SupportArticles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Content = "Step 1: Log in as an admin.\nStep 2: Click the Inventory button in the navbar.\nStep 3: Click the Edit button next to the item you wish to edit.\nStep 4: Change the desired fields (quantity, name, etc.) and press the Save Changes button when finished.",
-                            Keywords = "item,inventory,edit",
-                            Slug = "edit-inventory-item",
-                            Summary = "Learn how to edit an item's details.",
-                            Title = "How to Edit an Item in Inventory"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Content = "Step 1: Log into Pantreats or create an account.\nStep 2: Click the Application button in the navbar.\nStep 3. Fill out the required fields for the application and press the Submit button when finished.",
-                            Keywords = "application,fill out",
-                            Slug = "fill-out-application",
-                            Summary = "Learn how to fill out an application for Pantreats.",
-                            Title = "How to Fill Out an Application"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Content = "Step 1: Log in as an admin.\nStep 2: Click the User Management button in the navbar.\nStep 3: Click the dropdown menu under Actions for any user and change to the desired role.\nStep 4: Click the Save button next to the modified user when finished.",
-                            Keywords = "change,user,roles",
-                            Slug = "change-user-roles",
-                            Summary = "Learn how to change the role of a user to admin, volunteer, etc.",
-                            Title = "How to Change User Roles"
-                        });
                 });
 
             modelBuilder.Entity("Pantreats.Models.UserApplication", b =>

@@ -15,6 +15,15 @@
             </p>
         </div>
 
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Donor"
+               asp-action="Create"
+               class="btn btn-primary">
+                Add Donor
+            </a>
+        }
+
     </div>
 
     <div class="student-card">

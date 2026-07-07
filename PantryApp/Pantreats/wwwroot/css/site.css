@@ -1754,6 +1754,7 @@ span.flatpickr-weekday {
     gap: 1rem;
     margin-bottom: 1.25rem;
     flex-wrap: wrap;
+    font-family: var(--bs-body-font-family))
 }
 
 .order-details-subtitle {

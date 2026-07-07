@@ -34,23 +34,23 @@
     <div class="volunteer-content">
         <h2 class="volunteer-title">Want to Help?</h2>
         <p class="volunteer-text">
-            Behind every pantry visit is a team of dedicated volunteers who make it possible.<br />
-            Be the change and volunteer today!
+            <span>Behind every pantry visit is a team of dedicated volunteers who make it possible.</span>
+            <span>Be the change and volunteer today!</span>
         </p>
         @if (User.IsInRole("Students"))
         {
-            <div>
+            <div class="volunteer-cta">
                 <a asp-controller="Volunteer" asp-action="ApplyVolunteer"
-                       class="btn btn-outline-light btn-lg hero-secondary-btn px-4">
+                        class="btn btn-outline-light btn-lg hero-secondary-btn px-4">
                     Volunteer
                 </a>
             </div>
         }
         else
         {
-            <div>
+            <div class="volunteer-cta">
                 <a asp-area="Identity" asp-page="/Account/Register"
-                       class="btn btn-outline-light btn-lg hero-secondary-btn px-4">
+                        class="btn btn-outline-light btn-lg hero-secondary-btn px-4">
                     Volunteer
                 </a>
             </div>

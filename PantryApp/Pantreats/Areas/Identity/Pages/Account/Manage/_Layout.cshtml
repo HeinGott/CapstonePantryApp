@@ -9,16 +9,16 @@
     }
 }
 
-<h1 style="color:var(--pantreats-blue)">Manage your account</h1>
+<h1 class="manage-page-title">Manage your account</h1>
 
-<div>
-    <h2 style="color:var(--pantreats-green)">Change your account settings</h2>
+<div class="manage-page-shell">
+    <h2 class="manage-page-subtitle">Change your account settings</h2>
     <hr />
-    <div class="row">
-        <div class="col-md-3">
+    <div class="row manage-page-grid">
+        <div class="col-md-3 manage-nav-column">
             <partial name="_ManageNav" />
         </div>
-        <div class="col-md-9">
+        <div class="col-md-9 manage-content-column">
             @RenderBody()
         </div>
     </div>

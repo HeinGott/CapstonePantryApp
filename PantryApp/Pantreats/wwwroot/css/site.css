@@ -228,6 +228,49 @@ a:hover {
     padding: 4rem 0;
 }
 
+.manage-page-title {
+    color: var(--pantreats-blue);
+    font-size: clamp(2rem, 3vw, 2.75rem);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.manage-page-subtitle {
+    color: var(--pantreats-green);
+    font-size: clamp(1.4rem, 2vw, 2rem);
+    font-weight: 500;
+    margin-bottom: 0;
+}
+
+.manage-page-grid {
+    row-gap: 1.5rem;
+}
+
+.manage-nav-list {
+    gap: 0.35rem;
+}
+
+.manage-nav-list .nav-link {
+    border-radius: 0.5rem;
+    padding: 0.7rem 0.9rem;
+}
+
+.manage-section-title {
+    color: var(--pantreats-blue);
+    font-size: clamp(1.7rem, 2.2vw, 2.1rem);
+    margin-bottom: 1rem;
+}
+
+.manage-field-label {
+    color: var(--pantreats-blue);
+    font-weight: 600;
+    margin-bottom: 0.45rem;
+}
+
+.manage-field .form-control {
+    min-height: 3rem;
+}
+
 .pantreats-white-section {
     background-color: #ffffff;
 }
@@ -527,9 +570,18 @@ a:hover {
     line-height: 1.9;
 }
 
+.volunteer-text span {
+    display: block;
+}
+
+.volunteer-cta {
+    margin-top: 1.5rem;
+}
+
 .volunteer-img {
     flex: 2;
     height: 400px;
+    width: 100%;
     border-radius: 0px;
     object-fit: cover;
 }
@@ -616,6 +668,112 @@ a:hover {
 
 .fade-up:nth-child(2) {
     transition-delay: 0.35s;
+}
+
+@media (max-width: 991.98px) {
+    .volunteer-section {
+        flex-direction: column-reverse;
+    }
+
+    .volunteer-content {
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        align-items: center;
+    }
+
+    .volunteer-img {
+        flex: none;
+        height: 320px;
+    }
+
+    .contact-section .container,
+    .our-mission-section .container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .our-mission-section,
+    .contact-section {
+        min-height: auto;
+        padding: 2.5rem 0;
+    }
+
+    .our-mission-title,
+    .contact-title {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .mission-text {
+        font-size: 1.2rem;
+        line-height: 1.5;
+    }
+
+    .description-mission-text {
+        font-size: 1.05rem;
+        line-height: 1.75;
+    }
+
+    .volunteer-section {
+        min-height: auto;
+    }
+
+    .volunteer-content {
+        padding: 2rem 1.25rem 2.5rem;
+    }
+
+    .volunteer-title {
+        font-size: 1.85rem;
+        margin-bottom: 1rem;
+    }
+
+    .volunteer-text {
+        font-size: 1.05rem;
+        line-height: 1.7;
+    }
+
+    .volunteer-text span + span {
+        margin-top: 0.5rem;
+    }
+
+    .volunteer-cta,
+    .volunteer-cta .btn {
+        width: 100%;
+    }
+
+    .volunteer-cta .btn {
+        max-width: 18rem;
+    }
+
+    .volunteer-img {
+        height: 240px;
+    }
+
+    .contact-text {
+        font-size: 1.05rem;
+    }
+
+    .contact-links {
+        gap: 0.85rem;
+        margin-top: 1.25rem;
+    }
+
+    .contact-link {
+        font-size: 1rem;
+        line-height: 1.5;
+        text-align: center;
+        overflow-wrap: anywhere;
+    }
+
+    .copy-toast {
+        top: auto;
+        right: 1rem;
+        bottom: 1rem;
+        left: 1rem;
+        text-align: center;
+    }
 }
 
 /* admin dashboard */
@@ -1652,6 +1810,14 @@ span.flatpickr-weekday {
 
 @media (max-width: 768px) {
 
+    .manage-nav-column {
+        margin-bottom: 0.5rem;
+    }
+
+    .manage-content-column {
+        padding-top: 0;
+    }
+
     .admin-hero,
     .admin-section-heading {
         align-items: flex-start;
@@ -1689,6 +1855,34 @@ span.flatpickr-weekday {
 }
 
 @media (max-width: 575.98px) {
+    .manage-page-title {
+        font-size: 1.9rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .manage-page-subtitle {
+        font-size: 1.2rem;
+        line-height: 1.4;
+    }
+
+    .manage-page-shell hr {
+        margin: 1rem 0 1.25rem;
+    }
+
+    .manage-nav-list .nav-link {
+        padding: 0.8rem 0.9rem;
+    }
+
+    .manage-section-title {
+        font-size: 1.55rem;
+        margin-bottom: 0.85rem;
+    }
+
+    .manage-field .form-control {
+        font-size: 1rem;
+        min-height: 3.1rem;
+    }
+
     .admin-page-title {
         font-size: 2rem;
     }

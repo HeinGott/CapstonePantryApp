@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const dropdownItems = Array.from(navbar.querySelectorAll(".nav-item.dropdown"));
     const standardNavItems = Array.from(navbar.querySelectorAll(".nav-item:not(.dropdown)"));
-    const desktopMediaQuery = window.matchMedia("(min-width: 768px)");
+    const desktopMediaQuery = window.matchMedia("(min-width: 1400px)");
 
     const isDesktop = () => desktopMediaQuery.matches;
 

@@ -153,11 +153,16 @@ body {
     border-bottom: 3px solid var(--pantreats-green);
 }
 
+.pantreats-navbar .container-fluid {
+    gap: 0.75rem;
+}
+
 .pantreats-brand {
     color: #ffffff;
     font-weight: 700;
     font-size: 1.2rem;
     text-decoration: none;
+    white-space: nowrap;
 }
 
 .pantreats-brand:hover {
@@ -171,6 +176,7 @@ body {
     background-color: transparent !important;
     box-shadow: none !important;
     outline: none;
+    white-space: nowrap;
 }
 
 .pantreats-nav-link:hover {
@@ -193,6 +199,15 @@ a:hover {
 
 .pantreats-navbar .navbar-toggler-icon {
     filter: invert(1);
+}
+
+.pantreats-primary-nav,
+.pantreats-auth-nav {
+    row-gap: 0.35rem;
+}
+
+.pantreats-auth-nav {
+    flex-shrink: 0;
 }
 
 .pantreats-logout-form {
@@ -442,6 +457,19 @@ a:hover {
     color: #17463a;
 }
 
+.pantreats-dropdown-header {
+    color: var(--pantreats-blue);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 0.9rem 0.35rem;
+    text-transform: uppercase;
+}
+
+.pantreats-dropdown-divider {
+    margin: 0.35rem 0;
+}
+
 .microsoft-login-icon-button {
     border: none;
     background: transparent;
@@ -466,7 +494,44 @@ a:hover {
     border-radius: 8px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1400px) {
+    .pantreats-navbar .container-fluid {
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+    .pantreats-navbar .navbar-collapse {
+        display: flex !important;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: nowrap;
+        min-width: 0;
+    }
+
+    .pantreats-primary-nav {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        min-width: 0;
+    }
+
+    .pantreats-primary-nav > .nav-item,
+    .pantreats-auth-nav > .nav-item {
+        flex: 0 0 auto;
+    }
+
+    .pantreats-navbar .nav-link {
+        padding-left: 0.65rem;
+        padding-right: 0.65rem;
+    }
+
+    .pantreats-auth-nav {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        margin-left: 0.5rem;
+    }
+
     .navbar .dropdown:hover .dropdown-menu {
         display: block;
         margin-top: 0;
@@ -690,6 +755,12 @@ a:hover {
     .our-mission-section .container {
         padding-left: 1.5rem;
         padding-right: 1.5rem;
+    }
+}
+
+@media (max-width: 1399.98px) {
+    .pantreats-navbar .navbar-collapse {
+        padding-top: 0.75rem;
     }
 }
 

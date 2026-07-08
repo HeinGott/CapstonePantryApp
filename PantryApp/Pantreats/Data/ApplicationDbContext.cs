@@ -21,6 +21,7 @@ namespace Pantreats.Data
         public DbSet<RecipeIngredient> RecipeIngredients { get; set; }
         public DbSet<VolunteerSchedule> VolunteerSchedules { get; set; }
         public DbSet<ScheduleChangeRequest> ScheduleChangeRequests { get; set; }
+        public DbSet<VolunteerShift> VolunteerShifts { get; set; }
         public DbSet<SupportArticle> SupportArticles { get; set; }
 
         /*this method configures the relationships between OrderItem and Inventory,
@@ -50,6 +51,12 @@ namespace Pantreats.Data
             modelBuilder.Entity<VolunteerSchedule>()
                 .HasIndex(s => s.UserId)
                 .IsUnique();
+
+            modelBuilder.Entity<VolunteerShift>()
+                .HasIndex(shift => new { shift.ShiftDate, shift.StartTime });
+
+            modelBuilder.Entity<VolunteerShift>()
+                .HasIndex(shift => new { shift.UserId, shift.ShiftDate });
 
             //configures the relationships between Orders and OrderFulfilment
             modelBuilder.Entity<OrderFulfilment>()

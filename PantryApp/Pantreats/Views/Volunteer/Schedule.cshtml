@@ -98,6 +98,40 @@
         }
     </section>
 
+    <section class="student-card mb-4">
+        <div class="student-history-header mb-3">
+            <div>
+                <h2 class="student-section-title mb-1">Upcoming Assigned Shifts</h2>
+                <p class="student-page-subtitle mb-0">
+                    These are the real shifts you've been scheduled to work.
+                </p>
+            </div>
+        </div>
+
+        @if (!Model.UpcomingShifts.Any())
+        {
+            <div class="admin-empty-state">
+                <i class="bi bi-calendar-week"></i>
+                <span>No assigned shifts yet.</span>
+            </div>
+        }
+        else
+        {
+            <div class="volunteer-admin-shift-list">
+                @foreach (var shift in Model.UpcomingShifts)
+                {
+                    <article class="volunteer-admin-shift-card @(shift.OutsideAvailability ? "is-warning" : "")">
+                        <div>
+                            <strong>@shift.ShiftDate.ToLocalTime().ToString("ddd, MMM d")</strong>
+                            <span>@shift.TimeLabel</span>
+                        </div>
+                        <span>@(string.IsNullOrWhiteSpace(shift.Notes) ? shift.Status : shift.Notes)</span>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
     @if (Model.HasPendingRequest && Model.PendingRequest != null)
     {
         <section class="student-card mb-4">

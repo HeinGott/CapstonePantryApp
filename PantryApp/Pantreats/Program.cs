@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Pantreats.Data;
 using Pantreats.Services;
 
@@ -43,7 +44,11 @@ else
 
 // add services to the container
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString)
+        // This app does some schema preparation outside normal EF migrations,
+        // so we don't want startup to fail solely because the runtime model
+        // doesn't exactly match the last snapshot.
+        .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -174,11 +179,13 @@ app.Run();
 static async Task PrepareDatabaseAsync(ApplicationDbContext dbContext)
 {
     await EnsureStudentApplicationWorkflowSchemaAsync(dbContext);
+    await EnsureVolunteerSchedulingSchemaAsync(dbContext);
 
     try
     {
         await dbContext.Database.MigrateAsync();
         await EnsureStudentApplicationWorkflowSchemaAsync(dbContext);
+        await EnsureVolunteerSchedulingSchemaAsync(dbContext);
     }
     catch (SqlException ex) when (ex.Message.Contains("AspNetRoles", StringComparison.OrdinalIgnoreCase))
     {
@@ -229,6 +236,47 @@ static async Task EnsureStudentApplicationWorkflowSchemaAsync(ApplicationDbConte
         """);
 }
 
+static async Task EnsureVolunteerSchedulingSchemaAsync(ApplicationDbContext dbContext)
+{
+    var connectionString = dbContext.Database.GetConnectionString();
+    if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        return;
+    }
+
+    await using var connection = new SqlConnection(connectionString);
+    await connection.OpenAsync();
+
+    if (!await TableExistsAsync(connection, "VolunteerShifts"))
+    {
+        await ExecuteNonQueryAsync(connection, """
+            CREATE TABLE [VolunteerShifts] (
+                [VolunteerShiftId] int IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                [UserId] nvarchar(450) NOT NULL,
+                [ShiftDate] date NOT NULL,
+                [StartTime] time NOT NULL,
+                [EndTime] time NOT NULL,
+                [Status] nvarchar(32) NOT NULL CONSTRAINT [DF_VolunteerShifts_Status] DEFAULT N'Scheduled',
+                [Notes] nvarchar(max) NULL,
+                [CreatedAt] datetime2 NOT NULL CONSTRAINT [DF_VolunteerShifts_CreatedAt] DEFAULT SYSUTCDATETIME(),
+                [UpdatedAt] datetime2 NOT NULL CONSTRAINT [DF_VolunteerShifts_UpdatedAt] DEFAULT SYSUTCDATETIME(),
+                [CreatedByUserId] nvarchar(450) NULL,
+                [UpdatedByUserId] nvarchar(450) NULL
+            );
+            """);
+    }
+
+    await EnsureIndexExistsAsync(connection, "VolunteerShifts", "IX_VolunteerShifts_ShiftDate_StartTime", """
+        CREATE INDEX [IX_VolunteerShifts_ShiftDate_StartTime]
+        ON [VolunteerShifts] ([ShiftDate], [StartTime]);
+        """);
+
+    await EnsureIndexExistsAsync(connection, "VolunteerShifts", "IX_VolunteerShifts_UserId_ShiftDate", """
+        CREATE INDEX [IX_VolunteerShifts_UserId_ShiftDate]
+        ON [VolunteerShifts] ([UserId], [ShiftDate]);
+        """);
+}
+
 static async Task<bool> TableExistsAsync(SqlConnection connection, string tableName)
 {
     await using var command = connection.CreateCommand();
@@ -248,6 +296,24 @@ static async Task<bool> ColumnExistsAsync(SqlConnection connection, string table
     command.Parameters.AddWithValue("@tableName", tableName);
     command.Parameters.AddWithValue("@columnName", columnName);
     return Convert.ToInt32(await command.ExecuteScalarAsync()) > 0;
+}
+
+static async Task EnsureIndexExistsAsync(SqlConnection connection, string tableName, string indexName, string createSql)
+{
+    await using var command = connection.CreateCommand();
+    command.CommandText = """
+        SELECT COUNT(*)
+        FROM sys.indexes
+        WHERE name = @indexName
+          AND object_id = OBJECT_ID(@tableName);
+        """;
+    command.Parameters.AddWithValue("@indexName", indexName);
+    command.Parameters.AddWithValue("@tableName", tableName);
+
+    if (Convert.ToInt32(await command.ExecuteScalarAsync()) == 0)
+    {
+        await ExecuteNonQueryAsync(connection, createSql);
+    }
 }
 
 static async Task ExecuteNonQueryAsync(SqlConnection connection, string sql)

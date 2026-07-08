@@ -22,6 +22,7 @@ namespace Pantreats.Models
 
         public bool HasPendingRequest { get; set; }
         public ScheduleChangeRequestSummaryViewModel? PendingRequest { get; set; }
+        public List<VolunteerAssignedShiftViewModel> UpcomingShifts { get; set; } = new();
 
         public List<VolunteerScheduleRosterRowViewModel> Roster { get; set; } = new();
     }

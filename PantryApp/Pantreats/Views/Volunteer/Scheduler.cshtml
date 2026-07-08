@@ -1,0 +1,916 @@
+@model Pantreats.Models.VolunteerSchedulerPageViewModel
+
+@{
+    ViewData["Title"] = "Volunteer Scheduler";
+    var previousWeek = Model.WeekStart.AddDays(-7);
+    var nextWeek = Model.WeekStart.AddDays(7);
+    var hasFormErrors = !ViewData.ModelState.IsValid;
+    var plannerStartHour = 7;
+    var plannerEndHour = 21;
+    var plannerStartMinutes = plannerStartHour * 60;
+    var plannerEndMinutes = plannerEndHour * 60;
+    var plannerTotalMinutes = plannerEndMinutes - plannerStartMinutes;
+    var pxPerMinute = 0.5;
+    var gridPadding = 14;
+    var plannerGridHeight = plannerTotalMinutes * pxPerMinute + (gridPadding * 2);
+    var hourLabels = Enumerable.Range(plannerStartHour, plannerEndHour - plannerStartHour + 1).ToList();
+}
+
+<div class="student-page volunteer-planner-page">
+    <div class="mb-2">
+        <a asp-action="Index" class="btn student-back-btn">
+            &larr; Back to volunteer dashboard
+        </a>
+    </div>
+
+    <div class="volunteer-planner-topbar">
+        <div>
+            <h1 class="donor-page-title mb-1">Volunteer Scheduler</h1>
+            <p class="donor-page-subtitle mb-0">
+                @Model.WeekStart.ToString("MMM d") - @Model.WeekEnd.ToString("MMM d, yyyy")
+            </p>
+        </div>
+
+        <div class="volunteer-planner-nav" aria-label="Scheduler week controls">
+            <a asp-action="Scheduler" asp-route-weekStart="@previousWeek.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary">
+                <i class="bi bi-chevron-left"></i>
+                <span>Previous</span>
+            </a>
+            <a asp-action="Scheduler" asp-route-weekStart="@DateTime.Today.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary">
+                This Week
+            </a>
+            <a asp-action="Scheduler" asp-route-weekStart="@nextWeek.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary">
+                <span>Next</span>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+
+    @if (hasFormErrors)
+    {
+        <div class="alert alert-danger mb-3" role="alert">
+            <div asp-validation-summary="ModelOnly"></div>
+        </div>
+    }
+
+    <form id="plannerShiftForm" asp-action="SaveShift" method="post" class="d-none">
+        @Html.AntiForgeryToken()
+        <input id="plannerShiftId" name="VolunteerShiftId" value="0" />
+        <input id="plannerUserId" name="UserId" />
+        <input id="plannerShiftDate" name="ShiftDate" />
+        <input id="plannerStartTime" name="StartTime" />
+        <input id="plannerEndTime" name="EndTime" />
+        <input id="plannerNotes" name="Notes" />
+        <input id="plannerWeekStart" name="WeekStart" value="@Model.WeekStart.ToString("yyyy-MM-dd")" />
+    </form>
+
+    <div class="volunteer-planner-shell">
+        <aside class="volunteer-planner-sidebar">
+            <div class="volunteer-planner-panel-head">
+                <div>
+                    <h2>Volunteers</h2>
+                    <span>@Model.Volunteers.Count approved</span>
+                </div>
+            </div>
+
+            <div class="volunteer-planner-roster">
+                @foreach (var volunteer in Model.Volunteers)
+                {
+                    var initials = string.Join("", volunteer.FullName
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                        .Take(2)
+                        .Select(name => name[0]))
+                        .ToUpperInvariant();
+
+                    <article class="volunteer-planner-person"
+                             draggable="true"
+                             data-volunteer-id="@volunteer.UserId"
+                             data-volunteer-name="@volunteer.FullName">
+                        <a asp-action="Details"
+                           asp-route-id="@volunteer.VolunteerApplicationId"
+                           class="volunteer-planner-person-main">
+                            <span class="volunteer-planner-avatar">@initials</span>
+                            <div class="volunteer-planner-person-copy">
+                                <strong>@volunteer.FullName</strong>
+                                <span>@volunteer.Email</span>
+                            </div>
+                        </a>
+
+                        <details class="volunteer-planner-availability">
+                            <summary>
+                                <span>Availability</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </summary>
+                            <div class="volunteer-planner-availability-grid" aria-label="@($"{volunteer.FullName} availability")">
+                                <span class="volunteer-planner-availability-head">Day</span>
+                                <span class="volunteer-planner-availability-head">AM</span>
+                                <span class="volunteer-planner-availability-head">PM</span>
+                                @foreach (var row in volunteer.AvailabilityRows)
+                                {
+                                    <span class="volunteer-planner-availability-day">@row.DayLabel</span>
+                                    <span class="volunteer-planner-slot @(row.Morning ? "is-available" : "is-unavailable")">
+                                        @(row.Morning ? "AM" : "-")
+                                    </span>
+                                    <span class="volunteer-planner-slot @(row.Afternoon ? "is-available" : "is-unavailable")">
+                                        @(row.Afternoon ? "PM" : "-")
+                                    </span>
+                                }
+                            </div>
+                        </details>
+
+                        @if (volunteer.NextShiftDate.HasValue && !string.IsNullOrWhiteSpace(volunteer.NextShiftTimeLabel))
+                        {
+                            <p class="volunteer-planner-next">
+                                Next: @volunteer.NextShiftDate.Value.ToString("MMM d") @volunteer.NextShiftTimeLabel
+                            </p>
+                        }
+                    </article>
+                }
+            </div>
+
+            <details class="volunteer-planner-editor" @(Model.IsEditingShift || hasFormErrors ? "open" : "")>
+                <summary>
+                    <span>@(Model.IsEditingShift ? "Edit selected shift" : "Manual shift entry")</span>
+                    <i class="bi bi-chevron-down"></i>
+                </summary>
+
+                <form asp-action="SaveShift" method="post" class="volunteer-planner-editor-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="VolunteerShiftId" value="@Model.ShiftForm.VolunteerShiftId" />
+                    <input type="hidden" name="WeekStart" value="@Model.WeekStart.ToString("yyyy-MM-dd")" />
+
+                    <label>
+                        <span>Volunteer</span>
+                        <select name="UserId" class="form-select">
+                            <option value="">Select volunteer</option>
+                            @foreach (var volunteer in Model.Volunteers)
+                            {
+                                <option value="@volunteer.UserId" selected="@(Model.ShiftForm.UserId == volunteer.UserId)">
+                                    @volunteer.FullName
+                                </option>
+                            }
+                        </select>
+                    </label>
+
+                    <label>
+                        <span>Date</span>
+                        <input name="ShiftDate" class="form-control" type="date" value="@Model.ShiftForm.ShiftDate.ToString("yyyy-MM-dd")" />
+                    </label>
+
+                    <div class="volunteer-planner-editor-times">
+                        <label>
+                            <span>Start</span>
+                            <input name="StartTime" class="form-control" type="time" value="@Model.ShiftForm.StartTime" />
+                        </label>
+                        <label>
+                            <span>End</span>
+                            <input name="EndTime" class="form-control" type="time" value="@Model.ShiftForm.EndTime" />
+                        </label>
+                    </div>
+
+                    <label>
+                        <span>Notes</span>
+                        <textarea name="Notes" class="form-control" rows="3">@Model.ShiftForm.Notes</textarea>
+                    </label>
+
+                    <div class="volunteer-planner-editor-actions">
+                        <button type="submit" class="btn btn-success">Save</button>
+                        <a asp-action="Scheduler" asp-route-weekStart="@Model.WeekStart.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary">Clear</a>
+                    </div>
+                </form>
+            </details>
+        </aside>
+
+        <section class="volunteer-planner-board"
+                 data-planner-start="@plannerStartMinutes"
+                 data-planner-end="@plannerEndMinutes"
+                 data-px-per-minute="@pxPerMinute"
+                 data-grid-padding="@gridPadding">
+            <div class="volunteer-planner-context-menu" data-planner-context-menu hidden>
+                <button type="button" class="volunteer-planner-context-action" data-context-action="copy">
+                    Copy
+                </button>
+                <button type="button" class="volunteer-planner-context-action" data-context-action="paste">
+                    Paste
+                </button>
+            </div>
+            <div class="volunteer-planner-time-column">
+                <div class="volunteer-planner-day-spacer"></div>
+                <div class="volunteer-planner-time-ruler">
+                    @foreach (var hour in hourLabels)
+                    {
+                        var offset = gridPadding + ((hour * 60 - plannerStartMinutes) * pxPerMinute);
+                        <span data-minute="@(hour * 60)" style="top:@offset.ToString(System.Globalization.CultureInfo.InvariantCulture)px">
+                            @DateTime.Today.AddHours(hour).ToString("h tt")
+                        </span>
+                    }
+                </div>
+            </div>
+
+            <div class="volunteer-planner-days">
+                @foreach (var day in Model.Days)
+                {
+                    <article class="volunteer-planner-day" data-drop-date="@day.Date.ToString("yyyy-MM-dd")">
+                        <header>
+                            <strong>@day.Date.ToString("dddd")</strong>
+                            <span>@day.Date.ToString("MMM d")</span>
+                        </header>
+
+                        <div class="volunteer-planner-lane">
+                            @foreach (var hour in hourLabels)
+                            {
+                                var offset = gridPadding + ((hour * 60 - plannerStartMinutes) * pxPerMinute);
+                                <span class="volunteer-planner-hour-line" data-minute="@(hour * 60)" style="top:@offset.ToString(System.Globalization.CultureInfo.InvariantCulture)px"></span>
+                            }
+
+                            @foreach (var shift in day.Shifts)
+                            {
+                                var top = gridPadding + (shift.StartMinutes * pxPerMinute);
+                                var height = Math.Max(46, shift.DurationMinutes * pxPerMinute);
+
+                                <article class="volunteer-planner-shift @(shift.OutsideAvailability ? "is-warning" : "")"
+                                         style="top:@top.ToString(System.Globalization.CultureInfo.InvariantCulture)px;height:@height.ToString(System.Globalization.CultureInfo.InvariantCulture)px"
+                                         data-shift-id="@shift.VolunteerShiftId"
+                                         data-user-id="@shift.UserId"
+                                         data-shift-date="@day.Date.ToString("yyyy-MM-dd")"
+                                         data-full-name="@shift.FullName"
+                                         data-start="@shift.StartTime"
+                                         data-end="@shift.EndTime"
+                                         data-notes="@shift.Notes">
+                                    <button class="volunteer-planner-resize is-top" type="button" aria-label="Adjust shift start"></button>
+                                    <div class="volunteer-planner-shift-body">
+                                        <strong>@shift.FullName</strong>
+                                        <span data-time-label>@shift.TimeLabel</span>
+                                        @if (shift.OutsideAvailability)
+                                        {
+                                            <small>Outside availability</small>
+                                        }
+                                    </div>
+                                    <div class="volunteer-planner-shift-actions">
+                                        <form asp-action="DeleteShift" method="post" data-delete-shift-form>
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@shift.VolunteerShiftId" />
+                                            <input type="hidden" name="weekStart" value="@Model.WeekStart.ToString("yyyy-MM-dd")" />
+                                            <button type="submit" title="Delete shift">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <button class="volunteer-planner-resize is-bottom" type="button" aria-label="Adjust shift end"></button>
+                                </article>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const board = document.querySelector(".volunteer-planner-board");
+            const form = document.getElementById("plannerShiftForm");
+            const tokenField = form?.querySelector('input[name="__RequestVerificationToken"]');
+            const fields = {
+                id: document.getElementById("plannerShiftId"),
+                userId: document.getElementById("plannerUserId"),
+                date: document.getElementById("plannerShiftDate"),
+                start: document.getElementById("plannerStartTime"),
+                end: document.getElementById("plannerEndTime"),
+                notes: document.getElementById("plannerNotes")
+            };
+
+            if (!board || !form) {
+                return;
+            }
+
+            const plannerStart = Number(board.dataset.plannerStart);
+            const plannerEnd = Number(board.dataset.plannerEnd);
+            let pxPerMinute = Number(board.dataset.pxPerMinute);
+            const gridPadding = Number(board.dataset.gridPadding || 0);
+            const defaultDuration = 120;
+            const interval = 15;
+            const minShiftDuration = 30;
+            const minShiftHeight = 46;
+            const saveUrl = form.getAttribute("action");
+            const weekStartField = document.getElementById("plannerWeekStart");
+            const contextMenu = board.querySelector("[data-planner-context-menu]");
+            const contextCopyAction = contextMenu?.querySelector('[data-context-action="copy"]');
+            const contextPasteAction = contextMenu?.querySelector('[data-context-action="paste"]');
+            let copiedShift = null;
+            let copiedShiftElement = null;
+            let contextMenuState = null;
+
+            const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+            const snap = value => Math.round(value / interval) * interval;
+            const toTime = minutes => {
+                const hours = Math.floor(minutes / 60).toString().padStart(2, "0");
+                const mins = (minutes % 60).toString().padStart(2, "0");
+                return `${hours}:${mins}`;
+            };
+            const toLabel = (start, end) => {
+                const format = minutes => new Date(2000, 0, 1, Math.floor(minutes / 60), minutes % 60)
+                    .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+                return `${format(start)} - ${format(end)}`;
+            };
+            const minutesFromTime = value => {
+                const [hours, minutes] = value.split(":").map(Number);
+                return hours * 60 + minutes;
+            };
+            const getLaneFromPoint = (x, y) => document.elementFromPoint(x, y)?.closest(".volunteer-planner-lane");
+            const topForStart = start => gridPadding + ((start - plannerStart) * pxPerMinute);
+            const minutesFromLanePoint = (lane, clientY) => {
+                const rect = lane.getBoundingClientRect();
+                return plannerStart + snap((clientY - rect.top - gridPadding) / pxPerMinute);
+            };
+            const minutesFromLaneTop = (lane, top) => {
+                const rect = lane.getBoundingClientRect();
+                return plannerStart + snap((top - rect.top - gridPadding) / pxPerMinute);
+            };
+            const positionShift = shift => {
+                const start = minutesFromTime(shift.dataset.pendingStart || shift.dataset.start);
+                const end = minutesFromTime(shift.dataset.pendingEnd || shift.dataset.end);
+                shift.style.top = `${topForStart(start)}px`;
+                shift.style.height = `${Math.max(minShiftHeight, (end - start) * pxPerMinute)}px`;
+            };
+            const setShiftState = (shift, state, enabled) => {
+                shift.classList.toggle(state, enabled);
+            };
+            const escapeHtml = value => String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+            const buildShiftMarkup = shiftData => `
+                <button class="volunteer-planner-resize is-top" type="button" aria-label="Adjust shift start"></button>
+                <div class="volunteer-planner-shift-body">
+                    <strong>${escapeHtml(shiftData.fullName)}</strong>
+                    <span data-time-label>${escapeHtml(shiftData.timeLabel)}</span>
+                    ${shiftData.outsideAvailability ? "<small>Outside availability</small>" : ""}
+                </div>
+                <div class="volunteer-planner-shift-actions">
+                    <form action="/Volunteer/DeleteShift" method="post" data-delete-shift-form>
+                        <input name="__RequestVerificationToken" type="hidden" value="${escapeHtml(tokenField?.value || "")}">
+                        <input type="hidden" name="id" value="${shiftData.volunteerShiftId}" />
+                        <input type="hidden" name="weekStart" value="${escapeHtml(weekStartField?.value || "")}" />
+                        <button type="submit" title="Delete shift">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </div>
+                <button class="volunteer-planner-resize is-bottom" type="button" aria-label="Adjust shift end"></button>
+            `;
+            const applyShiftData = (shift, shiftData) => {
+                shift.dataset.shiftId = shiftData.volunteerShiftId;
+                shift.dataset.userId = shiftData.userId;
+                shift.dataset.shiftDate = shiftData.shiftDate;
+                shift.dataset.fullName = shiftData.fullName;
+                shift.dataset.start = shiftData.startTime;
+                shift.dataset.end = shiftData.endTime;
+                shift.dataset.notes = shiftData.notes || "";
+                delete shift.dataset.pendingStart;
+                delete shift.dataset.pendingEnd;
+                shift.classList.toggle("is-warning", shiftData.outsideAvailability);
+                shift.innerHTML = buildShiftMarkup(shiftData);
+                positionShift(shift);
+            };
+            const clearCopiedShift = () => {
+                copiedShift = null;
+                copiedShiftElement?.classList.remove("is-copied");
+                copiedShiftElement = null;
+            };
+            const setCopiedShift = shift => {
+                copiedShift = {
+                    userId: shift.dataset.userId,
+                    fullName: shift.dataset.fullName || "Volunteer",
+                    start: minutesFromTime(shift.dataset.start),
+                    end: minutesFromTime(shift.dataset.end),
+                    notes: shift.dataset.notes || ""
+                };
+                copiedShiftElement?.classList.remove("is-copied");
+                copiedShiftElement = shift;
+                copiedShiftElement.classList.add("is-copied");
+            };
+            const hideContextMenu = () => {
+                if (!contextMenu) {
+                    return;
+                }
+
+                contextMenu.hidden = true;
+                contextMenuState = null;
+            };
+            const positionContextMenu = (x, y) => {
+                if (!contextMenu) {
+                    return;
+                }
+
+                contextMenu.style.left = "0";
+                contextMenu.style.top = "0";
+                contextMenu.hidden = false;
+
+                const boardRect = board.getBoundingClientRect();
+                const menuRect = contextMenu.getBoundingClientRect();
+                const maxLeft = Math.max(0, boardRect.width - menuRect.width - 8);
+                const maxTop = Math.max(0, boardRect.height - menuRect.height - 8);
+                const left = clamp(x - boardRect.left, 8, maxLeft);
+                const top = clamp(y - boardRect.top, 8, maxTop);
+
+                contextMenu.style.left = `${left}px`;
+                contextMenu.style.top = `${top}px`;
+            };
+            const showContextMenu = (event, options) => {
+                if (!contextMenu || !contextCopyAction || !contextPasteAction) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                contextMenuState = {
+                    shift: options.shift || null,
+                    lane: options.lane || null
+                };
+
+                contextCopyAction.hidden = !options.canCopy;
+                contextPasteAction.hidden = !options.canPaste;
+
+                if (contextCopyAction.hidden && contextPasteAction.hidden) {
+                    hideContextMenu();
+                    return;
+                }
+
+                positionContextMenu(event.clientX, event.clientY);
+            };
+            const pasteCopiedShift = lane => {
+                if (!copiedShift || !lane) {
+                    return;
+                }
+
+                const day = lane.closest("[data-drop-date]");
+                if (!day) {
+                    return;
+                }
+
+                const temporaryShift = createShiftElement({
+                    volunteerShiftId: 0,
+                    userId: copiedShift.userId,
+                    fullName: copiedShift.fullName,
+                    shiftDate: day.dataset.dropDate,
+                    startTime: toTime(copiedShift.start),
+                    endTime: toTime(copiedShift.end),
+                    timeLabel: toLabel(copiedShift.start, copiedShift.end),
+                    notes: copiedShift.notes,
+                    outsideAvailability: false,
+                    startMinutes: copiedShift.start - plannerStart,
+                    durationMinutes: copiedShift.end - copiedShift.start
+                });
+
+                temporaryShift?.classList.add("is-saving");
+
+                submitShift({
+                    userId: copiedShift.userId,
+                    date: day.dataset.dropDate,
+                    start: copiedShift.start,
+                    end: copiedShift.end,
+                    notes: copiedShift.notes,
+                    shiftElement: temporaryShift
+                }).catch(error => {
+                    temporaryShift?.remove();
+                    window.alert(error.message);
+                }).finally(() => {
+                    temporaryShift?.classList.remove("is-saving");
+                });
+            };
+            const findVolunteerCard = userId => document.querySelector(`.volunteer-planner-person[data-volunteer-id="${CSS.escape(userId)}"]`);
+            const createShiftElement = shiftData => {
+                const lane = document.querySelector(`.volunteer-planner-day[data-drop-date="${shiftData.shiftDate}"] .volunteer-planner-lane`);
+                if (!lane) {
+                    return null;
+                }
+
+                const shift = document.createElement("article");
+                shift.className = `volunteer-planner-shift${shiftData.outsideAvailability ? " is-warning" : ""}`;
+                applyShiftData(shift, shiftData);
+                lane.appendChild(shift);
+                initializeShiftElement(shift);
+                return shift;
+            };
+            const submitShift = async ({ shiftId = 0, userId, date, start, end, notes = "", shiftElement = null }) => {
+                fields.id.value = shiftId;
+                fields.userId.value = userId;
+                fields.date.value = date;
+                fields.start.value = toTime(start);
+                fields.end.value = toTime(end);
+                fields.notes.value = notes || "";
+
+                const formData = new FormData(form);
+                const response = await fetch(saveUrl, {
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({ message: "Unable to save shift." }));
+                    throw new Error(error.message || "Unable to save shift.");
+                }
+
+                const shiftData = await response.json();
+                const targetShift = shiftElement || document.querySelector(`.volunteer-planner-shift[data-shift-id="${shiftData.volunteerShiftId}"]`);
+                if (targetShift) {
+                    const targetLane = document.querySelector(`.volunteer-planner-day[data-drop-date="${shiftData.shiftDate}"] .volunteer-planner-lane`);
+                    if (targetLane && targetShift.parentElement !== targetLane) {
+                        targetLane.appendChild(targetShift);
+                    }
+
+                    applyShiftData(targetShift, shiftData);
+                    initializeShiftElement(targetShift);
+                } else {
+                    createShiftElement(shiftData);
+                }
+
+                return shiftData;
+            };
+            const deleteShift = async shift => {
+                const deleteForm = shift.querySelector("[data-delete-shift-form]");
+                if (!deleteForm) {
+                    return;
+                }
+
+                const response = await fetch(deleteForm.getAttribute("action"), {
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: new FormData(deleteForm)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({ message: "Unable to delete shift." }));
+                    throw new Error(error.message || "Unable to delete shift.");
+                }
+
+                shift.remove();
+            };
+            const syncPlannerScale = () => {
+                const lane = document.querySelector(".volunteer-planner-lane");
+                if (!lane) {
+                    return;
+                }
+
+                const availableHeight = Math.max(240, lane.clientHeight - (gridPadding * 2));
+                pxPerMinute = availableHeight / (plannerEnd - plannerStart);
+
+                document.querySelectorAll("[data-minute]").forEach(marker => {
+                    const minute = Number(marker.dataset.minute);
+                    marker.style.top = `${gridPadding + ((minute - plannerStart) * pxPerMinute)}px`;
+                });
+
+                document.querySelectorAll(".volunteer-planner-shift").forEach(positionShift);
+            };
+            syncPlannerScale();
+            window.addEventListener("resize", syncPlannerScale);
+
+            document.querySelectorAll(".volunteer-planner-person").forEach(card => {
+                card.addEventListener("dragstart", event => {
+                    event.dataTransfer.effectAllowed = "copy";
+                    event.dataTransfer.setData("text/plain", card.dataset.volunteerId);
+                });
+            });
+
+            document.querySelectorAll(".volunteer-planner-lane").forEach(lane => {
+                lane.addEventListener("dragover", event => {
+                    event.preventDefault();
+                    hideContextMenu();
+                    lane.classList.add("is-drop-target");
+                });
+
+                lane.addEventListener("dragleave", () => {
+                    lane.classList.remove("is-drop-target");
+                });
+
+                lane.addEventListener("drop", event => {
+                    event.preventDefault();
+                    hideContextMenu();
+                    lane.classList.remove("is-drop-target");
+
+                    const userId = event.dataTransfer.getData("text/plain");
+                    const day = lane.closest("[data-drop-date]");
+                    if (!userId || !day) {
+                        return;
+                    }
+
+                    const start = clamp(minutesFromLanePoint(lane, event.clientY), plannerStart, plannerEnd - defaultDuration);
+                    const end = start + defaultDuration;
+
+                    const volunteerCard = findVolunteerCard(userId);
+                    const temporaryShift = createShiftElement({
+                        volunteerShiftId: 0,
+                        userId,
+                        fullName: volunteerCard?.dataset.volunteerName || "Volunteer",
+                        shiftDate: day.dataset.dropDate,
+                        startTime: toTime(start),
+                        endTime: toTime(end),
+                        timeLabel: toLabel(start, end),
+                        outsideAvailability: false,
+                        startMinutes: start - plannerStart,
+                        durationMinutes: end - start
+                    });
+
+                    temporaryShift?.classList.add("is-saving");
+
+                    submitShift({
+                        userId,
+                        date: day.dataset.dropDate,
+                        start,
+                        end,
+                        notes: "",
+                        shiftElement: temporaryShift
+                    }).catch(error => {
+                        temporaryShift?.remove();
+                        window.alert(error.message);
+                    }).finally(() => {
+                        temporaryShift?.classList.remove("is-saving");
+                    });
+                });
+            });
+
+            const initializeShiftElement = shift => {
+                const topHandle = shift.querySelector(".volunteer-planner-resize.is-top");
+                const bottomHandle = shift.querySelector(".volunteer-planner-resize.is-bottom");
+                const body = shift.querySelector(".volunteer-planner-shift-body");
+                const label = shift.querySelector("[data-time-label]");
+                const deleteForm = shift.querySelector("[data-delete-shift-form]");
+
+                const startDrag = (event, edge) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const lane = shift.closest(".volunteer-planner-lane");
+                    const startY = event.clientY;
+                    const initialStart = minutesFromTime(shift.dataset.start);
+                    const initialEnd = minutesFromTime(shift.dataset.end);
+
+                    shift.classList.add("is-resizing");
+
+                    const move = moveEvent => {
+                        const delta = snap((moveEvent.clientY - startY) / pxPerMinute);
+                        let start = initialStart;
+                        let end = initialEnd;
+
+                        if (edge === "top") {
+                            start = clamp(initialStart + delta, plannerStart, initialEnd - minShiftDuration);
+                        } else {
+                            end = clamp(initialEnd + delta, initialStart + minShiftDuration, plannerEnd);
+                        }
+
+                        shift.dataset.pendingStart = toTime(start);
+                        shift.dataset.pendingEnd = toTime(end);
+                        shift.style.top = `${topForStart(start)}px`;
+                        shift.style.height = `${Math.max(minShiftHeight, (end - start) * pxPerMinute)}px`;
+                        if (label) {
+                            label.textContent = toLabel(start, end);
+                        }
+                    };
+
+                    const finish = () => {
+                        document.removeEventListener("pointermove", move);
+                        document.removeEventListener("pointerup", finish);
+                        shift.classList.remove("is-resizing");
+
+                        const start = minutesFromTime(shift.dataset.pendingStart || shift.dataset.start);
+                        const end = minutesFromTime(shift.dataset.pendingEnd || shift.dataset.end);
+                        const previousStart = shift.dataset.start;
+                        const previousEnd = shift.dataset.end;
+                        const previousLabel = label?.textContent || "";
+
+                        setShiftState(shift, "is-saving", true);
+
+                        submitShift({
+                            shiftId: shift.dataset.shiftId,
+                            userId: shift.dataset.userId,
+                            date: shift.dataset.shiftDate,
+                            start,
+                            end,
+                            notes: shift.dataset.notes || "",
+                            shiftElement: shift
+                        }).catch(error => {
+                            shift.dataset.start = previousStart;
+                            shift.dataset.end = previousEnd;
+                            delete shift.dataset.pendingStart;
+                            delete shift.dataset.pendingEnd;
+                            positionShift(shift);
+                            if (label) {
+                                label.textContent = previousLabel;
+                            }
+                            window.alert(error.message);
+                        }).finally(() => {
+                            setShiftState(shift, "is-saving", false);
+                        });
+                    };
+
+                    document.addEventListener("pointermove", move);
+                    document.addEventListener("pointerup", finish);
+                };
+
+                const startMove = event => {
+                    if (event.target.closest("a, button, form, .volunteer-planner-resize")) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const originalLane = shift.closest(".volunteer-planner-lane");
+                    const originalDay = shift.closest("[data-drop-date]");
+                    const shiftRect = shift.getBoundingClientRect();
+                    const grabOffsetY = event.clientY - shiftRect.top;
+                    const startX = event.clientX;
+                    const startY = event.clientY;
+                    const initialStart = minutesFromTime(shift.dataset.start);
+                    const initialEnd = minutesFromTime(shift.dataset.end);
+                    const duration = initialEnd - initialStart;
+                    let activeLane = originalLane;
+                    let activeDate = originalDay?.dataset.dropDate || shift.dataset.shiftDate;
+                    let pendingStart = initialStart;
+                    let pendingEnd = initialEnd;
+                    let hasMoved = false;
+
+                    shift.classList.add("is-moving");
+                    document.body.classList.add("volunteer-planner-is-dragging");
+
+                    const move = moveEvent => {
+                        if (!hasMoved && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < 4) {
+                            return;
+                        }
+
+                        hasMoved = true;
+                        const laneAtPointer = getLaneFromPoint(moveEvent.clientX, moveEvent.clientY);
+                        if (laneAtPointer) {
+                            activeLane?.classList.remove("is-drop-target");
+                            activeLane = laneAtPointer;
+                            activeLane.classList.add("is-drop-target");
+                        }
+
+                        if (!activeLane) {
+                            return;
+                        }
+
+                        const day = activeLane.closest("[data-drop-date]");
+                        if (day) {
+                            activeDate = day.dataset.dropDate;
+                        }
+
+                        pendingStart = clamp(minutesFromLaneTop(activeLane, moveEvent.clientY - grabOffsetY), plannerStart, plannerEnd - duration);
+                        pendingEnd = pendingStart + duration;
+
+                        if (shift.parentElement !== activeLane) {
+                            activeLane.appendChild(shift);
+                        }
+
+                        shift.dataset.shiftDate = activeDate;
+                        shift.style.top = `${topForStart(pendingStart)}px`;
+                        shift.style.height = `${Math.max(minShiftHeight, duration * pxPerMinute)}px`;
+                        if (label) {
+                            label.textContent = toLabel(pendingStart, pendingEnd);
+                        }
+                    };
+
+                    const finish = () => {
+                        document.removeEventListener("pointermove", move);
+                        document.removeEventListener("pointerup", finish);
+                        activeLane?.classList.remove("is-drop-target");
+                        shift.classList.remove("is-moving");
+                        document.body.classList.remove("volunteer-planner-is-dragging");
+
+                        if (!hasMoved) {
+                            return;
+                        }
+
+                        const previousDate = shift.dataset.shiftDate;
+                        const previousStart = shift.dataset.start;
+                        const previousEnd = shift.dataset.end;
+                        const previousLabel = label?.textContent || "";
+
+                        setShiftState(shift, "is-saving", true);
+                        submitShift({
+                            shiftId: shift.dataset.shiftId,
+                            userId: shift.dataset.userId,
+                            date: activeDate,
+                            start: pendingStart,
+                            end: pendingEnd,
+                            notes: shift.dataset.notes || "",
+                            shiftElement: shift
+                        }).catch(error => {
+                            shift.dataset.shiftDate = previousDate;
+                            shift.dataset.start = previousStart;
+                            shift.dataset.end = previousEnd;
+                            delete shift.dataset.pendingStart;
+                            delete shift.dataset.pendingEnd;
+
+                            const previousLane = document.querySelector(`.volunteer-planner-day[data-drop-date="${previousDate}"] .volunteer-planner-lane`);
+                            if (previousLane && shift.parentElement !== previousLane) {
+                                previousLane.appendChild(shift);
+                            }
+
+                            positionShift(shift);
+                            if (label) {
+                                label.textContent = previousLabel;
+                            }
+                            window.alert(error.message);
+                        }).finally(() => {
+                            setShiftState(shift, "is-saving", false);
+                        });
+                    };
+
+                    document.addEventListener("pointermove", move);
+                    document.addEventListener("pointerup", finish);
+                };
+
+                shift.addEventListener("contextmenu", event => {
+                    showContextMenu(event, {
+                        shift,
+                        canCopy: true,
+                        canPaste: false
+                    });
+                });
+                topHandle?.addEventListener("pointerdown", event => startDrag(event, "top"));
+                bottomHandle?.addEventListener("pointerdown", event => startDrag(event, "bottom"));
+                body?.addEventListener("pointerdown", startMove);
+                deleteForm?.addEventListener("submit", event => {
+                    hideContextMenu();
+                    event.preventDefault();
+                    setShiftState(shift, "is-saving", true);
+                    deleteShift(shift).then(() => {
+                        if (copiedShiftElement === shift) {
+                            clearCopiedShift();
+                        }
+                    }).catch(error => {
+                        setShiftState(shift, "is-saving", false);
+                        window.alert(error.message);
+                    });
+                });
+            };
+
+            document.querySelectorAll(".volunteer-planner-lane").forEach(lane => {
+                lane.addEventListener("contextmenu", event => {
+                    if (event.target.closest(".volunteer-planner-shift")) {
+                        return;
+                    }
+
+                    if (!copiedShift) {
+                        hideContextMenu();
+                        return;
+                    }
+
+                    showContextMenu(event, {
+                        lane,
+                        canCopy: false,
+                        canPaste: true
+                    });
+                });
+            });
+
+            document.querySelectorAll(".volunteer-planner-shift").forEach(initializeShiftElement);
+            contextCopyAction?.addEventListener("click", () => {
+                if (contextMenuState?.shift) {
+                    setCopiedShift(contextMenuState.shift);
+                }
+
+                hideContextMenu();
+            });
+            contextPasteAction?.addEventListener("click", () => {
+                if (contextMenuState?.lane && copiedShift) {
+                    pasteCopiedShift(contextMenuState.lane);
+                }
+
+                hideContextMenu();
+            });
+            document.addEventListener("pointerdown", event => {
+                if (contextMenu?.hidden) {
+                    return;
+                }
+
+                if (event.target instanceof Element && event.target.closest("[data-planner-context-menu]")) {
+                    return;
+                }
+
+                hideContextMenu();
+            });
+            board.addEventListener("scroll", hideContextMenu, true);
+            window.addEventListener("resize", hideContextMenu);
+            document.addEventListener("keydown", event => {
+                if (event.key === "Escape") {
+                    hideContextMenu();
+                    clearCopiedShift();
+                }
+            });
+        });
+    </script>
+}

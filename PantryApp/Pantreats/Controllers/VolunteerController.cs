@@ -41,6 +41,7 @@ namespace Pantreats.Controllers
                 .Select(application => new VolunteerApplicationSummaryViewModel
                 {
                     VolunteerApplicationId = application.VolunteerApplicationId,
+                    UserId = application.UserId,
                     FullName = BuildFullName(application.FirstName, application.LastName),
                     Email = application.Email ?? string.Empty,
                     Year = application.Year ?? string.Empty,
@@ -52,8 +53,29 @@ namespace Pantreats.Controllers
                 .OrderBy(summary => summary.FullName)
                 .ToList();
 
+            var weekStart = StartOfWeek(DateTime.Today);
+            var weekEnd = weekStart.AddDays(7);
+            var upcomingShifts = await _context.VolunteerShifts
+                .AsNoTracking()
+                .Where(shift =>
+                    shift.Status != VolunteerShiftStatuses.Cancelled &&
+                    shift.ShiftDate >= DateTime.Today &&
+                    shift.ShiftDate < weekEnd)
+                .OrderBy(shift => shift.ShiftDate)
+                .ThenBy(shift => shift.StartTime)
+                .ToListAsync();
+
+            var latestApplicationByUserId = latestApplications.ToDictionary(application => application.UserId, application => application);
+            var pendingScheduleRequests = await _context.ScheduleChangeRequests
+                .AsNoTracking()
+                .CountAsync(request => request.RequestStatus == ApplicationStatuses.Pending);
+
             var model = new VolunteerAdminIndexViewModel
             {
+                TotalVolunteers = summaries.Count(summary => summary.ApplicationStatus == ApplicationStatuses.Approved),
+                PendingScheduleRequests = pendingScheduleRequests,
+                UpcomingShiftsThisWeek = upcomingShifts.Count,
+                TodaysShifts = upcomingShifts.Count(shift => shift.ShiftDate.Date == DateTime.Today),
                 PendingApplications = summaries
                     .Where(summary => summary.ApplicationStatus == ApplicationStatuses.Pending)
                     .OrderBy(summary => summary.SubmittedAt)
@@ -61,6 +83,14 @@ namespace Pantreats.Controllers
                 ApprovedVolunteers = summaries
                     .Where(summary => summary.ApplicationStatus == ApplicationStatuses.Approved)
                     .OrderBy(summary => summary.FullName)
+                    .ToList(),
+                UpcomingShifts = upcomingShifts
+                    .Take(8)
+                    .Select(shift =>
+                    {
+                        latestApplicationByUserId.TryGetValue(shift.UserId, out var latestApplication);
+                        return BuildShiftSummaryViewModel(shift, latestApplication);
+                    })
                     .ToList()
             };
 
@@ -84,9 +114,25 @@ namespace Pantreats.Controllers
                 ? ApplicationStatuses.Pending
                 : application.ApplicationStatus;
 
+            var currentAvailability = await _context.VolunteerSchedules
+                .AsNoTracking()
+                .FirstOrDefaultAsync(schedule => schedule.UserId == application.UserId);
+
+            var upcomingShifts = await _context.VolunteerShifts
+                .AsNoTracking()
+                .Where(shift =>
+                    shift.UserId == application.UserId &&
+                    shift.Status != VolunteerShiftStatuses.Cancelled &&
+                    shift.ShiftDate >= DateTime.Today)
+                .OrderBy(shift => shift.ShiftDate)
+                .ThenBy(shift => shift.StartTime)
+                .Take(10)
+                .ToListAsync();
+
             var model = new VolunteerDetailsViewModel
             {
                 VolunteerApplicationId = application.VolunteerApplicationId,
+                UserId = application.UserId,
                 FullName = BuildFullName(application.FirstName, application.LastName),
                 FirstName = application.FirstName,
                 LastName = application.LastName,
@@ -119,7 +165,11 @@ namespace Pantreats.Controllers
                 ApplicationStatus = normalizedStatus,
                 SubmittedAt = application.SubmittedDate,
                 ReviewedAt = application.ReviewedAt,
-                ReviewNotes = application.ReviewNotes
+                ReviewNotes = application.ReviewNotes,
+                AvailabilityLastUpdated = currentAvailability?.LastUpdated,
+                UpcomingShifts = upcomingShifts
+                    .Select(shift => BuildShiftSummaryViewModel(shift, application))
+                    .ToList()
             };
 
             return View(model);
@@ -162,11 +212,6 @@ namespace Pantreats.Controllers
                 if (!await _userManager.IsInRoleAsync(user, "Volunteers"))
                 {
                     await _userManager.AddToRoleAsync(user, "Volunteers");
-                }
-
-                if (await _userManager.IsInRoleAsync(user, "Students"))
-                {
-                    await _userManager.RemoveFromRoleAsync(user, "Students");
                 }
             }
 
@@ -227,6 +272,141 @@ namespace Pantreats.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Details), new { id });
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Scheduler(DateTime? weekStart, string? userId, DateTime? shiftDate, int? editShiftId)
+        {
+            var resolvedWeekStart = StartOfWeek(weekStart?.Date ?? shiftDate?.Date ?? DateTime.Today);
+            var model = await BuildSchedulerModelAsync(resolvedWeekStart, userId, shiftDate, editShiftId);
+            return View(model);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveShift(VolunteerShiftFormViewModel model)
+        {
+            var resolvedWeekStart = StartOfWeek(model.WeekStart == default ? model.ShiftDate : model.WeekStart);
+            var isAjaxRequest = IsAjaxRequest();
+
+            if (!TryParseShiftFormTimes(model, out var startTime, out var endTime))
+            {
+                ModelState.AddModelError(string.Empty, "Please enter a valid start and end time.");
+            }
+            else if (endTime <= startTime)
+            {
+                ModelState.AddModelError(string.Empty, "End time must be after the start time.");
+            }
+
+            var latestApplications = await GetLatestVolunteerApplicationsAsync();
+            var latestApplication = latestApplications.FirstOrDefault(application =>
+                application.UserId == model.UserId &&
+                NormalizeApplicationStatus(application.ApplicationStatus) == ApplicationStatuses.Approved);
+
+            if (latestApplication == null)
+            {
+                ModelState.AddModelError(nameof(model.UserId), "Please choose an approved volunteer.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                if (isAjaxRequest)
+                {
+                    return BadRequest(new { message = "Please enter a valid shift." });
+                }
+
+                var invalidModel = await BuildSchedulerModelAsync(resolvedWeekStart, model.UserId, model.ShiftDate, model.VolunteerShiftId == 0 ? null : model.VolunteerShiftId, model);
+                return View("Scheduler", invalidModel);
+            }
+
+            var overlappingShiftExists = await _context.VolunteerShifts
+                .AsNoTracking()
+                .AnyAsync(shift =>
+                    shift.VolunteerShiftId != model.VolunteerShiftId &&
+                    shift.UserId == model.UserId &&
+                    shift.Status != VolunteerShiftStatuses.Cancelled &&
+                    shift.ShiftDate == model.ShiftDate.Date &&
+                    shift.StartTime < endTime &&
+                    startTime < shift.EndTime);
+
+            if (overlappingShiftExists)
+            {
+                if (isAjaxRequest)
+                {
+                    return BadRequest(new { message = "That volunteer already has an overlapping shift on this date." });
+                }
+
+                ModelState.AddModelError(string.Empty, "That volunteer already has an overlapping shift on this date.");
+                var overlappingModel = await BuildSchedulerModelAsync(resolvedWeekStart, model.UserId, model.ShiftDate, model.VolunteerShiftId == 0 ? null : model.VolunteerShiftId, model);
+                return View("Scheduler", overlappingModel);
+            }
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var shift = model.VolunteerShiftId == 0
+                ? null
+                : await _context.VolunteerShifts.FirstOrDefaultAsync(existingShift => existingShift.VolunteerShiftId == model.VolunteerShiftId);
+
+            if (shift == null)
+            {
+                shift = new VolunteerShift
+                {
+                    UserId = model.UserId,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedByUserId = currentUserId
+                };
+                _context.VolunteerShifts.Add(shift);
+            }
+
+            shift.UserId = model.UserId;
+            shift.ShiftDate = model.ShiftDate.Date;
+            shift.StartTime = startTime;
+            shift.EndTime = endTime;
+            shift.Status = VolunteerShiftStatuses.Scheduled;
+            shift.Notes = string.IsNullOrWhiteSpace(model.Notes) ? null : model.Notes.Trim();
+            shift.UpdatedAt = DateTime.UtcNow;
+            shift.UpdatedByUserId = currentUserId;
+
+            await _context.SaveChangesAsync();
+
+            if (isAjaxRequest)
+            {
+                var availability = await _context.VolunteerSchedules
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(schedule => schedule.UserId == shift.UserId);
+
+                var responseModel = BuildSchedulerShiftResponse(
+                    shift,
+                    latestApplication,
+                    availability);
+
+                return Json(responseModel);
+            }
+
+            return RedirectToAction(nameof(Scheduler), new { weekStart = resolvedWeekStart.ToString("yyyy-MM-dd") });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteShift(int id, DateTime weekStart)
+        {
+            var shift = await _context.VolunteerShifts
+                .FirstOrDefaultAsync(existingShift => existingShift.VolunteerShiftId == id);
+
+            if (shift != null)
+            {
+                _context.VolunteerShifts.Remove(shift);
+                await _context.SaveChangesAsync();
+            }
+
+            if (IsAjaxRequest())
+            {
+                return Json(new { success = true, id });
+            }
+
+            return RedirectToAction(nameof(Scheduler), new { weekStart = StartOfWeek(weekStart).ToString("yyyy-MM-dd") });
         }
 
         [HttpGet]
@@ -504,6 +684,24 @@ namespace Pantreats.Controllers
                 .ThenBy(schedule => schedule.LastName)
                 .ToListAsync();
 
+            var latestApplication = await _context.VolunteerApplications
+                .AsNoTracking()
+                .Where(application => application.UserId == userId)
+                .OrderByDescending(application => application.SubmittedDate)
+                .ThenByDescending(application => application.VolunteerApplicationId)
+                .FirstOrDefaultAsync();
+
+            var upcomingShifts = await _context.VolunteerShifts
+                .AsNoTracking()
+                .Where(shift =>
+                    shift.UserId == userId &&
+                    shift.Status != VolunteerShiftStatuses.Cancelled &&
+                    shift.ShiftDate >= DateTime.Today)
+                .OrderBy(shift => shift.ShiftDate)
+                .ThenBy(shift => shift.StartTime)
+                .Take(8)
+                .ToListAsync();
+
             var model = new VolunteerSchedulePageViewModel
             {
                 HasSchedule = mySchedule != null,
@@ -530,6 +728,17 @@ namespace Pantreats.Controllers
                     RequestStatus = pendingRequest.RequestStatus,
                     SubmittedAt = pendingRequest.SubmittedDate
                 },
+                UpcomingShifts = upcomingShifts
+                    .Select(shift => new VolunteerAssignedShiftViewModel
+                    {
+                        VolunteerShiftId = shift.VolunteerShiftId,
+                        ShiftDate = shift.ShiftDate,
+                        TimeLabel = FormatShiftTimeLabel(shift.StartTime, shift.EndTime),
+                        Status = shift.Status,
+                        Notes = shift.Notes,
+                        OutsideAvailability = !IsShiftWithinAvailability(shift, mySchedule, latestApplication)
+                    })
+                    .ToList(),
 
                 Roster = roster.Select(schedule => new VolunteerScheduleRosterRowViewModel
                 {
@@ -857,9 +1066,9 @@ namespace Pantreats.Controllers
                 .Where(existingApplication =>
                     existingApplication.UserId == userId &&
                     existingApplication.VolunteerApplicationId != id)
-                .AnyAsync();
+                .ToListAsync();
 
-            if (!remainingApplications)
+            if (!remainingApplications.Any())
             {
                 var volunteerSchedule = await _context.VolunteerSchedules
                     .FirstOrDefaultAsync(schedule => schedule.UserId == userId);
@@ -876,6 +1085,38 @@ namespace Pantreats.Controllers
                 if (scheduleChangeRequests.Any())
                 {
                     _context.ScheduleChangeRequests.RemoveRange(scheduleChangeRequests);
+                }
+
+                var shifts = await _context.VolunteerShifts
+                    .Where(shift => shift.UserId == userId)
+                    .ToListAsync();
+
+                if (shifts.Any())
+                {
+                    _context.VolunteerShifts.RemoveRange(shifts);
+                }
+            }
+
+            var hasApprovedApplications = remainingApplications.Any(existingApplication =>
+                NormalizeApplicationStatus(existingApplication.ApplicationStatus) == ApplicationStatuses.Approved);
+
+            if (!hasApprovedApplications)
+            {
+                var userApplication = await _context.UserApplications
+                    .Where(studentApplication => studentApplication.UserId == userId)
+                    .OrderByDescending(studentApplication => studentApplication.RegistrationDate)
+                    .ThenByDescending(studentApplication => studentApplication.ApplicationId)
+                    .FirstOrDefaultAsync();
+
+                if (userApplication != null)
+                {
+                    userApplication.IsVolunteer = false;
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user != null && await _userManager.IsInRoleAsync(user, "Volunteers"))
+                {
+                    await _userManager.RemoveFromRoleAsync(user, "Volunteers");
                 }
             }
 
@@ -974,6 +1215,382 @@ namespace Pantreats.Controllers
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 fileName
             );
+        }
+
+        private async Task<VolunteerSchedulerPageViewModel> BuildSchedulerModelAsync(
+            DateTime weekStart,
+            string? userId,
+            DateTime? shiftDate,
+            int? editShiftId,
+            VolunteerShiftFormViewModel? formOverride = null)
+        {
+            var resolvedWeekStart = StartOfWeek(weekStart);
+            var resolvedShiftDate = shiftDate?.Date ?? resolvedWeekStart;
+            var weekEnd = resolvedWeekStart.AddDays(5);
+
+            var latestApplications = await GetLatestVolunteerApplicationsAsync();
+            var approvedApplications = latestApplications
+                .Where(application => NormalizeApplicationStatus(application.ApplicationStatus) == ApplicationStatuses.Approved)
+                .OrderBy(application => BuildFullName(application.FirstName, application.LastName))
+                .ToList();
+
+            var approvedUserIds = approvedApplications.Select(application => application.UserId).Distinct().ToList();
+            var schedules = await _context.VolunteerSchedules
+                .AsNoTracking()
+                .Where(schedule => approvedUserIds.Contains(schedule.UserId))
+                .ToListAsync();
+
+            var shifts = await _context.VolunteerShifts
+                .AsNoTracking()
+                .Where(shift =>
+                    shift.Status != VolunteerShiftStatuses.Cancelled &&
+                    shift.ShiftDate >= resolvedWeekStart &&
+                    shift.ShiftDate < weekEnd)
+                .OrderBy(shift => shift.ShiftDate)
+                .ThenBy(shift => shift.StartTime)
+                .ToListAsync();
+
+            var nextShiftByUserId = shifts
+                .GroupBy(shift => shift.UserId)
+                .ToDictionary(group => group.Key, group => group.First());
+
+            var selectedShift = editShiftId == null
+                ? null
+                : await _context.VolunteerShifts.AsNoTracking()
+                    .FirstOrDefaultAsync(shift => shift.VolunteerShiftId == editShiftId.Value);
+
+            var selectedUserId = formOverride?.UserId
+                ?? selectedShift?.UserId
+                ?? userId
+                ?? approvedApplications.FirstOrDefault()?.UserId
+                ?? string.Empty;
+
+            var selectedDate = formOverride?.ShiftDate.Date
+                ?? selectedShift?.ShiftDate.Date
+                ?? resolvedShiftDate;
+
+            var shiftForm = formOverride ?? new VolunteerShiftFormViewModel
+            {
+                VolunteerShiftId = selectedShift?.VolunteerShiftId ?? 0,
+                UserId = selectedUserId,
+                ShiftDate = selectedDate,
+                StartTime = selectedShift == null ? "09:00" : selectedShift.StartTime.ToString(@"hh\:mm"),
+                EndTime = selectedShift == null ? "11:00" : selectedShift.EndTime.ToString(@"hh\:mm"),
+                Notes = selectedShift?.Notes,
+                WeekStart = resolvedWeekStart
+            };
+
+            var applicationByUserId = approvedApplications.ToDictionary(application => application.UserId, application => application);
+            var scheduleByUserId = schedules.ToDictionary(schedule => schedule.UserId, schedule => schedule);
+
+            return new VolunteerSchedulerPageViewModel
+            {
+                WeekStart = resolvedWeekStart,
+                WeekEnd = resolvedWeekStart.AddDays(4),
+                IsEditingShift = selectedShift != null || shiftForm.VolunteerShiftId != 0,
+                ShiftForm = shiftForm,
+                Volunteers = approvedApplications.Select(application =>
+                {
+                    scheduleByUserId.TryGetValue(application.UserId, out var availability);
+                    nextShiftByUserId.TryGetValue(application.UserId, out var nextShift);
+
+                    return new VolunteerSchedulerVolunteerViewModel
+                    {
+                        VolunteerApplicationId = application.VolunteerApplicationId,
+                        UserId = application.UserId,
+                        FullName = BuildFullName(application.FirstName, application.LastName),
+                        Email = application.Email ?? string.Empty,
+                        Year = application.Year ?? string.Empty,
+                        AvailabilitySummary = availability != null
+                            ? BuildAvailabilitySummary(availability)
+                            : BuildAvailabilitySummary(application),
+                        AvailabilityRows = BuildAvailabilityRows(availability, application),
+                        HasAvailabilityOnSelectedDay = HasAvailabilityOnDate(application, availability, shiftForm.ShiftDate),
+                        NextShiftDate = nextShift?.ShiftDate,
+                        NextShiftTimeLabel = nextShift == null ? null : FormatShiftTimeLabel(nextShift.StartTime, nextShift.EndTime)
+                    };
+                }).ToList(),
+                Days = Enumerable.Range(0, 5)
+                    .Select(offset =>
+                    {
+                        var date = resolvedWeekStart.AddDays(offset);
+                        return new VolunteerSchedulerDayViewModel
+                        {
+                            Date = date,
+                            Label = date.ToString("ddd, MMM d"),
+                            Shifts = shifts
+                                .Where(shift => shift.ShiftDate.Date == date.Date)
+                                .Select(shift =>
+                                {
+                                    applicationByUserId.TryGetValue(shift.UserId, out var application);
+                                    scheduleByUserId.TryGetValue(shift.UserId, out var availability);
+
+                                    return new VolunteerSchedulerShiftCardViewModel
+                                    {
+                                        VolunteerShiftId = shift.VolunteerShiftId,
+                                        VolunteerApplicationId = application?.VolunteerApplicationId ?? 0,
+                                        UserId = shift.UserId,
+                                        FullName = application == null
+                                            ? "Volunteer"
+                                            : BuildFullName(application.FirstName, application.LastName),
+                                        StartTime = shift.StartTime.ToString(@"hh\:mm"),
+                                        EndTime = shift.EndTime.ToString(@"hh\:mm"),
+                                        TimeLabel = FormatShiftTimeLabel(shift.StartTime, shift.EndTime),
+                                        Status = shift.Status,
+                                        OutsideAvailability = !IsShiftWithinAvailability(shift, availability, application),
+                                        Notes = shift.Notes,
+                                        StartMinutes = Math.Max(0, (int)(shift.StartTime - TimeSpan.FromHours(7)).TotalMinutes),
+                                        DurationMinutes = Math.Max(30, (int)(shift.EndTime - shift.StartTime).TotalMinutes)
+                                    };
+                                })
+                                .ToList()
+                        };
+                    })
+                    .ToList()
+            };
+        }
+
+        private async Task<List<VolunteerApplication>> GetLatestVolunteerApplicationsAsync()
+        {
+            var applications = await _context.VolunteerApplications
+                .AsNoTracking()
+                .OrderByDescending(application => application.SubmittedDate)
+                .ThenByDescending(application => application.VolunteerApplicationId)
+                .ToListAsync();
+
+            return applications
+                .GroupBy(application => application.UserId)
+                .Select(group => group.First())
+                .ToList();
+        }
+
+        private static VolunteerShiftSummaryViewModel BuildShiftSummaryViewModel(
+            VolunteerShift shift,
+            VolunteerApplication? application)
+        {
+            return new VolunteerShiftSummaryViewModel
+            {
+                VolunteerShiftId = shift.VolunteerShiftId,
+                VolunteerApplicationId = application?.VolunteerApplicationId ?? 0,
+                UserId = shift.UserId,
+                FullName = application == null
+                    ? "Volunteer"
+                    : BuildFullName(application.FirstName, application.LastName),
+                ShiftDate = shift.ShiftDate,
+                TimeLabel = FormatShiftTimeLabel(shift.StartTime, shift.EndTime),
+                Status = shift.Status,
+                Notes = shift.Notes
+            };
+        }
+
+        private static VolunteerSchedulerShiftResponseViewModel BuildSchedulerShiftResponse(
+            VolunteerShift shift,
+            VolunteerApplication? application,
+            VolunteerSchedule? availability)
+        {
+            return new VolunteerSchedulerShiftResponseViewModel
+            {
+                VolunteerShiftId = shift.VolunteerShiftId,
+                UserId = shift.UserId,
+                FullName = application == null
+                    ? "Volunteer"
+                    : BuildFullName(application.FirstName, application.LastName),
+                ShiftDate = shift.ShiftDate.ToString("yyyy-MM-dd"),
+                StartTime = shift.StartTime.ToString(@"hh\:mm"),
+                EndTime = shift.EndTime.ToString(@"hh\:mm"),
+                TimeLabel = FormatShiftTimeLabel(shift.StartTime, shift.EndTime),
+                Notes = shift.Notes,
+                OutsideAvailability = !IsShiftWithinAvailability(shift, availability, application),
+                StartMinutes = Math.Max(0, (int)(shift.StartTime - TimeSpan.FromHours(7)).TotalMinutes),
+                DurationMinutes = Math.Max(30, (int)(shift.EndTime - shift.StartTime).TotalMinutes)
+            };
+        }
+
+        private static string NormalizeApplicationStatus(string? status)
+        {
+            return string.IsNullOrWhiteSpace(status) ? ApplicationStatuses.Pending : status;
+        }
+
+        private bool IsAjaxRequest()
+        {
+            return string.Equals(Request.Headers["X-Requested-With"], "XMLHttpRequest", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static DateTime StartOfWeek(DateTime value)
+        {
+            var date = value.Date;
+            var difference = ((int)date.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+            return date.AddDays(-difference);
+        }
+
+        private static bool TryParseShiftFormTimes(
+            VolunteerShiftFormViewModel model,
+            out TimeSpan startTime,
+            out TimeSpan endTime)
+        {
+            startTime = default;
+            endTime = default;
+
+            return TimeSpan.TryParse(model.StartTime, out startTime)
+                && TimeSpan.TryParse(model.EndTime, out endTime);
+        }
+
+        private static string FormatShiftTimeLabel(TimeSpan startTime, TimeSpan endTime)
+        {
+            return $"{DateTime.Today.Add(startTime):h:mm tt} - {DateTime.Today.Add(endTime):h:mm tt}";
+        }
+
+        private static string BuildAvailabilitySummary(VolunteerApplication application)
+        {
+            return BuildAvailabilitySummaryFromObject(application);
+        }
+
+        private static string BuildAvailabilitySummary(VolunteerSchedule? availability, VolunteerApplication? fallbackApplication = null)
+        {
+            return availability != null
+                ? BuildAvailabilitySummaryFromObject(availability)
+                : fallbackApplication == null
+                    ? "No availability on file"
+                    : BuildAvailabilitySummaryFromObject(fallbackApplication);
+        }
+
+        private static string BuildAvailabilitySummaryFromObject(object source)
+        {
+            var slots = new List<string>();
+
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.MonMorning)), "Mon AM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.MonAfternoon)), "Mon PM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.TueMorning)), "Tue AM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.TueAfternoon)), "Tue PM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.WedMorning)), "Wed AM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.WedAfternoon)), "Wed PM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.ThuMorning)), "Thu AM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.ThuAfternoon)), "Thu PM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.FriMorning)), "Fri AM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.FriAfternoon)), "Fri PM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.SatMorning)), "Sat AM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.SatAfternoon)), "Sat PM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.SunMorning)), "Sun AM");
+            AddAvailabilitySlot(slots, GetAvailabilityValue(source, nameof(VolunteerSchedule.SunAfternoon)), "Sun PM");
+
+            return slots.Count == 0 ? "No availability on file" : string.Join(", ", slots);
+        }
+
+        private static List<VolunteerSchedulerAvailabilityRowViewModel> BuildAvailabilityRows(
+            VolunteerSchedule? availability,
+            VolunteerApplication application)
+        {
+            var source = availability as object ?? application;
+
+            return new List<VolunteerSchedulerAvailabilityRowViewModel>
+            {
+                BuildAvailabilityRow(source, "Mon", nameof(VolunteerSchedule.MonMorning), nameof(VolunteerSchedule.MonAfternoon)),
+                BuildAvailabilityRow(source, "Tue", nameof(VolunteerSchedule.TueMorning), nameof(VolunteerSchedule.TueAfternoon)),
+                BuildAvailabilityRow(source, "Wed", nameof(VolunteerSchedule.WedMorning), nameof(VolunteerSchedule.WedAfternoon)),
+                BuildAvailabilityRow(source, "Thu", nameof(VolunteerSchedule.ThuMorning), nameof(VolunteerSchedule.ThuAfternoon)),
+                BuildAvailabilityRow(source, "Fri", nameof(VolunteerSchedule.FriMorning), nameof(VolunteerSchedule.FriAfternoon)),
+                BuildAvailabilityRow(source, "Sat", nameof(VolunteerSchedule.SatMorning), nameof(VolunteerSchedule.SatAfternoon)),
+                BuildAvailabilityRow(source, "Sun", nameof(VolunteerSchedule.SunMorning), nameof(VolunteerSchedule.SunAfternoon))
+            };
+        }
+
+        private static VolunteerSchedulerAvailabilityRowViewModel BuildAvailabilityRow(
+            object source,
+            string dayLabel,
+            string morningPropertyName,
+            string afternoonPropertyName)
+        {
+            return new VolunteerSchedulerAvailabilityRowViewModel
+            {
+                DayLabel = dayLabel,
+                Morning = GetAvailabilityValue(source, morningPropertyName),
+                Afternoon = GetAvailabilityValue(source, afternoonPropertyName)
+            };
+        }
+
+        private static void AddAvailabilitySlot(List<string> slots, bool enabled, string label)
+        {
+            if (enabled)
+            {
+                slots.Add(label);
+            }
+        }
+
+        private static bool GetAvailabilityValue(object source, string propertyName)
+        {
+            var property = source.GetType().GetProperty(propertyName);
+            return property?.PropertyType == typeof(bool) && (bool)(property.GetValue(source) ?? false);
+        }
+
+        private static bool HasAvailabilityOnDate(
+            VolunteerApplication application,
+            VolunteerSchedule? availability,
+            DateTime shiftDate)
+        {
+            var source = availability as object ?? application;
+
+            return shiftDate.DayOfWeek switch
+            {
+                DayOfWeek.Monday => GetAvailabilityValue(source, nameof(VolunteerSchedule.MonMorning))
+                    || GetAvailabilityValue(source, nameof(VolunteerSchedule.MonAfternoon)),
+                DayOfWeek.Tuesday => GetAvailabilityValue(source, nameof(VolunteerSchedule.TueMorning))
+                    || GetAvailabilityValue(source, nameof(VolunteerSchedule.TueAfternoon)),
+                DayOfWeek.Wednesday => GetAvailabilityValue(source, nameof(VolunteerSchedule.WedMorning))
+                    || GetAvailabilityValue(source, nameof(VolunteerSchedule.WedAfternoon)),
+                DayOfWeek.Thursday => GetAvailabilityValue(source, nameof(VolunteerSchedule.ThuMorning))
+                    || GetAvailabilityValue(source, nameof(VolunteerSchedule.ThuAfternoon)),
+                DayOfWeek.Friday => GetAvailabilityValue(source, nameof(VolunteerSchedule.FriMorning))
+                    || GetAvailabilityValue(source, nameof(VolunteerSchedule.FriAfternoon)),
+                DayOfWeek.Saturday => GetAvailabilityValue(source, nameof(VolunteerSchedule.SatMorning))
+                    || GetAvailabilityValue(source, nameof(VolunteerSchedule.SatAfternoon)),
+                DayOfWeek.Sunday => GetAvailabilityValue(source, nameof(VolunteerSchedule.SunMorning))
+                    || GetAvailabilityValue(source, nameof(VolunteerSchedule.SunAfternoon)),
+                _ => false
+            };
+        }
+
+        private static bool IsShiftWithinAvailability(
+            VolunteerShift shift,
+            VolunteerSchedule? availability,
+            VolunteerApplication? fallbackApplication)
+        {
+            if (availability == null && fallbackApplication == null)
+            {
+                return false;
+            }
+
+            var noon = TimeSpan.FromHours(12);
+            var needsMorning = shift.StartTime < noon;
+            var needsAfternoon = shift.EndTime > noon;
+
+            if (!needsMorning && !needsAfternoon)
+            {
+                return false;
+            }
+
+            bool HasAvailability(string propertyName)
+            {
+                return (availability != null && GetAvailabilityValue(availability, propertyName))
+                    || (fallbackApplication != null && GetAvailabilityValue(fallbackApplication, propertyName));
+            }
+
+            bool HasRequiredSlots(string morningPropertyName, string afternoonPropertyName)
+            {
+                return (!needsMorning || HasAvailability(morningPropertyName))
+                    && (!needsAfternoon || HasAvailability(afternoonPropertyName));
+            }
+
+            return shift.ShiftDate.DayOfWeek switch
+            {
+                DayOfWeek.Monday => HasRequiredSlots(nameof(VolunteerSchedule.MonMorning), nameof(VolunteerSchedule.MonAfternoon)),
+                DayOfWeek.Tuesday => HasRequiredSlots(nameof(VolunteerSchedule.TueMorning), nameof(VolunteerSchedule.TueAfternoon)),
+                DayOfWeek.Wednesday => HasRequiredSlots(nameof(VolunteerSchedule.WedMorning), nameof(VolunteerSchedule.WedAfternoon)),
+                DayOfWeek.Thursday => HasRequiredSlots(nameof(VolunteerSchedule.ThuMorning), nameof(VolunteerSchedule.ThuAfternoon)),
+                DayOfWeek.Friday => HasRequiredSlots(nameof(VolunteerSchedule.FriMorning), nameof(VolunteerSchedule.FriAfternoon)),
+                DayOfWeek.Saturday => HasRequiredSlots(nameof(VolunteerSchedule.SatMorning), nameof(VolunteerSchedule.SatAfternoon)),
+                DayOfWeek.Sunday => HasRequiredSlots(nameof(VolunteerSchedule.SunMorning), nameof(VolunteerSchedule.SunAfternoon)),
+                _ => false
+            };
         }
 
         private IActionResult? EnsureApprovedStudentAccess()

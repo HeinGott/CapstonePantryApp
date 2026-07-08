@@ -4319,6 +4319,805 @@ span.flatpickr-weekday {
     color: var(--pantreats-blue);
 }
 
+.volunteer-admin-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.volunteer-admin-metric {
+    background: linear-gradient(180deg, #ffffff 0%, #f4f8ff 100%);
+    border: 1px solid #d8e3f6;
+    border-radius: 18px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.volunteer-admin-metric-label {
+    color: #5b6472;
+    font-size: 0.9rem;
+}
+
+.volunteer-admin-metric strong {
+    color: var(--pantreats-blue);
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.volunteer-admin-shift-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.volunteer-admin-shift-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.95rem 1rem;
+    border: 1px solid #d8e3f6;
+    border-radius: 14px;
+    background: #f8fbff;
+    color: inherit;
+    text-decoration: none;
+}
+
+.volunteer-admin-shift-card:hover {
+    border-color: #9eb6dd;
+    background: #f1f6ff;
+}
+
+.volunteer-admin-shift-card.is-warning {
+    border-color: #f0c36d;
+    background: #fff8e8;
+}
+
+.volunteer-admin-shift-card strong,
+.volunteer-admin-shift-card span {
+    display: block;
+}
+
+.volunteer-admin-shift-card span {
+    color: #5b6472;
+    font-size: 0.92rem;
+}
+
+.volunteer-scheduler-week-banner {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    background: #eef4ff;
+    color: var(--pantreats-blue);
+    font-weight: 600;
+}
+
+.volunteer-scheduler-roster {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    max-height: 950px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.volunteer-scheduler-roster-card {
+    border: 1px solid #dbe4f3;
+    border-radius: 16px;
+    background: #ffffff;
+    padding: 1rem;
+    cursor: grab;
+    box-shadow: 0 10px 30px rgba(16, 47, 97, 0.06);
+}
+
+.volunteer-scheduler-roster-card.is-warning {
+    border-color: #f0c36d;
+    background: #fffaf0;
+}
+
+.volunteer-scheduler-availability {
+    color: #4b5563;
+    font-size: 0.92rem;
+    margin-top: 0.75rem;
+}
+
+.volunteer-scheduler-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.volunteer-scheduler-day {
+    min-height: 240px;
+    border: 1px solid #dbe4f3;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.volunteer-scheduler-day.is-drop-target {
+    border-color: var(--pantreats-blue);
+    box-shadow: 0 0 0 4px rgba(16, 47, 97, 0.1);
+    transform: translateY(-2px);
+}
+
+.volunteer-scheduler-day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.volunteer-scheduler-day-header strong,
+.volunteer-scheduler-day-header span {
+    display: block;
+}
+
+.volunteer-scheduler-day-header span {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.volunteer-scheduler-empty {
+    border: 1px dashed #c6d3ea;
+    border-radius: 14px;
+    padding: 1rem;
+    color: #6b7280;
+    font-size: 0.92rem;
+    background: rgba(255, 255, 255, 0.65);
+}
+
+.volunteer-scheduler-shift-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.volunteer-scheduler-shift-card {
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid #d7e3f8;
+    padding: 0.9rem;
+}
+
+.volunteer-scheduler-shift-card.is-warning {
+    border-color: #f0c36d;
+    background: #fffaf0;
+}
+
+.volunteer-scheduler-warning {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: #fff1cc;
+    color: #9a6700;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 0.35rem 0.7rem;
+}
+
+.volunteer-planner-page {
+    --planner-border: #d7deea;
+    --planner-ink: #152033;
+    --planner-muted: #687386;
+    --planner-panel: #ffffff;
+    --planner-soft: #f6f8fb;
+    --planner-accent: #1f7a5b;
+    --planner-accent-soft: #e6f4ef;
+    min-height: calc(100vh - 248px);
+    overflow: visible;
+    padding: 0 0.35rem 0.6rem;
+}
+
+.volunteer-planner-topbar,
+.volunteer-planner-shell {
+    max-width: 100%;
+}
+
+.volunteer-planner-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    min-height: 48px;
+    margin-bottom: 0.75rem;
+}
+
+.volunteer-planner-topbar .donor-page-title {
+    font-size: clamp(1.35rem, 1.75vw, 1.75rem);
+    line-height: 1.1;
+}
+
+.volunteer-planner-topbar .donor-page-subtitle {
+    font-size: 0.82rem;
+}
+
+.volunteer-planner-nav {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.volunteer-planner-nav .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.volunteer-planner-shell {
+    display: grid;
+    grid-template-columns: minmax(230px, 260px) minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: stretch;
+    min-height: 720px;
+}
+
+.volunteer-planner-sidebar,
+.volunteer-planner-board {
+    border: 1px solid var(--planner-border);
+    background: var(--planner-panel);
+    border-radius: 8px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
+}
+
+.volunteer-planner-sidebar {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.volunteer-planner-panel-head {
+    flex: 0 0 auto;
+    padding: 0.75rem 0.85rem;
+    border-bottom: 1px solid var(--planner-border);
+    background: var(--planner-soft);
+}
+
+.volunteer-planner-panel-head h2 {
+    color: var(--planner-ink);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.volunteer-planner-panel-head span {
+    color: var(--planner-muted);
+    font-size: 0.85rem;
+}
+
+.volunteer-planner-roster {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    overflow: hidden;
+    padding: 0.65rem;
+}
+
+.volunteer-planner-person {
+    border: 1px solid var(--planner-border);
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 0.55rem;
+    cursor: grab;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.volunteer-planner-person:hover {
+    border-color: #9fb1c8;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
+}
+
+.volunteer-planner-person-main {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 0.5rem;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+}
+
+.volunteer-planner-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #e9f3ef;
+    color: #175f47;
+    font-weight: 800;
+    font-size: 0.78rem;
+}
+
+.volunteer-planner-person-copy {
+    min-width: 0;
+}
+
+.volunteer-planner-person-copy strong,
+.volunteer-planner-person-copy span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.volunteer-planner-person-copy strong {
+    color: var(--planner-ink);
+    font-size: 0.86rem;
+}
+
+.volunteer-planner-person-copy span,
+.volunteer-planner-next {
+    color: var(--planner-muted);
+    font-size: 0.76rem;
+}
+
+.volunteer-planner-availability {
+    margin-top: 0.45rem;
+    border-top: 1px solid #edf1f5;
+    padding-top: 0.4rem;
+}
+
+.volunteer-planner-availability summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--planner-muted);
+    cursor: pointer;
+    font-size: 0.76rem;
+    font-weight: 700;
+    list-style: none;
+}
+
+.volunteer-planner-availability summary::-webkit-details-marker {
+    display: none;
+}
+
+.volunteer-planner-availability summary .bi {
+    font-size: 0.72rem;
+    transition: transform 0.2s ease;
+}
+
+.volunteer-planner-availability[open] summary .bi {
+    transform: rotate(180deg);
+}
+
+.volunteer-planner-availability-grid {
+    display: grid;
+    grid-template-columns: minmax(38px, 0.8fr) repeat(2, minmax(42px, 1fr));
+    gap: 0.28rem;
+    align-items: center;
+    padding-top: 0.45rem;
+}
+
+.volunteer-planner-availability-head {
+    color: #7b8797;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.volunteer-planner-availability-head:first-child {
+    text-align: left;
+}
+
+.volunteer-planner-availability-day {
+    color: var(--planner-ink);
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.volunteer-planner-slot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    min-height: 22px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 0.14rem 0.42rem;
+}
+
+.volunteer-planner-slot.is-available {
+    background: #e9f3ef;
+    color: #175f47;
+}
+
+.volunteer-planner-slot.is-unavailable {
+    background: #f4f6f9;
+    color: #a2adba;
+}
+
+.volunteer-planner-next {
+    margin: 0.4rem 0 0;
+}
+
+.volunteer-planner-editor {
+    flex: 0 0 auto;
+    border-top: 1px solid var(--planner-border);
+    background: #fbfcfe;
+}
+
+.volunteer-planner-editor > summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.7rem 0.85rem;
+    color: var(--planner-ink);
+    cursor: pointer;
+    font-weight: 800;
+    list-style: none;
+}
+
+.volunteer-planner-editor > summary::-webkit-details-marker {
+    display: none;
+}
+
+.volunteer-planner-editor > summary .bi {
+    font-size: 0.76rem;
+    color: var(--planner-muted);
+    transition: transform 0.2s ease;
+}
+
+.volunteer-planner-editor[open] > summary .bi {
+    transform: rotate(180deg);
+}
+
+.volunteer-planner-editor-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 0 0.85rem 0.85rem;
+}
+
+.volunteer-planner-editor-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    color: var(--planner-muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.volunteer-planner-editor-times {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+}
+
+.volunteer-planner-editor-form .form-control,
+.volunteer-planner-editor-form .form-select {
+    width: 100%;
+    min-width: 0;
+}
+
+.volunteer-planner-editor-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.55rem;
+}
+
+.volunteer-planner-editor-actions .btn {
+    width: 100%;
+}
+
+.volunteer-planner-board {
+    position: relative;
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    overflow: hidden;
+}
+
+.volunteer-planner-context-menu {
+    position: absolute;
+    z-index: 30;
+    min-width: 160px;
+    padding: 0.35rem;
+    border: 1px solid rgba(21, 32, 51, 0.12);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
+    backdrop-filter: blur(10px);
+}
+
+.volunteer-planner-context-action {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--planner-ink);
+    font-size: 0.92rem;
+    font-weight: 600;
+    padding: 0.55rem 0.7rem;
+    text-align: left;
+}
+
+.volunteer-planner-context-action:hover,
+.volunteer-planner-context-action:focus-visible {
+    background: #edf6f2;
+    color: #175f47;
+    outline: none;
+}
+
+.volunteer-planner-time-column {
+    display: grid;
+    grid-template-rows: 48px minmax(0, 1fr);
+    border-right: 1px solid var(--planner-border);
+    background: #fbfcfe;
+    min-width: 64px;
+    min-height: 0;
+}
+
+.volunteer-planner-day-spacer {
+    height: 48px;
+    border-bottom: 1px solid var(--planner-border);
+}
+
+.volunteer-planner-time-ruler {
+    position: relative;
+    min-height: 0;
+}
+
+.volunteer-planner-time-ruler span {
+    position: absolute;
+    right: 0.65rem;
+    transform: translateY(-50%);
+    color: var(--planner-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.volunteer-planner-days {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    min-width: 0;
+    min-height: 0;
+}
+
+.volunteer-planner-day {
+    display: grid;
+    grid-template-rows: 48px minmax(0, 1fr);
+    border-right: 1px solid var(--planner-border);
+    min-width: 0;
+    min-height: 0;
+}
+
+.volunteer-planner-day:last-child {
+    border-right: 0;
+}
+
+.volunteer-planner-day header {
+    height: 48px;
+    border-bottom: 1px solid var(--planner-border);
+    background: #fbfcfe;
+    padding: 0.45rem 0.65rem;
+    text-align: center;
+}
+
+.volunteer-planner-day header strong,
+.volunteer-planner-day header span {
+    display: block;
+}
+
+.volunteer-planner-day header strong {
+    color: var(--planner-ink);
+    font-size: 0.84rem;
+}
+
+.volunteer-planner-day header span {
+    color: var(--planner-muted);
+    font-size: 0.72rem;
+}
+
+.volunteer-planner-lane {
+    position: relative;
+    min-height: 0;
+    background:
+        linear-gradient(90deg, rgba(31, 122, 91, 0.035), rgba(31, 122, 91, 0)),
+        #ffffff;
+    overflow: hidden;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.volunteer-planner-lane.is-drop-target {
+    background-color: var(--planner-accent-soft);
+    box-shadow: inset 0 0 0 2px rgba(31, 122, 91, 0.35);
+}
+
+.volunteer-planner-hour-line {
+    position: absolute;
+    left: 0.65rem;
+    right: 0.65rem;
+    border-top: 1px solid #edf1f5;
+}
+
+.volunteer-planner-shift {
+    position: absolute;
+    left: 0.7rem;
+    right: 0.7rem;
+    min-height: 46px;
+    border: 1px solid #a9c6ba;
+    border-left: 4px solid var(--planner-accent);
+    background: #f2fbf7;
+    border-radius: 8px;
+    box-shadow: 0 12px 22px rgba(15, 23, 42, 0.12);
+    cursor: pointer;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none;
+}
+
+.volunteer-planner-shift.is-warning {
+    border-color: #e5bd63;
+    border-left-color: #b7791f;
+    background: #fff9e8;
+}
+
+.volunteer-planner-shift.is-copied {
+    box-shadow: 0 0 0 2px rgba(31, 122, 91, 0.45), 0 12px 22px rgba(15, 23, 42, 0.12);
+}
+
+.volunteer-planner-shift.is-resizing,
+.volunteer-planner-shift.is-moving {
+    z-index: 5;
+    box-shadow: 0 18px 30px rgba(15, 23, 42, 0.18);
+}
+
+.volunteer-planner-shift.is-saving {
+    opacity: 0.72;
+}
+
+.volunteer-planner-shift.is-moving {
+    cursor: move;
+    opacity: 0.92;
+    pointer-events: none;
+}
+
+.volunteer-planner-shift-body {
+    padding: 0.5rem 2.1rem 0.5rem 0.55rem;
+    cursor: pointer;
+    height: 100%;
+}
+
+body.volunteer-planner-is-dragging,
+body.volunteer-planner-is-dragging * {
+    cursor: move !important;
+}
+
+.volunteer-planner-shift-body strong,
+.volunteer-planner-shift-body span,
+.volunteer-planner-shift-body small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.volunteer-planner-shift-body strong {
+    color: var(--planner-ink);
+    font-size: 0.8rem;
+}
+
+.volunteer-planner-shift-body span {
+    color: #315f50;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.volunteer-planner-shift-body small {
+    color: #9a6700;
+    font-size: 0.66rem;
+    font-weight: 800;
+}
+
+.volunteer-planner-shift-actions {
+    position: absolute;
+    top: 0.32rem;
+    right: 0.32rem;
+    display: flex;
+    gap: 0.18rem;
+}
+
+.volunteer-planner-shift-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: 1px solid rgba(21, 32, 51, 0.16);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.82);
+    color: var(--planner-muted);
+}
+
+.volunteer-planner-resize {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 10px;
+    border: 0;
+    background: transparent;
+    cursor: ns-resize;
+    z-index: 2;
+}
+
+.volunteer-planner-resize::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 34px;
+    height: 3px;
+    border-radius: 999px;
+    background: rgba(21, 32, 51, 0.18);
+    transform: translate(-50%, -50%);
+}
+
+.volunteer-planner-resize.is-top {
+    top: 0;
+}
+
+.volunteer-planner-resize.is-bottom {
+    bottom: 0;
+}
+
+@media (max-width: 1199px) {
+    .volunteer-planner-shell {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 0;
+        max-height: none;
+    }
+
+    .volunteer-planner-sidebar {
+        position: static;
+    }
+
+    .volunteer-planner-roster {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        max-height: none;
+        overflow: visible;
+    }
+
+    .volunteer-planner-board {
+        min-height: 650px;
+    }
+}
+
+@media (max-width: 767px) {
+    .volunteer-planner-topbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .volunteer-planner-nav {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 991px) {
+    .volunteer-admin-shift-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
 .image-popup {
     position: fixed;
     inset: 0;

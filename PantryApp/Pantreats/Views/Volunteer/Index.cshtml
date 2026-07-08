@@ -1,73 +1,139 @@
-﻿@model Pantreats.Models.VolunteerAdminIndexViewModel
+@model Pantreats.Models.VolunteerAdminIndexViewModel
 
 @{
-    ViewData["Title"] = "Volunteers";
+    ViewData["Title"] = "Volunteer Dashboard";
 }
 
 <div class="student-page py-4">
     <div class="donor-page-header mb-4">
         <div>
-            <h1 class="donor-page-title mb-1">Volunteers</h1>
+            <h1 class="donor-page-title mb-1">Volunteer Dashboard</h1>
             <p class="donor-page-subtitle mb-0">
-                Review pending volunteer applications and manage approved volunteers.
+                Review applicants, manage the roster, and jump into weekly scheduling.
             </p>
         </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-action="Scheduler" class="btn btn-outline-secondary">Open Scheduler</a>
+            <a asp-action="ScheduleRequests" class="btn btn-outline-secondary">Availability Requests</a>
+        </div>
     </div>
 
-    <div class="student-card mb-4">
-        <div class="student-history-header mb-3">
-            <div>
-                <h2 class="student-section-title mb-1">Pending Applicants</h2>
-                <p class="student-page-subtitle mb-0">
-                    These applications still need an admin decision.
-                </p>
-            </div>
-        </div>
+    <section class="volunteer-admin-metrics mb-4">
+        <article class="volunteer-admin-metric">
+            <span class="volunteer-admin-metric-label">Active Volunteers</span>
+            <strong>@Model.TotalVolunteers</strong>
+        </article>
+        <article class="volunteer-admin-metric">
+            <span class="volunteer-admin-metric-label">Today's Shifts</span>
+            <strong>@Model.TodaysShifts</strong>
+        </article>
+        <article class="volunteer-admin-metric">
+            <span class="volunteer-admin-metric-label">This Week's Shifts</span>
+            <strong>@Model.UpcomingShiftsThisWeek</strong>
+        </article>
+        <article class="volunteer-admin-metric">
+            <span class="volunteer-admin-metric-label">Pending Requests</span>
+            <strong>@Model.PendingScheduleRequests</strong>
+        </article>
+    </section>
 
-        <div class="table-responsive">
-            <table class="table student-table align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Year</th>
-                        <th>Email</th>
-                        <th>Submitted</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (!Model.PendingApplications.Any())
-                    {
-                        <tr>
-                            <td colspan="4" class="text-muted">No pending applications right now.</td>
-                        </tr>
-                    }
-                    else
-                    {
-                        @foreach (var application in Model.PendingApplications)
-                        {
-                            <tr class="student-row"
-                                role="button"
-                                tabindex="0"
-                                onclick="goToVolunteerDetails(@application.VolunteerApplicationId)"
-                                onkeydown="openVolunteerDetailsFromKey(event, @application.VolunteerApplicationId)">
-                                <td>@application.FullName</td>
-                                <td>@application.Year</td>
-                                <td>@application.Email</td>
-                                <td>@application.SubmittedAt.ToLocalTime().ToString("MM/dd/yyyy")</td>
+    <div class="row g-4">
+        <div class="col-xl-7">
+            <section class="student-card h-100">
+                <div class="student-history-header mb-3">
+                    <div>
+                        <h2 class="student-section-title mb-1">Pending Applicants</h2>
+                        <p class="student-page-subtitle mb-0">
+                            New volunteer applications waiting on approval.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table student-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Email</th>
+                                <th>Submitted</th>
                             </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.PendingApplications.Any())
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-muted">No pending applications right now.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var application in Model.PendingApplications)
+                                {
+                                    <tr class="student-row"
+                                        role="button"
+                                        tabindex="0"
+                                        onclick="goToVolunteerDetails(@application.VolunteerApplicationId)"
+                                        onkeydown="openVolunteerDetailsFromKey(event, @application.VolunteerApplicationId)">
+                                        <td>@application.FullName</td>
+                                        <td>@application.Year</td>
+                                        <td>@application.Email</td>
+                                        <td>@application.SubmittedAt.ToLocalTime().ToString("MM/dd/yyyy")</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <div class="col-xl-5">
+            <section class="student-card h-100">
+                <div class="student-history-header mb-3">
+                    <div>
+                        <h2 class="student-section-title mb-1">Upcoming Shifts</h2>
+                        <p class="student-page-subtitle mb-0">
+                            The next scheduled volunteer coverage on the calendar.
+                        </p>
+                    </div>
+                </div>
+
+                @if (!Model.UpcomingShifts.Any())
+                {
+                    <div class="admin-empty-state">
+                        <i class="bi bi-calendar-week"></i>
+                        <span>No shifts scheduled yet.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="volunteer-admin-shift-list">
+                        @foreach (var shift in Model.UpcomingShifts)
+                        {
+                            <a asp-action="Scheduler"
+                               asp-route-weekStart="@shift.ShiftDate.ToString("yyyy-MM-dd")"
+                               class="volunteer-admin-shift-card">
+                                <div>
+                                    <strong>@shift.FullName</strong>
+                                    <span>@shift.ShiftDate.ToLocalTime().ToString("ddd, MMM d")</span>
+                                </div>
+                                <span>@shift.TimeLabel</span>
+                            </a>
                         }
-                    }
-                </tbody>
-            </table>
+                    </div>
+                }
+            </section>
         </div>
     </div>
 
-    <div class="student-card">
+    <section class="student-card mt-4">
         <div class="student-history-header mb-3">
             <div>
-                <h2 class="student-section-title mb-1">Approved Volunteers</h2>
+                <h2 class="student-section-title mb-1">Volunteer Roster</h2>
                 <p class="student-page-subtitle mb-0">
-                    Active volunteers helping run the pantry.
+                    Approved volunteers who can be scheduled into shifts.
                 </p>
             </div>
         </div>
@@ -79,7 +145,7 @@
                         <th>Name</th>
                         <th>Year</th>
                         <th>Email</th>
-                        <th>Approved Record</th>
+                        <th>Volunteer Record</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,7 +174,7 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </section>
 </div>
 
 @section Scripts {

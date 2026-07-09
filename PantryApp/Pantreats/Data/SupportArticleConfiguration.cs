@@ -77,6 +77,33 @@ namespace Pantreats.Data
                     Keywords = new[] { "recipe", "recipes" },
                     Summary = "Learn how to add a recipe to Pantreats.",
                     Content = "Step 1: Log in as an admin. \nStep 2: Click the Recipes button on the navbar. \nStep 3: From the Recipes page, click the Add Recipe button. \nStep 4: Fill out the fields (recipe title, meal type, instructions, image, dietary information, ingredients) then either press Preview Recipe to see what your recipe will look like or Save Recipe to add the recipe."
+                },
+                new SupportArticle
+                {
+                    Id = 7,
+                    Title = "How to Change Accessibility Preferences",
+                    Slug = "change-accessibility-preferences",
+                    Keywords = new[] { "change", "accessibility" },
+                    Summary = "Learn how to make your experience more accessible (have pages read to you, increase text size, etc.).",
+                    Content = "Step 1: Click the 'Accessibility' button on the navbar. \nStep 2: From the Accessibility page, click any of the options located inside the cards (e.g, High Contrast) to make your experience more accessible. You may also enable the toolbar at the top of the page to access these tools from any page."
+                },
+                new SupportArticle
+                {
+                    Id = 8,
+                    Title = "How to Change Your Availabilty as a Volunteer",
+                    Slug = "change-volunteer-availability",
+                    Keywords = new[] { "change", "volunteer", "availability" },
+                    Summary = "Learn how to change your volunteering hours.",
+                    Content = "Step 1: Log in as a volunteer. \nStep 2: Click the 'Schedule' button on the navbar. \nStep 3: From the My Schedule page, click the 'Request Change' button. \nStep 4: Put a check next to the new dates you are requesting, along with a short note detailing why you are requesting the change. Then press the Submit Request button. An admin will review your request when able."
+                },
+                new SupportArticle
+                {
+                    Id = 9,
+                    Title = "How to Browse Recipes",
+                    Slug = "browse-recipes",
+                    Keywords = new[] { "browse", "recipe", "recipes" },
+                    Summary = "Learn how to browse recipes on Pantreats.",
+                    Content = "Step 1: From the homepage, under the 'What You Can Do With Pantreats?' section, click the 'Browse Recipes' card. \nStep 2: Enter a recipe name, ingredient, or instruction of the recipe you are looking for."
                 });
         }
     }

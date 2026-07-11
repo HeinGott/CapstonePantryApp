@@ -49,5 +49,37 @@ namespace Pantreats.Services
                 <p><a href='{orderUrl}'>View your order</a></p>
                 <p>Thanks for ordering with PanTreats! Your order should be ready shortly.</p>";
         }
+        public async Task<bool> SendVerificationCodeAsync(string toEmail, string code)
+        {
+            try
+            {
+                var email = _config.GetSection("Email");
+
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Do Not Reply - PanTreats Notification", email["From"]));
+                message.To.Add(MailboxAddress.Parse(toEmail));
+                message.Subject = "PanTreats Verification Code";
+                message.Body = new BodyBuilder { HtmlBody = BuildVerificationHtml(code) }.ToMessageBody();
+
+                using var client = new SmtpClient();
+                await client.ConnectAsync(email["Host"], int.Parse(email["Port"]), SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(email["User"], email["Pass"]);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Verification code email failed for {Email}", toEmail);
+                return false;
+            }
+        }
+
+        private string BuildVerificationHtml(string code)
+        {
+            return $@"
+                <p><strong>Pantreats Verification Code</strong></p>
+                <p>{code}</p>";
+        }
     }
 }

@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System.ComponentModel.DataAnnotations;
-using System.Text;
-using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -13,6 +10,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Pantreats.Models;
+using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Encodings.Web;
+using Pantreats.Services;
 
 namespace Pantreats.Areas.Identity.Pages.Account
 {
@@ -25,6 +27,7 @@ namespace Pantreats.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IEmailService _emailService;
 
         public RegisterModel(
             ApplicationDbContext context,
@@ -32,7 +35,8 @@ namespace Pantreats.Areas.Identity.Pages.Account
             IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IEmailService emailService)
         {
             _context = context;
             _userManager = userManager;
@@ -41,6 +45,7 @@ namespace Pantreats.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _emailService = emailService;
         }
 
         [BindProperty]
@@ -142,17 +147,13 @@ namespace Pantreats.Areas.Identity.Pages.Account
                         await EnsureDonorProfileAsync(user.Id);
                     }
 
-                    var userId = await _userManager.GetUserIdAsync(user);
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId, code, returnUrl },
-                        protocol: Request.Scheme);
+                    var codeSent = await SendNewVerificationCodeAsync(user.Id, Input.Email);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    if (!codeSent)
+                    {
+                        ModelState.AddModelError(string.Empty, "Failed to send verification code. Please try again.");
+                        return Page();
+                    }
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -258,6 +259,22 @@ namespace Pantreats.Areas.Identity.Pages.Account
             }
 
             return (IUserEmailStore<IdentityUser>)_userStore;
+        }
+        private async Task<bool> SendNewVerificationCodeAsync(string userId, string email)
+        {
+            var code = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
+
+            _context.EmailVerificationCodes.Add(new EmailVerificationCode
+            {
+                UserId = userId,
+                Code = code,
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+            });
+
+            await _context.SaveChangesAsync();
+
+            return await _emailService.SendVerificationCodeAsync(email, code);
         }
     }
 }

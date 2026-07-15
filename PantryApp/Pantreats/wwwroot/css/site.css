@@ -4326,30 +4326,41 @@ span.flatpickr-weekday {
 }
 
 .volunteer-admin-metric {
-    background: linear-gradient(180deg, #ffffff 0%, #f4f8ff 100%);
-    border: 1px solid #d8e3f6;
-    border-radius: 18px;
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 22px 24px;
+    border: 1px solid var(--pantreats-border);
+    box-shadow: var(--pantreats-shadow);
 }
 
 .volunteer-admin-metric-label {
-    color: #5b6472;
-    font-size: 0.9rem;
+    margin: 0 0 8px 0;
+    color: var(--pantreats-blue);
+    font-weight: 700;
 }
 
-.volunteer-admin-metric strong {
-    color: var(--pantreats-blue);
-    font-size: 2rem;
-    line-height: 1;
+.volunteer-admin-metric h2 {
+    margin: 0;
+    color: var(--pantreats-green-dark);
+    font-size: 34px;
+    font-weight: 800;
 }
 
 .volunteer-admin-shift-list {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+}
+
+.volunteer-admin-upcoming-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.volunteer-admin-upcoming-empty {
+    min-height: 180px;
+    padding: 1.5rem 1rem 2rem;
+    justify-content: center;
 }
 
 .volunteer-admin-shift-card {

@@ -235,9 +235,7 @@ namespace Pantreats.Controllers
                 VolunteerLastName = volunteerApplication?.LastName ?? string.Empty,
                 VolunteerEmail = volunteerApplication?.Email ?? string.Empty,
                 VolunteerPhoneNumber = volunteerApplication?.PhoneNum ?? string.Empty,
-                VolunteerYear = volunteerApplication?.Year ?? string.Empty,
-                HasVolunteeredBefore = volunteerApplication?.HasVolunteeredBefore ?? false,
-                PreviousCapacity = volunteerApplication?.PreviousCapacity,
+
                 ReasonForVolunteering = volunteerApplication?.ReasonForVolunteering ?? string.Empty,
                 VolunteerFrequency = volunteerApplication?.VolunteerFrequency ?? string.Empty,
                 OtherFrequency = volunteerApplication?.OtherFrequency,
@@ -380,11 +378,6 @@ namespace Pantreats.Controllers
                     volunteerApplication.LastName = model.VolunteerLastName;
                     volunteerApplication.Email = model.VolunteerEmail;
                     volunteerApplication.PhoneNum = model.VolunteerPhoneNumber;
-                    volunteerApplication.Year = model.VolunteerYear;
-                    volunteerApplication.HasVolunteeredBefore = model.HasVolunteeredBefore;
-                    volunteerApplication.PreviousCapacity = string.IsNullOrWhiteSpace(model.PreviousCapacity)
-                        ? null
-                        : model.PreviousCapacity.Trim();
                     volunteerApplication.ReasonForVolunteering = model.ReasonForVolunteering;
                     volunteerApplication.VolunteerFrequency = model.VolunteerFrequency;
                     volunteerApplication.OtherFrequency = string.IsNullOrWhiteSpace(model.OtherFrequency)

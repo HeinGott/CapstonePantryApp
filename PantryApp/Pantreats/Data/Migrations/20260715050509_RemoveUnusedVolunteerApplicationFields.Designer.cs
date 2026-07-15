@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pantreats.Data;
 
@@ -11,9 +12,11 @@ using Pantreats.Data;
 namespace Pantreats.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260715050509_RemoveUnusedVolunteerApplicationFields")]
+    partial class RemoveUnusedVolunteerApplicationFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -765,33 +768,6 @@ namespace Pantreats.Data.Migrations
                             Slug = "add-recipe",
                             Summary = "Learn how to add a recipe to Pantreats.",
                             Title = "How to Add a Recipe"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Content = "Step 1: Click the 'Accessibility' button on the navbar. \nStep 2: From the Accessibility page, click any of the options located inside the cards (e.g, High Contrast) to make your experience more accessible. You may also enable the toolbar at the top of the page to access these tools from any page.",
-                            Keywords = "change,accessibility",
-                            Slug = "change-accessibility-preferences",
-                            Summary = "Learn how to make your experience more accessible (have pages read to you, increase text size, etc.).",
-                            Title = "How to Change Accessibility Preferences"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Content = "Step 1: Log in as a volunteer. \nStep 2: Click the 'Schedule' button on the navbar. \nStep 3: From the My Schedule page, click the 'Request Change' button. \nStep 4: Put a check next to the new dates you are requesting, along with a short note detailing why you are requesting the change. Then press the Submit Request button. An admin will review your request when able.",
-                            Keywords = "change,volunteer,availability",
-                            Slug = "change-volunteer-availability",
-                            Summary = "Learn how to change your volunteering hours.",
-                            Title = "How to Change Your Availabilty as a Volunteer"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Content = "Step 1: From the homepage, under the 'What You Can Do With Pantreats?' section, click the 'Browse Recipes' card. \nStep 2: Enter a recipe name, ingredient, or instruction of the recipe you are looking for.",
-                            Keywords = "browse,recipe,recipes",
-                            Slug = "browse-recipes",
-                            Summary = "Learn how to browse recipes on Pantreats.",
-                            Title = "How to Browse Recipes"
                         });
                 });
 

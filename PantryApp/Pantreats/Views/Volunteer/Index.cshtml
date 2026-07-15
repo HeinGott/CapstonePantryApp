@@ -77,7 +77,6 @@
                                         onclick="goToVolunteerDetails(@application.VolunteerApplicationId)"
                                         onkeydown="openVolunteerDetailsFromKey(event, @application.VolunteerApplicationId)">
                                         <td>@application.FullName</td>
-                                        <td>@application.Year</td>
                                         <td>@application.Email</td>
                                         <td>@application.SubmittedAt.ToLocalTime().ToString("MM/dd/yyyy")</td>
                                     </tr>
@@ -165,7 +164,6 @@
                                 onclick="goToVolunteerDetails(@volunteer.VolunteerApplicationId)"
                                 onkeydown="openVolunteerDetailsFromKey(event, @volunteer.VolunteerApplicationId)">
                                 <td>@volunteer.FullName</td>
-                                <td>@volunteer.Year</td>
                                 <td>@volunteer.Email</td>
                                 <td>@volunteer.SubmittedAt.ToLocalTime().ToString("MM/dd/yyyy")</td>
                             </tr>

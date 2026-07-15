@@ -13,11 +13,7 @@ namespace Pantreats.Models
         public string LastName { get; set; }
         public string PhoneNum { get; set; }
         public string Email { get; set; }
-        public string Year { get; set; }
 
-        // Volunteer Experience
-        public bool HasVolunteeredBefore { get; set; }
-        public string? PreviousCapacity { get; set; }
         public string ReasonForVolunteering { get; set; }
 
         // Frequency

@@ -54,7 +54,6 @@
             <div>
                 <p class="student-review-eyebrow mb-2">Application Review</p>
                 <h1 class="student-details-title mb-1">@Model.FullName</h1>
-                <p class="student-details-subtitle mb-1">Year: @Model.Year</p>
             </div>
 
             <div class="student-review-status-wrap">
@@ -65,10 +64,6 @@
         </div>
 
         <div class="student-review-summary">
-            <div class="student-review-summary-item">
-                <span>Year</span>
-                <strong>@Model.Year</strong>
-            </div>
             <div class="student-review-summary-item">
                 <span>Frequency</span>
                 <strong>@Model.VolunteerFrequency</strong>
@@ -104,10 +99,6 @@
             <div class="student-fact-row">
                 <span>Phone number</span>
                 <strong>@Model.DisplayPhoneNumber</strong>
-            </div>
-            <div class="student-fact-row">
-                <span>Year</span>
-                <strong>@Model.Year</strong>
             </div>
             <div class="student-fact-row">
                 <span>Application record</span>
@@ -168,20 +159,6 @@
                 <h2 class="student-section-title mb-1">Experience</h2>
                 <p class="student-page-subtitle mb-0">Background and motivation.</p>
             </div>
-        </div>
-
-        <div class="student-fact-list">
-            <div class="student-fact-row">
-                <span>Volunteered before</span>
-                <strong>@FormatBool(Model.HasVolunteeredBefore)</strong>
-            </div>
-            @if (!string.IsNullOrWhiteSpace(Model.PreviousCapacity))
-            {
-                <div class="student-fact-row student-fact-subrow">
-                    <span>Previous capacity</span>
-                    <strong>@Model.PreviousCapacity</strong>
-                </div>
-            }
         </div>
 
         <div class="student-review-note mt-4">

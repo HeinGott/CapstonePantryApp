@@ -44,7 +44,7 @@ namespace Pantreats.Controllers
                     UserId = application.UserId,
                     FullName = BuildFullName(application.FirstName, application.LastName),
                     Email = application.Email ?? string.Empty,
-                    Year = application.Year ?? string.Empty,
+                    
                     ApplicationStatus = string.IsNullOrWhiteSpace(application.ApplicationStatus)
                         ? ApplicationStatuses.Pending
                         : application.ApplicationStatus,
@@ -138,10 +138,7 @@ namespace Pantreats.Controllers
                 LastName = application.LastName,
                 Email = application.Email ?? string.Empty,
                 PhoneNumber = application.PhoneNum,
-                Year = application.Year ?? string.Empty,
-
-                HasVolunteeredBefore = application.HasVolunteeredBefore,
-                PreviousCapacity = application.PreviousCapacity,
+                
                 ReasonForVolunteering = application.ReasonForVolunteering,
 
                 VolunteerFrequency = application.VolunteerFrequency,
@@ -212,6 +209,10 @@ namespace Pantreats.Controllers
                 if (!await _userManager.IsInRoleAsync(user, "Volunteers"))
                 {
                     await _userManager.AddToRoleAsync(user, "Volunteers");
+                }
+                if (await _userManager.IsInRoleAsync(user, "Students"))
+                {
+                    await _userManager.RemoveFromRoleAsync(user, "Students");
                 }
             }
 
@@ -522,10 +523,7 @@ namespace Pantreats.Controllers
                 LastName = model.LastName,
                 PhoneNum = model.PhoneNum,
                 Email = model.Email,
-                Year = model.Year,
-
-                HasVolunteeredBefore = model.HasVolunteeredBefore,
-                PreviousCapacity = model.PreviousCapacity,
+                
                 ReasonForVolunteering = model.ReasonForVolunteering,
 
                 VolunteerFrequency = model.VolunteerFrequency,
@@ -582,7 +580,7 @@ namespace Pantreats.Controllers
             {
                 VolunteerApplicationId = application.VolunteerApplicationId,
                 FullName = BuildFullName(application.FirstName, application.LastName),
-                Year = application.Year ?? string.Empty,
+                
                 ApplicationStatus = normalizedStatus,
                 SubmittedAt = application.SubmittedDate,
                 ReviewedAt = application.ReviewedAt,
@@ -1300,7 +1298,6 @@ namespace Pantreats.Controllers
                         UserId = application.UserId,
                         FullName = BuildFullName(application.FirstName, application.LastName),
                         Email = application.Email ?? string.Empty,
-                        Year = application.Year ?? string.Empty,
                         AvailabilitySummary = availability != null
                             ? BuildAvailabilitySummary(availability)
                             : BuildAvailabilitySummary(application),

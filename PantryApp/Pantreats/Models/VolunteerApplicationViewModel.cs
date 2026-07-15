@@ -19,12 +19,6 @@ namespace Pantreats.Models
         [EmailAddress(ErrorMessage = "Please enter a valid email")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Please select your year")]
-        public string Year { get; set; }
-
-        // Volunteer Experience
-        public bool HasVolunteeredBefore { get; set; }
-        public string? PreviousCapacity { get; set; }
 
         [Required(ErrorMessage = "Please tell us why you want to volunteer")]
         public string ReasonForVolunteering { get; set; }

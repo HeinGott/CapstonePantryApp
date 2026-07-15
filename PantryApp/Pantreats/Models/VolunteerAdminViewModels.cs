@@ -17,7 +17,7 @@
         public string UserId { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string Year { get; set; } = string.Empty;
+        
         public string ApplicationStatus { get; set; } = string.Empty;
         public DateTime SubmittedAt { get; set; }
     }
@@ -31,10 +31,7 @@
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
-        public string Year { get; set; } = string.Empty;
 
-        public bool HasVolunteeredBefore { get; set; }
-        public string? PreviousCapacity { get; set; }
         public string ReasonForVolunteering { get; set; } = string.Empty;
 
         public string VolunteerFrequency { get; set; } = string.Empty;

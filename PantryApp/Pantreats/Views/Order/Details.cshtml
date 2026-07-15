@@ -17,7 +17,7 @@
 
 <div class="order-details py-4">
 
-    @if (User.IsInRole("Admin"))
+    @if (User.IsInRole("Admin") || User.IsInRole("Volunteers"))
     {
         <a asp-controller="OrderFulfilments" asp-action="Index" class="back-button">&larr; Back to Order Fulfilment</a>
         <a asp-action="History" class="back-button">&larr; Back to Order History</a>
@@ -37,7 +37,7 @@
         <div class="alert alert-danger">@TempData["AddItemError"]</div>
     }
 
-    @if (User.IsInRole("Admin"))
+    @if (User.IsInRole("Admin") || User.IsInRole("Volunteers"))
     {
         <section class="order-details-overview">
             <div class="order-details-heading">
@@ -162,7 +162,7 @@
                 <p class="order-items-subtitle">Items included in this order.</p>
             </div>
 
-            @if (User.IsInRole("Admin") && !isCompleted)
+            @if (User.IsInRole("Admin") || User.IsInRole("Volunteers") && !isCompleted)
             {
                 <button type="button" id="openAddItem" class="inventory-edit-btn">Add Item</button>
             }
@@ -177,7 +177,7 @@
                         <th>Category</th>
                         <th>Quantity</th>
                         <th>Points</th>
-                        @if (User.IsInRole("Admin"))
+                        @if (User.IsInRole("Admin") || User.IsInRole("Volunteers"))
                         {
                             <th>Actions</th>
                         }
@@ -192,7 +192,7 @@
                             <td>@item.Category</td>
                             <td>@item.OrderQuantity</td>
                             <td>@item.Points</td>
-                            @if (User.IsInRole("Admin"))
+                            @if (User.IsInRole("Admin") || User.IsInRole("Volunteers"))
                             {
                                 <td>
                                     @if (!isCompleted)
@@ -211,7 +211,7 @@
         </div>
     </div>
 
-    @if (User.IsInRole("Admin") && !isCompleted)
+    @if (User.IsInRole("Admin") || User.IsInRole("Volunteers") && !isCompleted)
     {
         var inventoryItems = ViewBag.InventoryItems as List<Pantreats.Models.Inventory> ?? new List<Pantreats.Models.Inventory>();
 

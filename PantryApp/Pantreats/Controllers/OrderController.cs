@@ -30,7 +30,7 @@ namespace Pantreats.Controllers
                 .Include(order => order.OrderItems)
                 .Include(order => order.OrderFulfilment);
 
-            if (!User.IsInRole("Admin"))
+            if (!User.IsInRole("Admin") && !User.IsInRole("Volunteers"))
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity!.Name;
@@ -63,7 +63,7 @@ namespace Pantreats.Controllers
                 return NotFound();
             }
 
-            if (!User.IsInRole("Admin"))
+            if (!User.IsInRole("Admin") && !User.IsInRole("Volunteers"))
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity!.Name;
@@ -74,7 +74,7 @@ namespace Pantreats.Controllers
                 }
             }
 
-            if (User.IsInRole("Admin"))
+            if (User.IsInRole("Admin") || User.IsInRole("Volunteers"))
             {
                 var studentApplication = _context.UserApplications
                     .AsNoTracking()
@@ -99,7 +99,7 @@ namespace Pantreats.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Volunteers")]
         [ValidateAntiForgeryToken]
         public IActionResult MarkReadyForPickup(int id)
         {
@@ -124,7 +124,7 @@ namespace Pantreats.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Volunteers")]
         [ValidateAntiForgeryToken]
         public IActionResult MarkCompleted(int id)
         {
@@ -153,7 +153,7 @@ namespace Pantreats.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Volunteers")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteItem(int id)
         {
@@ -195,7 +195,7 @@ namespace Pantreats.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Volunteers")]
         [ValidateAntiForgeryToken]
         public IActionResult AddItem(int id, string upc, int quantity)
         {

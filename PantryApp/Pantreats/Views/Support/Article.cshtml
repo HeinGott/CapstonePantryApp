@@ -1,11 +1,65 @@
-﻿@model SupportArticle
+@model SupportArticle
 
 @{
-	ViewData["Title"] = Model.Title;
+    var steps = (Model.Content ?? string.Empty)
+        .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    ViewData["Title"] = Model.Title;
+    ViewData["FullWidth"] = true;
 }
 
-<div>
-	<h1>@Model.Title</h1>
-	<p>@Model.Summary</p>
-	<div style="white-space: pre-line">@Model.Content</div>
-</div>
+<section class="support-article-page">
+    <div class="container">
+        <div class="support-article-wrap support-reveal">
+            <a asp-controller="Support" asp-action="Index" class="support-back-link">
+                <i class="bi bi-arrow-left"></i>
+                Back to support
+            </a>
+
+            <article class="support-article-simple">
+                <header class="support-article-header">
+                    <h1>@Model.Title</h1>
+                    <p>@Model.Summary</p>
+                </header>
+
+                @if (steps.Length > 0)
+                {
+                    <div class="support-article-steps">
+                        @foreach (var step in steps)
+                        {
+                            <p class="support-article-step">@step</p>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="support-article-prose">@Model.Content</div>
+                }
+            </article>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (() => {
+            if (document.body.classList.contains("reduce-motion-mode")) {
+                document.querySelectorAll(".support-reveal").forEach((element) => element.classList.add("is-visible"));
+                return;
+            }
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) {
+                        return;
+                    }
+
+                    entry.target.classList.add("is-visible");
+                    observer.unobserve(entry.target);
+                });
+            }, { threshold: 0.14 });
+
+            document.querySelectorAll(".support-reveal").forEach((element) => observer.observe(element));
+        })();
+    </script>
+}

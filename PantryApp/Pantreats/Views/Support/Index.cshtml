@@ -1,27 +1,72 @@
-﻿@model List<SupportArticle>
+@model List<SupportArticle>
 
 @{
-    ViewData["Title"] = "Support Index";
+    ViewData["Title"] = "Support";
     ViewData["FullWidth"] = true;
 }
-<div class="col-lg-6 text-center text-lg-start">
-    <h1 style="color: darkblue">
-        User Manual
-    </h1>
-    <form asp-controller="Support" asp-action="Search" method="get">
-        <input type="text" name="keyword" placeholder="Search the manual" />
-        <button type="submit">Search</button>
-    </form>
 
-    @foreach (var article in Model)
-    {
-        <div>
-            <h2>
-                <a asp-controller="Support" asp-action="Article" asp-route-slug="@article.Slug">
-                    @article.Title
-                </a>
-            </h2>
-            <p>@article.Summary</p>
+<section class="support-guide-header">
+    <div class="container">
+        <div class="support-guide-intro support-reveal">
+            <h1 class="support-guide-title">User Manual</h1>
+            <p class="support-guide-text">
+                Find step-by-step help for the most common tasks in PanTreats.
+            </p>
+
+            <form asp-controller="Support" asp-action="Search" method="get" class="support-guide-search" role="search">
+                <label class="visually-hidden" for="supportKeyword">Search the manual</label>
+                <div class="support-guide-search-row">
+                    <input id="supportKeyword" type="text" name="keyword" class="support-guide-input" placeholder="Search the manual" />
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
         </div>
-    }
-</div>
+    </div>
+</section>
+
+<section class="support-library">
+    <div class="container">
+        <div class="support-section-heading support-reveal">
+            <h2>Guide Contents</h2>
+            <p>
+                Browse every help document currently available in the PanTreats manual.
+            </p>
+        </div>
+
+        <div class="support-guide-list">
+            @foreach (var article in Model)
+            {
+                <a asp-controller="Support" asp-action="Article" asp-route-slug="@article.Slug" class="support-guide-item support-reveal support-guide-row-link">
+                    <div class="support-guide-item-body">
+                        <h3>@article.Title</h3>
+                        <p>@article.Summary</p>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (() => {
+            if (document.body.classList.contains("reduce-motion-mode")) {
+                document.querySelectorAll(".support-reveal").forEach((element) => element.classList.add("is-visible"));
+                return;
+            }
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) {
+                        return;
+                    }
+
+                    entry.target.classList.add("is-visible");
+                    observer.unobserve(entry.target);
+                });
+            }, { threshold: 0.14 });
+
+            document.querySelectorAll(".support-reveal").forEach((element) => observer.observe(element));
+        })();
+    </script>
+}

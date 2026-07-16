@@ -11,10 +11,10 @@
 
             <!-- Header -->
             <div class="mb-4 text-center">
-                <img src="/Images/pantreatsLogo.png" class="mb-3" style="max-width: 220px;">
+                <img src="/Images/PantryLogo.png" class="mb-3" style="max-width: 220px;">
                 <h1 class="section-title">Volunteer Application</h1>
                 <p class="section-text">Thank you for your interest in volunteering with PanTreats!</p>
-            </div>            
+            </div>
 
             <form asp-controller="Volunteer" asp-action="VolunteerApplicationForm" method="post">
                 @Html.AntiForgeryToken()
@@ -49,12 +49,12 @@
                         <input asp-for="Email" class="form-control" />
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
-                    
+
                 </div>
 
                 <!-- Volunteer Experience -->
                 <h5 class="mb-3" style="color: var(--pantreats-blue);">Volunteer Experience</h5>
-                             
+
                 <div class="mb-4">
                     <label class="form-label">Why do you want to volunteer?</label>
                     <textarea asp-for="ReasonForVolunteering" class="form-control" rows="3"></textarea>
@@ -92,8 +92,13 @@
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th>
-                                <th>Fri</th><th>Sat</th><th>Sun</th>
+                                <th>Mon</th>
+                                <th>Tue</th>
+                                <th>Wed</th>
+                                <th>Thu</th>
+                                <th>Fri</th>
+                                <th>Sat</th>
+                                <th>Sun</th>
                             </tr>
                         </thead>
                         <tbody>

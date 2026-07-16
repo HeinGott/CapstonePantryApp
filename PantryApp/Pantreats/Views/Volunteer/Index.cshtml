@@ -21,20 +21,20 @@
 
     <section class="volunteer-admin-metrics mb-4">
         <article class="volunteer-admin-metric">
-            <span class="volunteer-admin-metric-label">Active Volunteers</span>
-            <strong>@Model.TotalVolunteers</strong>
+            <p class="volunteer-admin-metric-label">Active Volunteers</p>
+            <h2>@Model.TotalVolunteers</h2>
         </article>
         <article class="volunteer-admin-metric">
-            <span class="volunteer-admin-metric-label">Today's Shifts</span>
-            <strong>@Model.TodaysShifts</strong>
+            <p class="volunteer-admin-metric-label">Today's Shifts</p>
+            <h2>@Model.TodaysShifts</h2>
         </article>
         <article class="volunteer-admin-metric">
-            <span class="volunteer-admin-metric-label">This Week's Shifts</span>
-            <strong>@Model.UpcomingShiftsThisWeek</strong>
+            <p class="volunteer-admin-metric-label">This Week's Shifts</p>
+            <h2>@Model.UpcomingShiftsThisWeek</h2>
         </article>
         <article class="volunteer-admin-metric">
-            <span class="volunteer-admin-metric-label">Pending Requests</span>
-            <strong>@Model.PendingScheduleRequests</strong>
+            <p class="volunteer-admin-metric-label">Pending Requests</p>
+            <h2>@Model.PendingScheduleRequests</h2>
         </article>
     </section>
 
@@ -88,7 +88,7 @@
         </div>
 
         <div class="col-xl-5">
-            <section class="student-card h-100">
+            <section class="student-card h-100 volunteer-admin-upcoming-card">
                 <div class="student-history-header mb-3">
                     <div>
                         <h2 class="student-section-title mb-1">Upcoming Shifts</h2>
@@ -100,7 +100,7 @@
 
                 @if (!Model.UpcomingShifts.Any())
                 {
-                    <div class="admin-empty-state">
+                    <div class="admin-empty-state volunteer-admin-upcoming-empty">
                         <i class="bi bi-calendar-week"></i>
                         <span>No shifts scheduled yet.</span>
                     </div>

@@ -44,11 +44,22 @@ namespace Pantreats.Controllers
                 });
             }
 
+            if (!student.CurrentPointBalance.HasValue)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new
+                {
+                    success = false,
+                    message = "That student does not have an active pantry point balance yet. Please see pantry staff."
+                });
+            }
+
             return Ok(new
             {
                 success = true,
                 studentId = student.StudentId,
-                fullName = BuildFullName(student.FirstName, student.MiddleName, student.LastName)
+                fullName = BuildFullName(student.FirstName, student.MiddleName, student.LastName),
+                monthlyPointBalance = student.MonthlyPointBalance,
+                currentPointBalance = student.CurrentPointBalance
             });
         }
 
@@ -148,6 +159,7 @@ namespace Pantreats.Controllers
                 orderId = result.OrderId,
                 orderDate = result.OrderDate,
                 totalPoints = result.TotalPoints,
+                remainingPoints = result.RemainingPoints,
                 message = $"Checkout complete for {BuildFullName(student.FirstName, student.MiddleName, student.LastName)}."
             });
         }

@@ -53,14 +53,15 @@ namespace Pantreats.Controllers
                 .OrderBy(summary => summary.FullName)
                 .ToList();
 
-            var weekStart = StartOfWeek(DateTime.Today);
-            var weekEnd = weekStart.AddDays(7);
+            var today = DateTime.Today;
+            var dashboardWeekStart = GetDashboardWeekStart(today);
+            var dashboardWeekEnd = dashboardWeekStart.AddDays(7);
             var upcomingShifts = await _context.VolunteerShifts
                 .AsNoTracking()
                 .Where(shift =>
                     shift.Status != VolunteerShiftStatuses.Cancelled &&
-                    shift.ShiftDate >= DateTime.Today &&
-                    shift.ShiftDate < weekEnd)
+                    shift.ShiftDate >= today &&
+                    shift.ShiftDate < dashboardWeekEnd)
                 .OrderBy(shift => shift.ShiftDate)
                 .ThenBy(shift => shift.StartTime)
                 .ToListAsync();
@@ -75,7 +76,7 @@ namespace Pantreats.Controllers
                 TotalVolunteers = summaries.Count(summary => summary.ApplicationStatus == ApplicationStatuses.Approved),
                 PendingScheduleRequests = pendingScheduleRequests,
                 UpcomingShiftsThisWeek = upcomingShifts.Count,
-                TodaysShifts = upcomingShifts.Count(shift => shift.ShiftDate.Date == DateTime.Today),
+                TodaysShifts = upcomingShifts.Count(shift => shift.ShiftDate.Date == today),
                 PendingApplications = summaries
                     .Where(summary => summary.ApplicationStatus == ApplicationStatuses.Pending)
                     .OrderBy(summary => summary.SubmittedAt)
@@ -279,7 +280,9 @@ namespace Pantreats.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Scheduler(DateTime? weekStart, string? userId, DateTime? shiftDate, int? editShiftId)
         {
-            var resolvedWeekStart = StartOfWeek(weekStart?.Date ?? shiftDate?.Date ?? DateTime.Today);
+            var today = DateTime.Today;
+            var defaultWeekStart = GetDashboardWeekStart(today);
+            var resolvedWeekStart = StartOfWeek(weekStart?.Date ?? shiftDate?.Date ?? defaultWeekStart);
             var model = await BuildSchedulerModelAsync(resolvedWeekStart, userId, shiftDate, editShiftId);
             return View(model);
         }
@@ -1285,6 +1288,7 @@ namespace Pantreats.Controllers
             {
                 WeekStart = resolvedWeekStart,
                 WeekEnd = resolvedWeekStart.AddDays(4),
+                CurrentOperationalWeekStart = GetDashboardWeekStart(DateTime.Today),
                 IsEditingShift = selectedShift != null || shiftForm.VolunteerShiftId != 0,
                 ShiftForm = shiftForm,
                 Volunteers = approvedApplications.Select(application =>
@@ -1418,6 +1422,18 @@ namespace Pantreats.Controllers
             var date = value.Date;
             var difference = ((int)date.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
             return date.AddDays(-difference);
+        }
+
+        private static DateTime GetDashboardWeekStart(DateTime value)
+        {
+            var weekStart = StartOfWeek(value);
+
+            return value.DayOfWeek switch
+            {
+                DayOfWeek.Saturday => weekStart.AddDays(7),
+                DayOfWeek.Sunday => weekStart.AddDays(7),
+                _ => weekStart
+            };
         }
 
         private static bool TryParseShiftFormTimes(

@@ -6,6 +6,7 @@ namespace Pantreats.Models
     {
         public DateTime WeekStart { get; set; }
         public DateTime WeekEnd { get; set; }
+        public DateTime CurrentOperationalWeekStart { get; set; }
         public List<VolunteerSchedulerDayViewModel> Days { get; set; } = new();
         public List<VolunteerSchedulerVolunteerViewModel> Volunteers { get; set; } = new();
         public VolunteerShiftFormViewModel ShiftForm { get; set; } = new();

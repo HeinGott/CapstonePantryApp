@@ -51,6 +51,22 @@ namespace Pantreats.Services
 
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
+            var studentApplication = await _context.UserApplications
+                .Where(application => application.UserId == request.UserId)
+                .OrderByDescending(application => application.RegistrationDate)
+                .ThenByDescending(application => application.ApplicationId)
+                .FirstOrDefaultAsync();
+
+            if (studentApplication == null || studentApplication.ApplicationStatus != ApplicationStatuses.Approved)
+            {
+                return CheckoutResult.Failure("That student account is not approved for pantry checkout.");
+            }
+
+            if (!studentApplication.CurrentPointBalance.HasValue)
+            {
+                return CheckoutResult.Failure("No active point balance is available for this student yet. Please see pantry staff.");
+            }
+
             var inventoryItems = await _context.Inventory
                 .Where(item => distinctUPCs.Contains(item.UPC))
                 .ToListAsync();
@@ -67,6 +83,19 @@ namespace Pantreats.Services
                     $"Only {unavailableItem.Quantity} {unavailableItem.ItemName} {(unavailableItem.Quantity == 1 ? "is" : "are")} available right now.");
             }
 
+            var totalPoints = 0;
+
+            foreach (var inventoryItem in inventoryItems)
+            {
+                totalPoints += inventoryItem.Points * requestedItems[inventoryItem.UPC];
+            }
+
+            if (studentApplication.CurrentPointBalance.Value < totalPoints)
+            {
+                return CheckoutResult.Failure(
+                    $"This student only has {studentApplication.CurrentPointBalance.Value} points available right now.");
+            }
+
             var order = new Order
             {
                 UserId = request.UserId,
@@ -79,8 +108,6 @@ namespace Pantreats.Services
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
-
-            var totalPoints = 0;
 
             foreach (var inventoryItem in inventoryItems)
             {
@@ -97,11 +124,10 @@ namespace Pantreats.Services
                     OrderQuantity = quantity,
                     Points = inventoryItem.Points
                 });
-
-                totalPoints += inventoryItem.Points * quantity;
             }
 
             order.Total = totalPoints;
+            studentApplication.CurrentPointBalance -= totalPoints;
 
             var fulfilmentDate = order.OrderDate;
             var fulfilmentStatus = request.CompleteImmediately
@@ -119,7 +145,7 @@ namespace Pantreats.Services
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return CheckoutResult.Success(order.OrderId, totalPoints, order.OrderDate);
+            return CheckoutResult.Success(order.OrderId, totalPoints, order.OrderDate, studentApplication.CurrentPointBalance);
         }
     }
 
@@ -138,17 +164,19 @@ namespace Pantreats.Services
         public bool Succeeded { get; private set; }
         public int? OrderId { get; private set; }
         public int TotalPoints { get; private set; }
+        public int? RemainingPoints { get; private set; }
         public DateTime? OrderDate { get; private set; }
         public string Message { get; private set; } = string.Empty;
 
-        public static CheckoutResult Success(int orderId, int totalPoints, DateTime orderDate)
+        public static CheckoutResult Success(int orderId, int totalPoints, DateTime orderDate, int? remainingPoints)
         {
             return new CheckoutResult
             {
                 Succeeded = true,
                 OrderId = orderId,
                 TotalPoints = totalPoints,
-                OrderDate = orderDate
+                OrderDate = orderDate,
+                RemainingPoints = remainingPoints
             };
         }
 

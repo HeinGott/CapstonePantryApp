@@ -33,6 +33,7 @@
                     <span class="kiosk-eyebrow">Checked In Student</span>
                     <h2 class="kiosk-student-name" id="studentNameDisplay"></h2>
                     <p class="kiosk-student-id" id="studentIdDisplay"></p>
+                    <p class="kiosk-student-id" id="studentBalanceDisplay"></p>
                 </div>
 
                 <button type="button" class="btn btn-outline-secondary" id="startOverButton">
@@ -592,6 +593,7 @@
             const studentLookupButton = document.getElementById("studentLookupButton");
             const studentNameDisplay = document.getElementById("studentNameDisplay");
             const studentIdDisplay = document.getElementById("studentIdDisplay");
+            const studentBalanceDisplay = document.getElementById("studentBalanceDisplay");
             const lookupStatus = document.getElementById("lookupStatus");
             const itemUpcInput = document.getElementById("itemUpcInput");
             const itemLookupButton = document.getElementById("itemLookupButton");
@@ -650,6 +652,7 @@
                 state.cart.clear();
                 studentIdInput.value = "";
                 itemUpcInput.value = "";
+                studentBalanceDisplay.textContent = "";
 
                 lookupPanel.classList.remove("d-none");
                 checkoutPanel.classList.add("d-none");
@@ -773,11 +776,16 @@
 
                     state.student = {
                         studentId: data.studentId,
-                        fullName: data.fullName
+                        fullName: data.fullName,
+                        monthlyPointBalance: data.monthlyPointBalance,
+                        currentPointBalance: data.currentPointBalance
                     };
 
                     studentNameDisplay.textContent = data.fullName;
                     studentIdDisplay.textContent = `Student ID: ${data.studentId}`;
+                    studentBalanceDisplay.textContent = data.currentPointBalance == null
+                        ? "No active point balance."
+                        : `Current balance: ${data.currentPointBalance} points | Monthly balance: ${data.monthlyPointBalance ?? 0} points`;
 
                     lookupPanel.classList.add("d-none");
                     checkoutPanel.classList.remove("d-none");
@@ -905,6 +913,10 @@
                         studentId: state.student.studentId.toString(),
                         upcs
                     });
+
+                    if (state.student) {
+                        state.student.currentPointBalance = data.remainingPoints;
+                    }
 
                     checkoutConfirmModal.hide();
                     showCompletionScreen(data.orderId, data.orderDate);

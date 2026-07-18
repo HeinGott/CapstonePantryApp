@@ -206,6 +206,16 @@
                             }
                         </tr>
                     }
+
+                    <tr class="fw-semibold">
+                        <td colspan="3" class="text-end">Total</td>
+                        <td>@((Model.OrderItems ?? new List<OrderItem>()).Sum(orderItem => orderItem.OrderQuantity))</td>
+                        <td>@Model.Total</td>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Volunteers"))
+                        {
+                            <td></td>
+                        }
+                    </tr>
                 </tbody>
             </table>
         </div>

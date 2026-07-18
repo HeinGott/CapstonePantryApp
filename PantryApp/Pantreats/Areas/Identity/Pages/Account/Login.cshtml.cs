@@ -14,20 +14,25 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using Pantreats.Models;
 
 namespace Pantreats.Areas.Identity.Pages.Account
 {
     public class LoginModel : PageModel
     {
+        private readonly ApplicationDbContext _context;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
 
         public LoginModel(
+            ApplicationDbContext context,
             SignInManager<IdentityUser> signInManager,
             UserManager<IdentityUser> userManager,
             ILogger<LoginModel> logger)
         {
+            _context = context;
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
@@ -144,7 +149,7 @@ namespace Pantreats.Areas.Identity.Pages.Account
 
                         if (await _userManager.IsInRoleAsync(user, "Students"))
                         {
-                            return RedirectToAction("Index", "Home");
+                            return await RedirectStudentAsync(user.Id);
                         }
 
                         if (await _userManager.IsInRoleAsync(user, "Volunteers"))
@@ -180,6 +185,32 @@ namespace Pantreats.Areas.Identity.Pages.Account
 
             // if we got this far, something failed, redisplay form
             return Page();
+        }
+
+        private async Task<IActionResult> RedirectStudentAsync(string userId)
+        {
+            var latestApplication = await _context.UserApplications
+                .AsNoTracking()
+                .Where(application => application.UserId == userId)
+                .OrderByDescending(application => application.RegistrationDate)
+                .ThenByDescending(application => application.ApplicationId)
+                .FirstOrDefaultAsync();
+
+            var applicationStatus = string.IsNullOrWhiteSpace(latestApplication?.ApplicationStatus)
+                ? string.Empty
+                : latestApplication.ApplicationStatus;
+
+            if (applicationStatus == ApplicationStatuses.Approved)
+            {
+                return RedirectToAction("Index", "Shop");
+            }
+
+            if (applicationStatus == ApplicationStatuses.Pending)
+            {
+                return RedirectToAction("Status", "Student");
+            }
+
+            return RedirectToAction("Apply", "Student");
         }
     }
 }

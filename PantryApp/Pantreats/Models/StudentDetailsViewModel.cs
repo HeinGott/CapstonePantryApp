@@ -32,6 +32,9 @@ namespace Pantreats.Models
         public DateTime SubmittedAt { get; set; }
         public DateTime? ReviewedAt { get; set; }
         public string? ReviewNotes { get; set; }
+        public int? MonthlyPointBalance { get; set; }
+        public int? CurrentPointBalance { get; set; }
+        public DateTime? LastPointResetAt { get; set; }
         public int TotalOrders { get; set; }
         public List<StudentHistoryItemViewModel> OrderHistory { get; set; } = new();
         public bool ShowOrderHistory { get; set; }

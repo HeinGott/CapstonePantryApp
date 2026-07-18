@@ -190,6 +190,9 @@ namespace Pantreats.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(existingDonor => existingDonor.UserId == id);
 
+            var isVolunteerRole = roles.Contains("Volunteers");
+            var showVolunteerFlag = isVolunteerRole && volunteerApplication != null;
+
             var model = new UserEditViewModel
             {
                 UserId = user.Id,
@@ -203,7 +206,10 @@ namespace Pantreats.Controllers
                 StudentApplicationStatus = studentApplication?.ApplicationStatus,
                 StudentReviewNotes = studentApplication?.ReviewNotes,
                 StudentApplicationIsActive = studentApplication?.IsActive ?? false,
-                StudentApplicationIsVolunteer = studentApplication?.IsVolunteer ?? false,
+                StudentApplicationIsVolunteer = showVolunteerFlag && (studentApplication?.IsVolunteer ?? false),
+                MonthlyPointBalance = studentApplication?.MonthlyPointBalance,
+                CurrentPointBalance = studentApplication?.CurrentPointBalance,
+                LastPointResetAt = studentApplication?.LastPointResetAt,
                 StudentNumber = studentApplication?.StudentId,
                 StudentFirstName = studentApplication?.FirstName ?? string.Empty,
                 StudentMiddleName = studentApplication?.MiddleName ?? string.Empty,
@@ -278,6 +284,22 @@ namespace Pantreats.Controllers
                 ModelState.AddModelError(nameof(model.StudentDateOfBirth), "Date of birth cannot be in the future.");
             }
 
+            if (model.MonthlyPointBalance < 0)
+            {
+                ModelState.AddModelError(nameof(model.MonthlyPointBalance), "Monthly point balance cannot be negative.");
+            }
+
+            if (model.CurrentPointBalance < 0)
+            {
+                ModelState.AddModelError(nameof(model.CurrentPointBalance), "Current point balance cannot be negative.");
+            }
+
+            if (string.Equals(model.StudentApplicationStatus, ApplicationStatuses.Approved, StringComparison.OrdinalIgnoreCase) &&
+                !model.MonthlyPointBalance.HasValue)
+            {
+                ModelState.AddModelError(nameof(model.MonthlyPointBalance), "Approved students need a monthly point balance.");
+            }
+
             if (!ModelState.IsValid)
             {
                 PopulateRoleOptions(model);
@@ -332,9 +354,11 @@ namespace Pantreats.Controllers
 
                 if (studentApplication != null)
                 {
+                    var shouldMarkAsVolunteer = model.Role == "Volunteers" && model.HasVolunteerApplication;
+
                     studentApplication.StudentId = model.StudentNumber ?? studentApplication.StudentId;
                     studentApplication.FirstName = model.StudentFirstName;
-                    studentApplication.MiddleName = model.StudentMiddleName;
+                    studentApplication.MiddleName = model.StudentMiddleName ?? string.Empty;
                     studentApplication.LastName = model.StudentLastName;
                     studentApplication.DOB = model.StudentDateOfBirth;
                     studentApplication.PhoneNum = model.StudentApplicationPhoneNumber;
@@ -361,7 +385,21 @@ namespace Pantreats.Controllers
                         ? null
                         : model.StudentReviewNotes.Trim();
                     studentApplication.IsActive = model.StudentApplicationIsActive;
-                    studentApplication.IsVolunteer = model.StudentApplicationIsVolunteer;
+                    studentApplication.IsVolunteer = shouldMarkAsVolunteer && model.StudentApplicationIsVolunteer;
+                    studentApplication.MonthlyPointBalance = model.MonthlyPointBalance;
+                    studentApplication.CurrentPointBalance = model.CurrentPointBalance;
+                    studentApplication.LastPointResetAt = model.LastPointResetAt;
+
+                    if (studentApplication.ApplicationStatus != ApplicationStatuses.Approved)
+                    {
+                        studentApplication.CurrentPointBalance = null;
+                        studentApplication.LastPointResetAt = null;
+                    }
+                    else if (!studentApplication.CurrentPointBalance.HasValue && studentApplication.MonthlyPointBalance.HasValue)
+                    {
+                        studentApplication.CurrentPointBalance = studentApplication.MonthlyPointBalance.Value;
+                        studentApplication.LastPointResetAt ??= DateTime.UtcNow;
+                    }
                 }
             }
 
@@ -483,6 +521,15 @@ namespace Pantreats.Controllers
                     if (scheduleChangeRequests.Any())
                     {
                         _context.ScheduleChangeRequests.RemoveRange(scheduleChangeRequests);
+                    }
+
+                    var studentApplications = await _context.UserApplications
+                        .Where(application => application.UserId == userID && application.IsVolunteer)
+                        .ToListAsync();
+
+                    foreach (var studentApplication in studentApplications)
+                    {
+                        studentApplication.IsVolunteer = false;
                     }
 
                     await _context.SaveChangesAsync();

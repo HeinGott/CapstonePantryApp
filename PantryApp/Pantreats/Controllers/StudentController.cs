@@ -141,6 +141,9 @@ namespace Pantreats.Controllers
                 SubmittedAt = application.RegistrationDate,
                 ReviewedAt = application.ReviewedAt,
                 ReviewNotes = application.ReviewNotes,
+                MonthlyPointBalance = application.MonthlyPointBalance,
+                CurrentPointBalance = application.CurrentPointBalance,
+                LastPointResetAt = application.LastPointResetAt,
                 TotalOrders = orders.Count,
                 ShowOrderHistory = normalizedStatus == ApplicationStatuses.Approved,
                 OrderHistory = orders
@@ -309,7 +312,7 @@ namespace Pantreats.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Approve(int id, string? reviewNotes)
+        public async Task<IActionResult> Approve(int id, int monthlyPointBalance, string? reviewNotes)
         {
             var application = await _context.UserApplications
                 .FirstOrDefaultAsync(foundApplication => foundApplication.ApplicationId == id);
@@ -319,11 +322,21 @@ namespace Pantreats.Controllers
                 return NotFound();
             }
 
+            if (monthlyPointBalance < 0)
+            {
+                TempData["StatusMessage"] = "Monthly point balance must be zero or greater.";
+                TempData["StatusType"] = "error";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
             application.ApplicationStatus = ApplicationStatuses.Approved;
             application.IsActive = true;
             application.ReviewedAt = DateTime.UtcNow;
             application.ReviewedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             application.ReviewNotes = string.IsNullOrWhiteSpace(reviewNotes) ? null : reviewNotes.Trim();
+            application.MonthlyPointBalance = monthlyPointBalance;
+            application.CurrentPointBalance = monthlyPointBalance;
+            application.LastPointResetAt = DateTime.UtcNow;
 
             var user = await _userManager.FindByIdAsync(application.UserId);
             if (user != null && !await _userManager.IsInRoleAsync(user, "Students"))
@@ -332,6 +345,52 @@ namespace Pantreats.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = "Student approved and point balance saved.";
+            TempData["StatusType"] = "success";
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateApprovedStudent(int id, int monthlyPointBalance, int currentPointBalance, string? reviewNotes)
+        {
+            var application = await _context.UserApplications
+                .FirstOrDefaultAsync(foundApplication => foundApplication.ApplicationId == id);
+
+            if (application == null)
+            {
+                return NotFound();
+            }
+
+            if (monthlyPointBalance < 0 || currentPointBalance < 0)
+            {
+                TempData["StatusMessage"] = "Point balances must be zero or greater.";
+                TempData["StatusType"] = "error";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            application.ApplicationStatus = ApplicationStatuses.Approved;
+            application.IsActive = true;
+            application.ReviewedAt ??= DateTime.UtcNow;
+            application.ReviewedByUserId ??= User.FindFirstValue(ClaimTypes.NameIdentifier);
+            application.ReviewNotes = string.IsNullOrWhiteSpace(reviewNotes) ? null : reviewNotes.Trim();
+            application.MonthlyPointBalance = monthlyPointBalance;
+            application.CurrentPointBalance = currentPointBalance;
+            application.LastPointResetAt ??= DateTime.UtcNow;
+
+            var user = await _userManager.FindByIdAsync(application.UserId);
+            if (user != null && !await _userManager.IsInRoleAsync(user, "Students"))
+            {
+                await _userManager.AddToRoleAsync(user, "Students");
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = "Student point balances updated.";
+            TempData["StatusType"] = "success";
 
             return RedirectToAction(nameof(Details), new { id });
         }
@@ -354,6 +413,8 @@ namespace Pantreats.Controllers
             application.ReviewedAt = DateTime.UtcNow;
             application.ReviewedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             application.ReviewNotes = string.IsNullOrWhiteSpace(reviewNotes) ? null : reviewNotes.Trim();
+            application.CurrentPointBalance = null;
+            application.LastPointResetAt = null;
 
             var user = await _userManager.FindByIdAsync(application.UserId);
             if (user != null && await _userManager.IsInRoleAsync(user, "Students"))
@@ -362,6 +423,9 @@ namespace Pantreats.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = "Student application rejected.";
+            TempData["StatusType"] = "success";
 
             return RedirectToAction(nameof(Details), new { id });
         }

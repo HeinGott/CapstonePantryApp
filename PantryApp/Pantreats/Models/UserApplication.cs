@@ -55,5 +55,11 @@ namespace Pantreats.Models
         public string? ReviewedByUserId { get; set; }
 
         public string? ReviewNotes { get; set; }
+
+        public int? MonthlyPointBalance { get; set; }
+
+        public int? CurrentPointBalance { get; set; }
+
+        public DateTime? LastPointResetAt { get; set; }
     }
 }

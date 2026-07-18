@@ -15,7 +15,7 @@
 
             <!-- HEADER -->
             <div class="mb-4 text-center">
-                <img src="/Images/pantreatsLogo.png" class="mb-3" style="max-width: 220px;">
+                <img src="/Images/PantryLogo.png" class="mb-3" style="max-width: 220px;">
                 <h1 class="section-title">
                     Pantry Application
                 </h1>
@@ -52,7 +52,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Student ID</label>
-                        <input asp-for="StudentId" class="form-control" type="number" required/>
+                        <input asp-for="StudentId" class="form-control" type="number" min="1000" max="999999999" required />
                         <span asp-validation-for="StudentId" class="text-danger"></span>
                     </div>
 
@@ -62,7 +62,8 @@
                                type="text"
                                class="form-control pantreats-date-input"
                                id="studentDobInput"
-                               min="1960-01-01" />
+                               min="1960-01-01"
+                               required />
                         <span asp-validation-for="DOB" class="text-danger"></span>
                     </div>
 

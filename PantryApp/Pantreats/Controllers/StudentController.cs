@@ -274,7 +274,7 @@ namespace Pantreats.Controllers
 
             application.StudentId = model.StudentId;
             application.FirstName = model.FirstName;
-            application.MiddleName = model.MiddleName;
+            application.MiddleName = model.MiddleName ?? string.Empty;
             application.LastName = model.LastName;
             application.DOB = model.DOB;
             application.PhoneNum = model.PhoneNum;

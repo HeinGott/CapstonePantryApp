@@ -335,75 +335,118 @@
 
     <script>
 
-        function loadAccessibilityToolbar() {
-        const showToolbar = localStorage.getItem("showAccessibilityToolbar");
-        const toolbar = document.getElementById("accessibilityToolbar");
+            function loadAccessibilityToolbar() {
+                const showToolbar = localStorage.getItem("panTreatsShowAccessToolbar");
+                const toolbar = document.getElementById("accessibilityToolbar");
 
-        if (!toolbar) {
-        return;
-        }
+                if (!toolbar) {
+                    return;
+                }
 
-        toolbar.style.display = showToolbar === "true" ? "block" : "none";
-        }
+                if (showToolbar === "true") {
+                    toolbar.style.display = "block";
+                } else {
+                    toolbar.style.display = "none";
+                }
+            }
 
         function toggleAccessibilityPanel() {
         const panel = document.getElementById("accessibilityPanel");
         panel.style.display = panel.style.display === "block" ? "none" : "block";
         }
 
-        function readCurrentPage() {
-        const mainContent = document.querySelector("main") || document.body;
-        const pageText = mainContent.innerText;
+            function readCurrentPage() {
+                const mainContent = document.querySelector("main") || document.body;
+                const pageText = mainContent.innerText;
 
-        window.speechSynthesis.cancel();
+                window.speechSynthesis.cancel();
 
-        const speech = new SpeechSynthesisUtterance(pageText);
+                const speech = new SpeechSynthesisUtterance(pageText);
 
-        const voices = window.speechSynthesis.getVoices();
-        const selectedVoice = localStorage.getItem("preferredVoice");
+                const voices = window.speechSynthesis.getVoices();
+                const selectedVoice = localStorage.getItem("panTreatsReaderVoice");
 
-        if (selectedVoice && voices[selectedVoice]) {
-        speech.voice = voices[selectedVoice];
-        }
+                if (selectedVoice !== null && voices[selectedVoice]) {
+                    speech.voice = voices[selectedVoice];
+                }
 
-        speech.rate = parseFloat(localStorage.getItem("speechRate") || "1");
-        speech.pitch = 1;
-        speech.volume = 1;
+                speech.rate = parseFloat(
+                    localStorage.getItem("panTreatsReadingSpeed") || "1"
+                );
 
-        window.speechSynthesis.speak(speech);
-        }
+                speech.pitch = 1;
+                speech.volume = 1;
+
+                window.speechSynthesis.speak(speech);
+            }
 
         function stopReadingPage() {
         window.speechSynthesis.cancel();
         }
 
-        function hideAccessibilityToolbar() {
-        localStorage.setItem("showAccessibilityToolbar", "false");
-        loadAccessibilityToolbar();
-        }
+            function hideAccessibilityToolbar() {
+                localStorage.setItem("panTreatsShowAccessToolbar", "false");
 
-        function applyGlobalAccessibilityPreferences() {
-        document.body.classList.toggle("large-text-mode", localStorage.getItem("largeTextMode") === "true");
-        document.body.classList.toggle("high-contrast-mode", localStorage.getItem("highContrastMode") === "true");
-        document.body.classList.toggle("reduce-motion-mode", localStorage.getItem("reduceMotionMode") === "true");
-        document.body.classList.toggle("dyslexia-font-mode", localStorage.getItem("dyslexiaFontMode") === "true");
-        document.body.classList.toggle("large-buttons-mode", localStorage.getItem("largeButtonsMode") === "true");
-        document.body.classList.toggle("keyboard-focus-mode", localStorage.getItem("keyboardFocusMode") === "true");
+                const toolbarToggle = document.getElementById("toolbarToggle");
 
-        document.body.classList.remove("deuteranopia-mode", "protanopia-mode", "tritanopia-mode");
+                if (toolbarToggle) {
+                    toolbarToggle.checked = false;
+                }
 
-        switch (localStorage.getItem("colorBlindMode")) {
-        case "deuteranopia":
-        document.body.classList.add("deuteranopia-mode");
-        break;
-        case "protanopia":
-        document.body.classList.add("protanopia-mode");
-        break;
-        case "tritanopia":
-        document.body.classList.add("tritanopia-mode");
-        break;
-        }
-        }
+                loadAccessibilityToolbar();
+            }
+
+            function applyGlobalAccessibilityPreferences() {
+                document.body.classList.toggle(
+                    "large-text-mode",
+                    localStorage.getItem("panTreatsLargeText") === "true"
+                );
+
+                document.body.classList.toggle(
+                    "high-contrast-mode",
+                    localStorage.getItem("panTreatsHighContrast") === "true"
+                );
+
+                document.body.classList.toggle(
+                    "reduce-motion-mode",
+                    localStorage.getItem("reduceMotionMode") === "true"
+                );
+
+                document.body.classList.toggle(
+                    "dyslexia-font-mode",
+                    localStorage.getItem("dyslexiaFontMode") === "true"
+                );
+
+                document.body.classList.toggle(
+                    "large-buttons-mode",
+                    localStorage.getItem("largeButtonsMode") === "true"
+                );
+
+                document.body.classList.toggle(
+                    "keyboard-focus-mode",
+                    localStorage.getItem("keyboardFocusMode") === "true"
+                );
+
+                document.body.classList.remove(
+                    "greenRed-mode",
+                    "redGreen-mode",
+                    "blueYellow-mode"
+                );
+
+                switch (localStorage.getItem("panTreatsColorSupport")) {
+                    case "greenRed":
+                        document.body.classList.add("greenRed-mode");
+                        break;
+
+                    case "redGreen":
+                        document.body.classList.add("redGreen-mode");
+                        break;
+
+                    case "blueYellow":
+                        document.body.classList.add("blueYellow-mode");
+                        break;
+                }
+            }
 
         loadAccessibilityToolbar();
         applyGlobalAccessibilityPreferences();

@@ -2159,7 +2159,7 @@ span.flatpickr-weekday {
     gap: 1rem;
     margin-bottom: 1.25rem;
     flex-wrap: wrap;
-    font-family: var(--bs-body-font-family))
+    font-family: var(--bs-body-font-family);
 }
 
 .order-details-subtitle {
@@ -5639,62 +5639,284 @@ body.volunteer-planner-is-dragging * {
 
 
 .high-contrast-mode {
-    background: #000 !important;
-    color: #fff !important;
+    background-color: #000000 !important;
+    color: #ffffff !important;
 }
 
-.high-contrast-mode .pantreats-page-shell,
-.high-contrast-mode .pantreats-page-content,
-.high-contrast-mode main,
-.high-contrast-mode .container {
-    background: #000 !important;
-    color: #fff !important;
-}
+    .high-contrast-mode .pantreats-page-shell,
+    .high-contrast-mode .pantreats-page-content,
+    .high-contrast-mode main {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+    }
 
-.high-contrast-mode .student-card,
-.high-contrast-mode .pantreats-navbar,
-.high-contrast-mode .pantreats-footer,
-.high-contrast-mode .dropdown-menu {
-    background: #000 !important;
-    color: #fff !important;
-    border: 2px solid #fff !important;
-}
 
-.high-contrast-mode h1,
-.high-contrast-mode h2,
-.high-contrast-mode h3,
-.high-contrast-mode h4,
-.high-contrast-mode h5,
-.high-contrast-mode p,
-.high-contrast-mode li,
-.high-contrast-mode label,
-.high-contrast-mode span,
-.high-contrast-mode a {
-    color: #fff !important;
-}
+    .high-contrast-mode .pantreats-white-section,
+    .high-contrast-mode .pantreats-blue-section,
+    .high-contrast-mode .pantreats-hero-section,
+    .high-contrast-mode .our-mission-section,
+    .high-contrast-mode .contact-section,
+    .high-contrast-mode .volunteer-section {
+        background-color: transparent !important;
+    }
 
-.high-contrast-mode .btn-primary {
-    background: #ffff00 !important;
-    color: #000 !important;
-    border: 2px solid #ffff00 !important;
-}
 
-.high-contrast-mode .btn-outline-primary,
-.high-contrast-mode .btn-outline-secondary,
-.high-contrast-mode .btn-outline-danger {
-    background: #000 !important;
-    color: #ffff00 !important;
-    border: 2px solid #ffff00 !important;
-}
+    .high-contrast-mode .student-card,
+    .high-contrast-mode .student-profile-card,
+    .high-contrast-mode .info-card,
+    .high-contrast-mode .step-card,
+    .high-contrast-mode .help-panel,
+    .high-contrast-mode .hero-logo-panel,
+    .high-contrast-mode .admin-panel,
+    .high-contrast-mode .admin-panel-volunteer,
+    .high-contrast-mode .admin-queue-card,
+    .high-contrast-mode .admin-list-row,
+    .high-contrast-mode .vendor-card,
+    .high-contrast-mode .volunteer-admin-metric,
+    .high-contrast-mode .volunteer-admin-shift-card,
+    .high-contrast-mode .accessibility-panel {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        border: 2px solid #ffffff !important;
+        box-shadow: none !important;
+    }
 
-.high-contrast-mode input,
-.high-contrast-mode select,
-.high-contrast-mode textarea {
-    background: #000 !important;
-    color: #fff !important;
-    border: 2px solid #fff !important;
-}
 
+    .high-contrast-mode .pantreats-navbar,
+    .high-contrast-mode .pantreats-footer,
+    .high-contrast-mode .dropdown-menu {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        border-color: #ffffff !important;
+    }
+
+
+    .high-contrast-mode h1,
+    .high-contrast-mode h2,
+    .high-contrast-mode h3,
+    .high-contrast-mode h4,
+    .high-contrast-mode h5,
+    .high-contrast-mode h6,
+    .high-contrast-mode p,
+    .high-contrast-mode li,
+    .high-contrast-mode label,
+    .high-contrast-mode span,
+    .high-contrast-mode strong,
+    .high-contrast-mode small {
+        color: #ffffff !important;
+    }
+
+
+    .high-contrast-mode a {
+        color: #ffff00 !important;
+    }
+
+        .high-contrast-mode a:hover,
+        .high-contrast-mode a:focus {
+            color: #00ffff !important;
+        }
+
+
+    .high-contrast-mode img {
+        background-color: #ffffff !important;
+    }
+
+
+    .high-contrast-mode input,
+    .high-contrast-mode select,
+    .high-contrast-mode textarea {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        border: 2px solid #ffffff !important;
+    }
+
+        .high-contrast-mode input::placeholder,
+        .high-contrast-mode textarea::placeholder {
+            color: #dddddd !important;
+        }
+
+        .high-contrast-mode select option {
+            background-color: #000000;
+            color: #ffffff;
+        }
+
+
+    .high-contrast-mode .btn-primary,
+    .high-contrast-mode .accessibility-toggle {
+        background-color: #ffff00 !important;
+        color: #000000 !important;
+        border: 2px solid #ffff00 !important;
+    }
+
+    .high-contrast-mode .btn-outline-primary,
+    .high-contrast-mode .btn-outline-secondary,
+    .high-contrast-mode .btn-outline-danger {
+        background-color: #000000 !important;
+        color: #ffff00 !important;
+        border: 2px solid #ffff00 !important;
+    }
+
+    .high-contrast-mode button:hover,
+    .high-contrast-mode button:focus {
+        outline: 3px solid #00ffff !important;
+        outline-offset: 2px;
+    }
+
+
+
+
+    .high-contrast-mode .text-muted,
+    .high-contrast-mode .section-text,
+    .high-contrast-mode .hero-text,
+    .high-contrast-mode .section-text-light {
+        color: #ffffff !important;
+    }
+
+    .high-contrast-mode main > *,
+    .high-contrast-mode main .card,
+    .high-contrast-mode main [class*="card"],
+    .high-contrast-mode main [class*="panel"],
+    .high-contrast-mode main [class*="section"] {
+        color: #ffffff !important;
+    }
+
+    .high-contrast-mode .privacy-card,
+    .high-contrast-mode .policy-card,
+    .high-contrast-mode .content-card,
+    .high-contrast-mode .page-card,
+    .high-contrast-mode .rounded,
+    .high-contrast-mode .shadow,
+    .high-contrast-mode .shadow-sm {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        border-color: #ffffff !important;
+        box-shadow: none !important;
+    }
+
+    .high-contrast-mode .bg-white,
+    .high-contrast-mode .bg-light {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+    }
+
+    .high-contrast-mode main h1,
+    .high-contrast-mode main h2,
+    .high-contrast-mode main h3,
+    .high-contrast-mode main h4,
+    .high-contrast-mode main h5,
+    .high-contrast-mode main h6,
+    .high-contrast-mode main p,
+    .high-contrast-mode main li,
+    .high-contrast-mode main span,
+    .high-contrast-mode main strong {
+        color: #ffffff !important;
+    }
+
+    .high-contrast-mode .report-card,
+    .high-contrast-mode .report-stat-card,
+    .high-contrast-mode .report-summary-card,
+    .high-contrast-mode .report-table-card,
+    .high-contrast-mode .inventory-card,
+    .high-contrast-mode .order-card,
+    .high-contrast-mode .fulfilment-card,
+    .high-contrast-mode .order-items-card,
+    .high-contrast-mode .student-order-status-panel,
+    .high-contrast-mode .student-order-timeline-step,
+    .high-contrast-mode .order-fulfilment-summary > div,
+    .high-contrast-mode .donor-card,
+    .high-contrast-mode .donor-form-card {
+        background: #000000 !important;
+        color: #ffffff !important;
+        border-color: #ffffff !important;
+        box-shadow: none !important;
+    }
+
+    .high-contrast-mode .card,
+    .high-contrast-mode .card-body,
+    .high-contrast-mode .card-header,
+    .high-contrast-mode .card-footer {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        border-color: #ffffff !important;
+    }
+
+    .high-contrast-mode hr {
+        border: 0 !important;
+        border-top: 1px solid #666666 !important;
+        opacity: 1 !important;
+    }
+
+    .high-contrast-mode table,
+    .high-contrast-mode thead,
+    .high-contrast-mode tbody,
+    .high-contrast-mode tr,
+    .high-contrast-mode td,
+    .high-contrast-mode th {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        border-color: #555555 !important;
+    }
+
+    .high-contrast-mode table {
+        border-color: #ffffff !important;
+    }
+
+    .high-contrast-mode tbody td {
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+    }
+
+    .high-contrast-mode thead th {
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom-color: #ffffff !important;
+    }
+
+    .high-contrast-mode [class*="metric"],
+    .high-contrast-mode [class*="stat-card"],
+    .high-contrast-mode [class*="summary-card"] {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        border: 1px solid #ffffff !important;
+        box-shadow: none !important;
+    }
+
+    .high-contrast-mode .kiosk-page,
+    .high-contrast-mode .kiosk-container,
+    .high-contrast-mode .kiosk-panel,
+    .high-contrast-mode .scheduler-grid,
+    .high-contrast-mode .scheduler-calendar,
+    .high-contrast-mode .scheduler-sidebar,
+    .high-contrast-mode .calendar-grid,
+    .high-contrast-mode .calendar-day,
+    .high-contrast-mode .calendar-time-column {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+
+        .high-contrast-mode .kiosk-page *,
+        .high-contrast-mode .kiosk-container *,
+        .high-contrast-mode .kiosk-panel *,
+        .high-contrast-mode .scheduler-grid *,
+        .high-contrast-mode .scheduler-calendar *,
+        .high-contrast-mode .scheduler-sidebar *,
+        .high-contrast-mode .calendar-grid * {
+            color: #000000 !important;
+        }
+
+    .high-contrast-mode .scheduler-grid,
+    .high-contrast-mode .scheduler-calendar,
+    .high-contrast-mode .calendar-grid,
+    .high-contrast-mode .calendar-day {
+        border-color: #cbd5e1 !important;
+    }
+
+    .high-contrast-mode .kiosk-page .btn-primary,
+    .high-contrast-mode .kiosk-container .btn-primary {
+        background-color: #102f61 !important;
+        color: #ffffff !important;
+        border-color: #102f61 !important;
+    }
 
 .greenRed-mode {
     --pantreats-blue: #1f4e79;
@@ -5772,4 +5994,181 @@ select:focus,
 .accessibility-page-header p {
     display: block !important;
     width: 100%;
+}
+
+.high-contrast-mode .shop-item-image img,
+.high-contrast-mode .inventory-image img,
+.high-contrast-mode .category-icon img,
+.high-contrast-mode .shop-card img,
+.high-contrast-mode img {
+    filter: none !important;
+    opacity: 1 !important;
+}
+
+.high-contrast-mode .inventory-image,
+.high-contrast-mode .image-container,
+.high-contrast-mode .shop-card-image {
+    background: #000 !important;
+    border: 1px solid #555 !important;
+}
+
+.high-contrast-mode .shop-card,
+.high-contrast-mode .product-card,
+.high-contrast-mode .item-card {
+    background: #000 !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+}
+
+.high-contrast-mode .shop-item-card {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border: 1px solid #ffffff !important;
+}
+
+.high-contrast-mode .shop-item-body {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+.high-contrast-mode .shop-item-title {
+    color: #ffffff !important;
+}
+
+.high-contrast-mode .shop-item-brand,
+.high-contrast-mode .shop-item-size {
+    color: #ffffff !important;
+}
+
+.high-contrast-mode .shop-item-meta {
+    color: #6c9f35 !important;
+}
+
+.high-contrast-mode .shop-item-footer {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+.high-contrast-mode .shop-item-image {
+    background-color: #ffffff !important;
+}
+
+
+.high-contrast-mode .shop-filter-bar {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+    .high-contrast-mode .shop-filter-bar span,
+    .high-contrast-mode .shop-filter-bar p,
+    .high-contrast-mode .shop-filter-bar label,
+    .high-contrast-mode .shop-filter-label,
+    .high-contrast-mode .shop-category-pill {
+        color: #000000 !important;
+    }
+
+        .high-contrast-mode .shop-category-pill.active {
+            color: #ffffff !important;
+            background-color: #102f61 !important;
+        }
+
+    .high-contrast-mode .shop-filter-bar img {
+        filter: none !important;
+        opacity: 1 !important;
+    }
+
+.high-contrast-mode .image-popup .popup-content {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border: 2px solid #ffffff !important;
+}
+
+.high-contrast-mode .image-popup .popup-info {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+.high-contrast-mode .image-popup .popup-title,
+.high-contrast-mode .image-popup .popup-brand,
+.high-contrast-mode .image-popup .popup-size,
+.high-contrast-mode .image-popup .popup-details,
+.high-contrast-mode .image-popup .popup-details p,
+.high-contrast-mode .image-popup .popup-details span {
+    color: #ffffff !important;
+}
+
+.high-contrast-mode .image-popup .popup-category {
+    color: #6c9f35 !important;
+}
+
+.high-contrast-mode .image-popup #popupImage {
+    background-color: #ffffff !important;
+    filter: none !important;
+    opacity: 1 !important;
+}
+
+.high-contrast-mode .image-popup .popup-arrow {
+    background-color: #102f61 !important;
+    color: #ffffff !important;
+    border: 1px solid #ffffff !important;
+}
+
+.high-contrast-mode .image-popup .popup-close {
+    color: #ffffff !important;
+    background-color: #000000 !important;
+    border: 1px solid #ffffff !important;
+}
+
+.high-contrast-mode .student-review-shell,
+.high-contrast-mode .student-review-hero,
+.high-contrast-mode .student-review-summary,
+.high-contrast-mode .student-review-summary-item,
+.high-contrast-mode .student-review-panel {
+    background: #000000 !important;
+    background-image: none !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+    box-shadow: none !important;
+}
+
+    .high-contrast-mode .student-review-hero h1,
+    .high-contrast-mode .student-review-hero h2,
+    .high-contrast-mode .student-review-hero p,
+    .high-contrast-mode .student-review-hero span,
+    .high-contrast-mode .student-review-hero strong,
+    .high-contrast-mode .student-review-summary-item span,
+    .high-contrast-mode .student-review-summary-item strong,
+    .high-contrast-mode .student-review-panel h1,
+    .high-contrast-mode .student-review-panel h2,
+    .high-contrast-mode .student-review-panel h3,
+    .high-contrast-mode .student-review-panel p,
+    .high-contrast-mode .student-review-panel span,
+    .high-contrast-mode .student-review-panel strong {
+        color: #ffffff !important;
+    }
+
+.high-contrast-mode .student-review-summary-item {
+    border: 1px solid #ffffff !important;
+}
+
+.high-contrast-mode .student-review-panel hr,
+.high-contrast-mode .student-review-panel [class*="row"] {
+    border-color: #666666 !important;
+}
+
+
+.high-contrast-mode .privacy-page {
+    background: #000000 !important;
+}
+
+.high-contrast-mode .privacy-section {
+    background: #000000 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 2rem !important;
+}
+
+.high-contrast-mode .privacy-header {
+    background: #000000 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 2rem !important;
 }

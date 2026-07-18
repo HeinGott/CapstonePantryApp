@@ -362,44 +362,90 @@
     });
 
     function loadVoices() {
-        availableVoices = speechSynthesis.getVoices();
         const voiceSelect = document.getElementById("voiceSelect");
 
+        availableVoices = window.speechSynthesis.getVoices();
         voiceSelect.innerHTML = "";
 
-        availableVoices.forEach(function (voice, index) {
+        if (availableVoices.length === 0) {
+            const noVoiceOption = document.createElement("option");
+
+            noVoiceOption.value = "";
+            noVoiceOption.textContent = "No voice found on this computer";
+            noVoiceOption.disabled = true;
+            noVoiceOption.selected = true;
+
+            voiceSelect.appendChild(noVoiceOption);
+            voiceSelect.disabled = true;
+
+            localStorage.removeItem("panTreatsReaderVoice");
+            return;
+        }
+
+        voiceSelect.disabled = false;
+
+        availableVoices.forEach(function(voice, index) {
             const option = document.createElement("option");
+
             option.value = index;
-            option.textContent = `${voice.name} (${voice.lang})`;
+            option.textContent = `${voice.name} - ${voice.lang}`;
+
             voiceSelect.appendChild(option);
         });
+
         const savedVoice = localStorage.getItem("panTreatsReaderVoice");
 
-        if (savedVoice !== null) {
+        if (
+            savedVoice !== null &&
+            availableVoices[Number(savedVoice)]
+        ) {
             voiceSelect.value = savedVoice;
+        } else {
+            voiceSelect.value = "0";
+            localStorage.setItem("panTreatsReaderVoice", "0");
         }
     }
 
-    document.getElementById("voiceSelect").addEventListener("change", function () {
-        savePanTreatsAccessSetting("panTreatsReaderVoice", this.value);
-    });
+    document.getElementById("voiceSelect")
+        .addEventListener("change", function() {
+
+            if (this.value !== "") {
+                savePanTreatsAccessSetting(
+                    "panTreatsReaderVoice",
+                    this.value
+                );
+            }
+        });
 
     function readPanTreatsPageAloud() {
-        const text = (document.querySelector("main") || document.body).innerText;
+        availableVoices = window.speechSynthesis.getVoices();
 
-        speechSynthesis.cancel();
+        if (availableVoices.length === 0) {
+            alert("No reading voice was found on this computer.");
+            return;
+        }
+
+        const text =
+            (document.querySelector("main") || document.body).innerText;
+
+        window.speechSynthesis.cancel();
 
         const speech = new SpeechSynthesisUtterance(text);
-        const selectedVoice = localStorage.getItem("panTreatsReaderVoice");
+        const selectedVoice =
+            Number(localStorage.getItem("panTreatsReaderVoice") || "0");
 
-        if (selectedVoice && availableVoices[selectedVoice]) {
+        if (availableVoices[selectedVoice]) {
             speech.voice = availableVoices[selectedVoice];
         }
-        speech.rate = parseFloat(localStorage.getItem("panTreatsReadingSpeed") || "1");
+
+        speech.rate = parseFloat(
+            localStorage.getItem("panTreatsReadingSpeed") || "1"
+        );
+
         speech.pitch = 1;
         speech.volume = 1;
 
-        speechSynthesis.speak(speech);
+        window.speechSynthesis.speak(speech);
     }
     function stopReadingPage() {
         speechSynthesis.cancel();

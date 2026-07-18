@@ -1,21 +1,83 @@
-﻿@model List<SupportArticle>
+@model List<SupportArticle>
+
 @{
-	ViewData["Title"] = "Search Results";
+    var keyword = Context.Request.Query["keyword"].ToString();
+
+    ViewData["Title"] = "Search Results";
+    ViewData["FullWidth"] = true;
 }
 
-@if(!Model.Any())
-{
-	<p>No articles matched the search. Please try something else.</p>
+<section class="support-results-page">
+    <div class="container">
+        <div class="support-results-hero support-reveal">
+            <div>
+                <h1 class="support-results-title support-results-title-plain">
+                    @(string.IsNullOrWhiteSpace(keyword) ? "Search the manual" : $"Results for \"{keyword}\"")
+                </h1>
+                <p class="support-results-text support-results-text-plain">
+                    @(Model.Any()
+                        ? $"Found {Model.Count} article{(Model.Count == 1 ? string.Empty : "s")} that match your search."
+                        : "No articles matched that search yet, but you can try a different keyword or browse the full manual.")
+                </p>
+            </div>
+
+            <form asp-controller="Support" asp-action="Search" method="get" class="support-guide-search support-search-form-compact" role="search">
+                <label class="visually-hidden" for="supportSearchResults">Search the manual</label>
+                <div class="support-guide-search-row">
+                    <input id="supportSearchResults" type="text" name="keyword" class="support-guide-input" value="@keyword" placeholder="Search the manual" />
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="support-empty-state support-reveal">
+                <div class="support-empty-icon" aria-hidden="true">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h2>No articles matched the search</h2>
+                <p>Please try another keyword or head back to the full support index.</p>
+                <a asp-controller="Support" asp-action="Index" class="btn btn-primary">Browse all articles</a>
+            </div>
+        }
+        else
+        {
+            <div class="support-guide-list">
+                @foreach (var article in Model)
+                {
+                    <a asp-controller="Support" asp-action="Article" asp-route-slug="@article.Slug" class="support-guide-item support-reveal support-guide-row-link">
+                        <div class="support-guide-item-body">
+                            <h2>@article.Title</h2>
+                            <p>@article.Summary</p>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (() => {
+            if (document.body.classList.contains("reduce-motion-mode")) {
+                document.querySelectorAll(".support-reveal").forEach((element) => element.classList.add("is-visible"));
+                return;
+            }
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) {
+                        return;
+                    }
+
+                    entry.target.classList.add("is-visible");
+                    observer.unobserve(entry.target);
+                });
+            }, { threshold: 0.14 });
+
+            document.querySelectorAll(".support-reveal").forEach((element) => observer.observe(element));
+        })();
+    </script>
 }
-	@foreach (var article in Model)
-	{
-		<div>
-
-			<h1>@article.Title</h1>
-
-			<p>@article.Summary</p>
-
-			<a asp-controller="Support" asp-action="Article" asp-route-slug="@article.Slug">
-			</a>
-		</div>
-	}

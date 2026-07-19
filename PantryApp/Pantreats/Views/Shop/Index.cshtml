@@ -236,6 +236,15 @@
         </div>
     </div>
 
+    @if (Model.CurrentPointBalance.HasValue || Model.MonthlyPointBalance.HasValue)
+    {
+        <section class="student-card mb-4">
+            <span class="shop-kicker">Student Balance</span>
+            <h2 class="h5 mb-1">Current point balance: @(Model.CurrentPointBalance ?? 0)</h2>
+            <p class="text-muted mb-0">Monthly recurring balance: @(Model.MonthlyPointBalance?.ToString() ?? "Not assigned") points</p>
+        </section>
+    }
+
     <section class="shop-cart-panel d-none" id="shopCartPanel" aria-labelledby="shopCartPanelLabel">
         <div class="shop-cart-panel-header">
             <div>
@@ -911,6 +920,97 @@
 
             function getCartQuantity() {
                 return cart.reduce((total, item) => total + item.quantity, 0);
+            }
+
+            function getCartPoints() {
+                return cart.reduce((total, item) => total + (item.quantity * item.points), 0);
+            }
+
+            function normalizeCartItem(item, availableStock = null) {
+                return {
+                    upc: item.upc || item.UPC,
+                    itemName: item.itemName || item.ItemName,
+                    brandName: item.brandName || item.BrandName,
+                    unitSize: item.unitSize || item.UnitSize,
+                    points: Math.max(0, Number(item.points || item.Points || 0)),
+                    availableStock: Math.max(0, Number(availableStock ?? item.availableStock ?? item.AvailableStock ?? Number.MAX_SAFE_INTEGER)),
+                    quantity: Math.max(1, Number(item.quantity || item.Quantity || 1))
+                };
+            }
+
+            function showCheckoutConfirmation() {
+                clearStatus();
+                viewOrdersLink.classList.add('d-none');
+
+                if (cart.length === 0) {
+                    setStatus('Add at least one item before checkout.', 'danger');
+                    return;
+                }
+
+                const itemCount = getCartQuantity();
+                const totalPoints = getCartPoints();
+                const itemLabel = itemCount === 1 ? 'item' : 'items';
+                checkoutConfirmationMessage.textContent =
+                    `You're about to place a pickup order for ${itemCount} ${itemLabel}, totaling ${totalPoints} ${totalPoints === 1 ? 'point' : 'points'}. Would you like to continue?`;
+                checkoutConfirmation.show();
+            }
+
+            function renderCart() {
+                cartItems.innerHTML = '';
+                const itemCount = getCartQuantity();
+                const totalPoints = getCartPoints();
+
+                cartCountBadge.textContent = itemCount;
+                cartTotal.textContent = totalPoints;
+                emptyCartMessage.classList.toggle('d-none', cart.length > 0);
+                checkoutButton.disabled = cart.length === 0;
+
+                cart.forEach(item => {
+                    const linePoints = item.quantity * item.points;
+                    const row = document.createElement('div');
+                    row.className = 'shop-cart-row';
+                    row.innerHTML = `
+                        <div class="shop-cart-details">
+                            <strong>${escapeHtml(item.itemName)}</strong>
+                            <span>${escapeHtml(item.brandName || 'Pantry item')} ${item.unitSize ? '&middot; ' + escapeHtml(item.unitSize) : ''}</span>
+                            <em>${item.quantity} ${item.quantity === 1 ? 'item' : 'items'} &middot; ${linePoints} ${linePoints === 1 ? 'point' : 'points'}</em>
+                        </div>
+                        <div class="shop-cart-quantity" data-cart-upc="${escapeHtml(item.upc)}">
+                            <button type="button" class="btn shop-cart-quantity-button" data-quantity-action="decrease" aria-label="Decrease quantity">-</button>
+                            <input type="number"
+                                   class="form-control shop-cart-quantity-input"
+                                   min="0"
+                                   step="1"
+                                   value="${item.quantity}"
+                                   inputmode="numeric"
+                                   aria-label="Quantity for ${escapeHtml(item.itemName)}" />
+                            <button type="button" class="btn shop-cart-quantity-button" data-quantity-action="increase" aria-label="Increase quantity">+</button>
+                        </div>
+                    `;
+
+                    const quantityWrap = row.querySelector('.shop-cart-quantity');
+                    const quantityInput = row.querySelector('.shop-cart-quantity-input');
+                    const decreaseButton = quantityWrap.querySelector('[data-quantity-action="decrease"]');
+                    const increaseButton = quantityWrap.querySelector('[data-quantity-action="increase"]');
+
+                    decreaseButton.addEventListener('click', () => {
+                        updateCartItemQuantity(item.upc, item.quantity - 1, true);
+                    });
+
+                    increaseButton.addEventListener('click', () => {
+                        updateCartItemQuantity(item.upc, item.quantity + 1, false);
+                    });
+
+                    quantityInput.addEventListener('change', () => {
+                        updateCartItemQuantity(item.upc, Number(quantityInput.value), true);
+                    });
+
+                    quantityInput.addEventListener('blur', () => {
+                        quantityInput.value = String(getCartItemQuantity(item.upc));
+                    });
+
+                    cartItems.appendChild(row);
+                });
             }
 
             function toggleCart() {

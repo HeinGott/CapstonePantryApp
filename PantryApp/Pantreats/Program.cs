@@ -92,6 +92,8 @@ builder.Services.AddControllersWithViews();
 //the email service
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<CheckoutService>();
+builder.Services.AddScoped<StudentPointBalanceService>();
+builder.Services.AddHostedService<MonthlyPointResetHostedService>();
 
 builder.Services.AddHttpClient();
 

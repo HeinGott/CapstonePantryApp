@@ -11,6 +11,8 @@ namespace Pantreats.Models
         public int PageSize { get; set; }
         public string? SearchTerm { get; set; }
         public string? SelectedSubcategory { get; set; }
+        public int? MonthlyPointBalance { get; set; }
+        public int? CurrentPointBalance { get; set; }
 
         public bool HasPreviousPage => PageNumber > 1;
         public bool HasNextPage => PageNumber < TotalPages;

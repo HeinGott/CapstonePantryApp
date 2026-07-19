@@ -5,11 +5,25 @@
 
     string FormatDate(DateTime? value) => value.HasValue ? value.Value.ToString("MM/dd/yyyy") : "Not provided";
     string FormatDateTime(DateTime? value) => value.HasValue ? value.Value.ToLocalTime().ToString("MM/dd/yyyy h:mm tt") : "Not reviewed yet";
+    string FormatLastReset(DateTime? value) => value.HasValue ? value.Value.ToLocalTime().ToString("MM/dd/yyyy h:mm tt") : "Not reset yet";
     string FormatBool(bool value) => value ? "Yes" : "No";
     string FormatNullableBool(bool? value) => value.HasValue ? (value.Value ? "Yes" : "No") : "Not provided";
+    string FormatNullablePoints(int? value) => value.HasValue ? $"{value.Value} points" : "Not assigned";
 }
 
 <div class="student-details-page py-4">
+    @if (TempData["StatusMessage"] is string statusMessage)
+    {
+        var statusType = TempData["StatusType"] as string;
+        var alertClass = string.Equals(statusType, "error", StringComparison.OrdinalIgnoreCase)
+            ? "alert-danger"
+            : "alert-success";
+
+        <div class="alert @alertClass" role="alert">
+            @statusMessage
+        </div>
+    }
+
     <div class="mb-3 d-flex justify-content-between align-items-center gap-2 flex-wrap">
         <a asp-action="Index" class="btn student-back-btn">&larr; Back to Students</a>
 
@@ -55,6 +69,30 @@
             <div class="student-review-summary-item">
                 <span>Reviewed</span>
                 <strong>@FormatDateTime(Model.ReviewedAt)</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="student-review-panel mb-4">
+        <div class="student-review-panel-header">
+            <div>
+                <h2 class="student-section-title mb-1">Point Balance</h2>
+                <p class="student-page-subtitle mb-0">Monthly pantry allowance and currently available balance.</p>
+            </div>
+        </div>
+
+        <div class="student-fact-list">
+            <div class="student-fact-row">
+                <span>Monthly recurring balance</span>
+                <strong>@FormatNullablePoints(Model.MonthlyPointBalance)</strong>
+            </div>
+            <div class="student-fact-row">
+                <span>Current balance</span>
+                <strong>@FormatNullablePoints(Model.CurrentPointBalance)</strong>
+            </div>
+            <div class="student-fact-row">
+                <span>Last monthly reset</span>
+                <strong>@FormatLastReset(Model.LastPointResetAt)</strong>
             </div>
         </div>
     </section>
@@ -180,6 +218,13 @@
             <div class="student-decision-grid">
                 <form asp-action="Approve" asp-route-id="@Model.ApplicationId" method="post" class="student-decision-form student-decision-form-approve">
                     @Html.AntiForgeryToken()
+                    <label class="form-label">Monthly point balance</label>
+                    <input name="monthlyPointBalance"
+                           type="number"
+                           min="0"
+                           class="form-control"
+                           value="@(Model.MonthlyPointBalance ?? 0)"
+                           required />
                     <label class="form-label">Approval notes</label>
                     <textarea name="reviewNotes" class="form-control" rows="4" placeholder="Optional note for the application record"></textarea>
                     <button type="submit" class="btn btn-success mt-3">Approve Student</button>
@@ -195,16 +240,56 @@
         }
         else
         {
-            <div class="student-fact-list">
-                <div class="student-fact-row">
-                    <span>Current status</span>
-                    <strong>@Model.ApplicationStatus</strong>
+            @if (Model.ApplicationStatus == Pantreats.Models.ApplicationStatuses.Approved)
+            {
+                <form asp-action="UpdateApprovedStudent" asp-route-id="@Model.ApplicationId" method="post" class="student-decision-form student-decision-form-approve">
+                    @Html.AntiForgeryToken()
+                    <div class="student-fact-list mb-3">
+                        <div class="student-fact-row">
+                            <span>Current status</span>
+                            <strong>@Model.ApplicationStatus</strong>
+                        </div>
+                        <div class="student-fact-row">
+                            <span>Reviewed on</span>
+                            <strong>@FormatDateTime(Model.ReviewedAt)</strong>
+                        </div>
+                    </div>
+
+                    <label class="form-label">Monthly point balance</label>
+                    <input name="monthlyPointBalance"
+                           type="number"
+                           min="0"
+                           class="form-control"
+                           value="@(Model.MonthlyPointBalance ?? 0)"
+                           required />
+
+                    <label class="form-label mt-3">Current point balance</label>
+                    <input name="currentPointBalance"
+                           type="number"
+                           min="0"
+                           class="form-control"
+                           value="@(Model.CurrentPointBalance ?? Model.MonthlyPointBalance ?? 0)"
+                           required />
+
+                    <label class="form-label mt-3">Review notes</label>
+                    <textarea name="reviewNotes" class="form-control" rows="4" placeholder="Optional note for the application record">@Model.ReviewNotes</textarea>
+
+                    <button type="submit" class="btn btn-primary mt-3">Save Student Access</button>
+                </form>
+            }
+            else
+            {
+                <div class="student-fact-list">
+                    <div class="student-fact-row">
+                        <span>Current status</span>
+                        <strong>@Model.ApplicationStatus</strong>
+                    </div>
+                    <div class="student-fact-row">
+                        <span>Reviewed on</span>
+                        <strong>@FormatDateTime(Model.ReviewedAt)</strong>
+                    </div>
                 </div>
-                <div class="student-fact-row">
-                    <span>Reviewed on</span>
-                    <strong>@FormatDateTime(Model.ReviewedAt)</strong>
-                </div>
-            </div>
+            }
         }
     </section>
 

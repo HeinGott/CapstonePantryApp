@@ -66,6 +66,12 @@
         </article>
 
         <article class="admin-user-summary-card">
+            <span class="admin-user-summary-label">Current balance</span>
+            <strong>@(Model.CurrentPointBalance.HasValue ? $"{Model.CurrentPointBalance.Value} points" : "Not active")</strong>
+            <p>@(Model.MonthlyPointBalance.HasValue ? $"Renews at {Model.MonthlyPointBalance.Value} points monthly." : "No monthly balance assigned")</p>
+        </article>
+
+        <article class="admin-user-summary-card">
             <span class="admin-user-summary-label">Volunteer application</span>
             <strong>@(Model.HasVolunteerApplication ? (Model.VolunteerApplicationStatus ?? "On file") : "Not on file")</strong>
             <p>@(Model.VolunteerSubmittedAt.HasValue ? $"Submitted {Model.VolunteerSubmittedAt.Value.ToLocalTime():MMM d, yyyy}" : "No volunteer application recorded")</p>
@@ -83,6 +89,7 @@
         <input asp-for="StudentApplicationId" type="hidden" />
         <input asp-for="VolunteerApplicationId" type="hidden" />
         <input asp-for="DonorId" type="hidden" />
+        <input asp-for="LastPointResetAt" type="hidden" />
 
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
@@ -189,6 +196,18 @@
                     </div>
 
                     <div class="admin-user-field">
+                        <label asp-for="MonthlyPointBalance" class="form-label">Monthly Point Balance</label>
+                        <input asp-for="MonthlyPointBalance" type="number" min="0" class="form-control" />
+                        <span asp-validation-for="MonthlyPointBalance" class="text-danger"></span>
+                    </div>
+
+                    <div class="admin-user-field">
+                        <label asp-for="CurrentPointBalance" class="form-label">Current Point Balance</label>
+                        <input asp-for="CurrentPointBalance" type="number" min="0" class="form-control" />
+                        <span asp-validation-for="CurrentPointBalance" class="text-danger"></span>
+                    </div>
+
+                    <div class="admin-user-field">
                         <label asp-for="EmployedHouseMembers" class="form-label">Employed Household Members</label>
                         <input asp-for="EmployedHouseMembers" type="number" min="0" class="form-control" />
                     </div>
@@ -244,6 +263,7 @@
 
                     <div class="admin-user-subcard">
                         <h3>Admin Status</h3>
+                        <p class="admin-user-footnote">Last monthly reset: <strong>@(Model.LastPointResetAt.HasValue ? Model.LastPointResetAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "Not reset yet")</strong></p>
                         <div class="admin-user-toggle-grid">
                             <label class="admin-user-toggle"><input asp-for="StudentApplicationIsActive" type="checkbox" /> <span>Application active</span></label>
                             <label class="admin-user-toggle"><input asp-for="StudentApplicationIsVolunteer" type="checkbox" /> <span>Marked as volunteer</span></label>

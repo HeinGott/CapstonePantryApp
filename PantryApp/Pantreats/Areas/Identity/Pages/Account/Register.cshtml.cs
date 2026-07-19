@@ -233,6 +233,37 @@ namespace Pantreats.Areas.Identity.Pages.Account
                 return Url.Action("Dashboard", "Donor") ?? "/";
             }
 
+            if (User.IsInRole("Students"))
+            {
+                var userId = _userManager.GetUserId(User);
+
+                if (!string.IsNullOrWhiteSpace(userId))
+                {
+                    var latestApplication = _context.UserApplications
+                        .AsNoTracking()
+                        .Where(application => application.UserId == userId)
+                        .OrderByDescending(application => application.RegistrationDate)
+                        .ThenByDescending(application => application.ApplicationId)
+                        .FirstOrDefault();
+
+                    var applicationStatus = string.IsNullOrWhiteSpace(latestApplication?.ApplicationStatus)
+                        ? string.Empty
+                        : latestApplication.ApplicationStatus;
+
+                    if (applicationStatus == ApplicationStatuses.Approved)
+                    {
+                        return Url.Action("Index", "Shop") ?? "/";
+                    }
+
+                    if (applicationStatus == ApplicationStatuses.Pending)
+                    {
+                        return Url.Action("Status", "Student") ?? "/";
+                    }
+                }
+
+                return Url.Action("Apply", "Student") ?? "/";
+            }
+
             return Url.Action("Index", "Home") ?? "/";
         }
 

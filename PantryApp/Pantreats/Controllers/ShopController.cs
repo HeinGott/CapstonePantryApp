@@ -31,6 +31,8 @@ namespace Pantreats.Controllers
                 return accessResult;
             }
 
+            var studentApplication = await GetLatestStudentApplicationAsync();
+
             page = Math.Max(page, 1);
             search = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
             subcategory = string.IsNullOrWhiteSpace(subcategory) || subcategory.Equals("all", StringComparison.OrdinalIgnoreCase)
@@ -101,7 +103,9 @@ namespace Pantreats.Controllers
                 TotalInventoryItems = totalInventoryItems,
                 SearchTerm = search,
                 SelectedSubcategory = subcategory,
-                PageSize = PageSize
+                PageSize = PageSize,
+                MonthlyPointBalance = studentApplication?.MonthlyPointBalance,
+                CurrentPointBalance = studentApplication?.CurrentPointBalance
             });
         }
 
@@ -228,8 +232,25 @@ namespace Pantreats.Controllers
             {
                 success = true,
                 orderId = result.OrderId,
+                remainingPoints = result.RemainingPoints,
                 message = $"Order #{result.OrderId} was placed. We'll get it ready for pickup."
             });
+        }
+
+        private async Task<UserApplication?> GetLatestStudentApplicationAsync()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return null;
+            }
+
+            return await _context.UserApplications
+                .AsNoTracking()
+                .Where(application => application.UserId == userId)
+                .OrderByDescending(application => application.RegistrationDate)
+                .ThenByDescending(application => application.ApplicationId)
+                .FirstOrDefaultAsync();
         }
 
         private static string BuildImageName(string itemName)

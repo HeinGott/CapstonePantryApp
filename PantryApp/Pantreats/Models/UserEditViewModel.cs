@@ -36,9 +36,14 @@ namespace Pantreats.Models
         public string? StudentReviewNotes { get; set; }
         public bool StudentApplicationIsActive { get; set; }
         public bool StudentApplicationIsVolunteer { get; set; }
+        [Range(0, int.MaxValue, ErrorMessage = "Monthly point balance cannot be negative.")]
+        public int? MonthlyPointBalance { get; set; }
+        [Range(0, int.MaxValue, ErrorMessage = "Current point balance cannot be negative.")]
+        public int? CurrentPointBalance { get; set; }
+        public DateTime? LastPointResetAt { get; set; }
         public int? StudentNumber { get; set; }
         public string StudentFirstName { get; set; } = string.Empty;
-        public string StudentMiddleName { get; set; } = string.Empty;
+        public string? StudentMiddleName { get; set; }
         public string StudentLastName { get; set; } = string.Empty;
         public DateTime? StudentDateOfBirth { get; set; }
         public string StudentApplicationPhoneNumber { get; set; } = string.Empty;

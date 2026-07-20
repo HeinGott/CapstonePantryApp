@@ -23,6 +23,7 @@ namespace Pantreats.Data
         public DbSet<ScheduleChangeRequest> ScheduleChangeRequests { get; set; }
         public DbSet<VolunteerShift> VolunteerShifts { get; set; }
         public DbSet<SupportArticle> SupportArticles { get; set; }
+        public DbSet<EmailVerificationCode> EmailVerificationCodes { get; set; }
 
         /*this method configures the relationships between OrderItem and Inventory,
         this will ensure if the inventory item is deleted, that the upc will be set to null and
